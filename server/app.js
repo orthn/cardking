@@ -4,6 +4,7 @@ let path = require('path');
 let cookieParser = require('cookie-parser');
 let logger = require('morgan');
 
+require('dotenv').config({path: path.join(__dirname, '.env')});
 //default router
 let router = require('./routes/index');
 
