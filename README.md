@@ -47,7 +47,7 @@ API_KEY=1234
 DB_USER='username'
 DB_PASSWD='password'
 ```
-wheread `1234` represents the API key
+wheread `1234` represents the API key. **Make sure not to push your `.env` file to github!**
 #### Start Server
 ```
 npm run server
