@@ -1,10 +1,10 @@
 {
   "scripts": {
     "server": "cd server && node ./bin/www && cd ..",
-
     "client": "cd client && npm run client && cd .."
   },
   "dependencies": {
-    "dotenv": "^16.4.7"
+    "dotenv": "^16.4.7",
+    "mongodb": "^6.12.0"
   }
 }

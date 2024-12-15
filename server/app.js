@@ -7,6 +7,7 @@ let logger = require('morgan');
 require('dotenv').config({path: path.join(__dirname, '.env')});
 //default router
 let router = require('./routes/index');
+let users = require('./routes/users');
 
 let app = express();
 
@@ -20,9 +21,31 @@ app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-//localhost/
-app.use('/', router);
+class User {
+    constructor(id, name, username, email, password, goal) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.goal = goal;
+    }
+    check() {
+        if (this.name !== null && this.name !== "" && this.name !== undefined) {
+            return true
+        } else return false
+    }
+}
 
+
+//localhost/
+
+app.use('/', router);
+app.use('/users', users);
+
+
+
+//app.use('/users', users);
+console.log("http://localhost:6000/users");
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
     next(createError(404));
