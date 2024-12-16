@@ -3,6 +3,7 @@ let express = require('express');
 let path = require('path');
 let cookieParser = require('cookie-parser');
 let logger = require('morgan');
+let connectDB = require('./controllers/dbManager');
 
 require('dotenv').config({path: path.join(__dirname, '.env')});
 //default router
@@ -36,6 +37,8 @@ class User {
     }
 }
 
+connectDB();
+
 
 //localhost/
 
@@ -53,6 +56,11 @@ app.use(function (req, res, next) {
 
 // error handler
 app.use(function (err, req, res, next) {
+    res.status(err.status || 500).json({
+        message: err.message,
+        error: req.app.get('env') === 'development' ? err : {}
+    });
+    /*
     // set locals, only providing error in development
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
@@ -60,6 +68,9 @@ app.use(function (err, req, res, next) {
     // render the error page
     res.status(err.status || 500);
     res.render('error');
+     */
 });
+
+
 
 module.exports = app;
