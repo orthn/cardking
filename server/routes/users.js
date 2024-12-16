@@ -35,6 +35,10 @@ router.post('/register', async function (req, res) {
          */
 
         // TODO: Input validation? Or done at front end?
+        // Enis: am besten beides einfach
+        if (!username || !email || !password) {
+            return res.status(400).json({ error: "username, email und password sind erforderlich" });
+        }
 
         // Check if the user already exists
         let existingUser = await User.findOne({ username });
@@ -47,10 +51,10 @@ router.post('/register', async function (req, res) {
 
         // Create a new User instance using the User model
         const newUser = new User({
-            username,
+            username:username,
+            email: email,
             password: hashedPassword,
-            email,
-            goal
+            goal: goal || ''
         });
 
         //let user = new User(username, password, email);

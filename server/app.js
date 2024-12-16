@@ -4,6 +4,7 @@ let path = require('path');
 let cookieParser = require('cookie-parser');
 let logger = require('morgan');
 let connectDB = require('./controllers/dbManager');
+let cors = require('cors');
 
 require('dotenv').config({path: path.join(__dirname, '.env')});
 //default router
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(cors());
 
 class User {
     constructor(id, name, username, email, password, goal) {
