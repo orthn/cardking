@@ -1,0 +1,46 @@
+/* Entfernt alle Padding und Margin */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Stellt sicher, dass body 100% Höhe hat */
+html, body {
+  height: 100%;
+}
+
+/* Entfernt alle Standardstile des Browsers */
+body {
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+
+input, button, textarea, select {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+/* Verhindert, dass Links unterstrichen sind */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul, ol {
+  list-style: none;
+}

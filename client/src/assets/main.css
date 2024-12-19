@@ -1,35 +1,37 @@
-@import './base.css';
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+:root {
+  --gradient-start: #77C9D4; /* Helles Türkis */
+  --gradient-end: #57BC90;   /* Frisches Grün */
+  --card-bg-color: #ffffff;  /* Weiß bleibt unverändert */
+  --text-color: #015249;     /* Dunkelgrün für Text */
+  --subtitle-color: #57BC90; /* Frisches Grün für Untertitel */
+  --input-bg-color: #fff; /* Neutraler Grauton */
+  --input-border-color: #77C9D4; /* Helles Türkis für Input-Ränder */
+  --button-bg-color: #57BC90; /* Frisches Grün für Buttons */
+  --button-text-color: #ffffff; /* Weiß bleibt unverändert */
+  --link-color: #015249; /* Dunkelgrün für Links */
+  --shadow-color: rgba(1, 82, 73, 0.1); /* Leichter Schatten in Dunkelgrün */
+  --highlight-color: #77C9D4; /* Helles Türkis für Highlights */
+  --muted-text-color: #A5A5AF; /* Neutraler Grauton für dezente Texte */
+  --font-family-default: 'Inter', Arial, sans-serif;
+  --font-family-heading: 'Inter', sans-serif;
 }
 
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
-}
-
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
-
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
+[data-theme='dark'] {
+  --gradient-start: #111214; /* Tiefes Schwarz */
+  --gradient-end: #cdc5b8;   /* Weiches Beige */
+  --card-bg-color: #111214;  /* Tiefes Schwarz für Kartenhintergrund */
+  --text-color: #cdc5b8;     /* Helles Beige für Text */
+  --subtitle-color: #cdc5b8; /* Gleiches helles Beige für Untertitel */
+  --input-bg-color: #cdc5b8; /* Sehr dunkles Grau für Inputs */
+  --input-border-color: #cdc5b8; /* Helles Beige für Input-Ränder */
+  --button-bg-color: #d83129; /* Kräftiges Rot für Buttons */
+  --button-text-color: #111214; /* Tiefes Schwarz für Button-Text */
+  --link-color: #d83129; /* Kräftiges Rot für Links */
+  --shadow-color: rgba(17, 18, 20, 0.5); /* Leichter Schatten in Schwarz */
+  --highlight-color: #d83129; /* Kräftiges Rot für Highlights */
+  --muted-text-color: #5a5a5a; /* Dezentes Grau für weniger wichtige Texte */
+  --font-family-default: 'Inter', Arial, sans-serif;
+  --font-family-heading: 'Inter', sans-serif;
 }

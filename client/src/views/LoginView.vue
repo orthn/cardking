@@ -35,23 +35,23 @@ const goToRegister = () => {
       <p class="subtitle">Please sign in to continue</p>
       <form @submit.prevent="handleLogin" class="form">
         <div class="form-group">
-          <label for="email">E-Mail</label>
           <input
-              id="email"
-              type="email"
-              v-model="email"
-              required
-              placeholder="max.mustermann@mail.com"
+            id="email"
+            class="form-control"
+            type="email"
+            v-model="email"
+            required
+            placeholder="Username"
           />
         </div>
         <div class="form-group">
-          <label for="password">Password</label>
           <input
-              id="password"
-              type="password"
-              v-model="password"
-              required
-              placeholder="**********"
+            id="password"
+            type="password"
+            class="form-control"
+            v-model="password"
+            required
+            placeholder="Password"
           />
         </div>
         <div class="actions">
@@ -67,125 +67,135 @@ const goToRegister = () => {
 </template>
 
 <style scoped>
-/* reseten von styles für selbe baseline */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-/* BG*/
-body {
-  background: #f4f4f4;
-  font-family: Arial, sans-serif;
-}
-
-/* login container */
+/* Container */
 .container {
+  height: 100vh;
+  width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  padding: 1rem;
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  background-size: 400% 400%;
+  animation: gradient-animation 12s ease infinite;
 }
 
-
 .card {
-  background: #ffffff;
-  padding: 2rem;
-  border-radius: 8px;
+  font-family: var(--font-family-heading);
   width: 100%;
-  max-width: 350px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  max-width: 400px;
+  padding: 2rem;
+  background-color: var(--card-bg-color);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px var(--shadow-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+/* Titel und Untertitel */
+.title {
+  font-family: var(--font-family-heading);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
   text-align: center;
 }
 
-
-.title {
-  font-size: 1.8rem;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-  color: #333;
-}
-
 .subtitle {
-  font-size: 0.9rem;
-  color: #666;
+  font-family: var(--font-family-heading);
+  font-size: 1rem;
+  color: var(--subtitle-color);
+  text-align: center;
   margin-bottom: 1.5rem;
 }
 
-
-.form {
-  text-align: left;
-}
-
+/* Formular */
 .form-group {
-  margin-bottom: 1.2rem;
+  width: 100%;
+  margin-bottom: 1.5rem;
 }
 
-.form-group label {
+.form-control-label {
+  font-family: var(--font-family-heading);
+  font-size: 0.85rem;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
   display: block;
-  margin-bottom: 0.4rem;
-  font-size: 0.9rem;
-  color: #333;
 }
 
-.form-group input {
+.form-control {
+  font-family: var(--font-family-heading);
   width: 100%;
-  padding: 0.6rem 0.8rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  transition: border-color 0.2s;
+  padding: 0.7rem 1rem;
+  background-color: var(--input-bg-color);
+  border: 1px solid var(--input-border-color);
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-.form-group input:focus {
-  border-color: #666;
+.form-control:focus {
   outline: none;
+  border-color: var(--highlight-color);
+  box-shadow: 0 0 6px var(--highlight-color);
 }
 
-
-.actions {
-  margin-top: 1.5rem;
-}
-
+/* Button */
 .btn {
+  font-family: var(--font-family-heading);
   width: 100%;
-  padding: 0.7rem;
+  background-color: var(--button-bg-color);
+  color: var(--button-text-color);
+  padding: 0.7rem 1rem;
   border: none;
-  border-radius: 4px;
-  background: #333;
-  color: #fff;
-  font-size: 0.95rem;
+  border-radius: 6px;
+  font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background-color 0.3s, box-shadow 0.3s;
 }
 
 .btn:hover {
-  background: #555;
+  background-color: var(--highlight-color);
+  box-shadow: 0 6px 15px var(--highlight-color);
 }
 
+.btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px var(--highlight-color);
+}
 
+/* Register Text */
 .register-text {
-  margin-top: 1.5rem;
   font-size: 0.85rem;
-  color: #666;
+  text-align: center;
+  color: var(--muted-text-color);
+  margin-top: 1.5rem;
 }
 
 .link {
-  color: #1a73e8;
+  color: var(--link-color);
   text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s;
 }
 
 .link:hover {
-  text-decoration: underline;
+  color: var(--highlight-color);
 }
 
-
-@media (min-width: 600px) {
-  .card {
-    padding: 2.5rem;
+/* Dynamischer Hintergrundgradient */
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
 </style>
