@@ -19,6 +19,7 @@ const handleRegister = async () => {
       username: name.value,
       email: email.value,
       password: password.value,
+      goal: undefined
     })
   });
 
@@ -45,14 +46,14 @@ const goToLogin = () => {
       <h2 class="title">Create Account</h2>
       <form @submit.prevent="handleRegister" class="form">
         <div class="form-group">
-          <label for="name">Name</label>
+          <label for="name">Username</label>
           <input
               id="name"
               class="form-control"
               type="text"
               v-model="name"
               required
-              placeholder="Your Name"
+              placeholder="Your Username"
           />
         </div>
         <div class="form-group">

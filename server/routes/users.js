@@ -25,7 +25,6 @@ router.post('/register', async function (req, res) {
         let password = await bcrypt.hash("Secure1234", await bcrypt.genSalt(12));
         let email = "user.test@domain.com";*/
         const { username, password, email, goal } = req.body;
-
         console.log(req.body)
 
         /*
@@ -43,6 +42,7 @@ router.post('/register', async function (req, res) {
         // Check if the user already exists
         let existingUser = await User.findOne({ username });
         if (existingUser) {
+            console.log("User already exists");
             return res.status(400).send("Username already exists");
         }
 
@@ -67,19 +67,15 @@ router.post('/register', async function (req, res) {
     }
 })
 
-
-
-router.get('/login', async function (req, res) {
+router.post('/login', async function (req, res) {
     /*
     let username = req.body.username;
     let password = req.body.password;
     let email = req.body.email;
      */
-    const { username, password, email, goal } = req.body;
-
-    if (username === undefined || username === null || username === "") res.status(400).send("Username is required");
-    if (password === undefined || password === null || password === "") res.status(400).send("Password is required");
-    if (email === undefined || email === null || email === "") res.status(400).send("Email is required");
+    const {username, password } = req.body;
+    if (username === undefined || username === null || username === "") return res.status(400).send("Username is required");
+    if (password === undefined || password === null || password === "") return res.status(400).send("Password is required");
 
     //let user = new User(username, password, email);
     // retrieve userdata from database for checking validity and password
@@ -90,8 +86,8 @@ router.get('/login', async function (req, res) {
 
     let check = await bcrypt.compare(password, dbUser.password);
 
-    if (check) res.status(200).send("User is authenticated");
-    else res.status(401).send("Invalid credentials");
+    if (check) return res.status(200).send("User is authenticated");
+    else return res.status(401).send("Invalid credentials");
 })
 
 module.exports = router;

@@ -1,14 +1,14 @@
 <script setup>
 import { ref } from 'vue'
 
-const email = ref('')
+const username = ref('')
 const password = ref('')
 
 const handleLogin = async () => {
-  const response = await fetch('http://localhost:6000/users/login', {
+  const response = await fetch('http://localhost:3000/users/login', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ email: email.value, password: password.value })
+    body: JSON.stringify({ username: username.value, password: password.value })
   });
 
   const data = await response.json();
