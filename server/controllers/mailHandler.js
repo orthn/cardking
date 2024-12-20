@@ -7,13 +7,15 @@ const sendResetMail = function (email, resetToken) {
 
 // Create a transporter object using the default SMTP transport
     let transporter = nodemailer.createTransport({
-        service: 'hotmail',
+        host: 'smtp.gmail.com',
         auth: {
             user: process.env.EMAIL_ADDRESS,
             pass: process.env.EMAIL_PASSWORD,
         },
     });
-    const _url = `http://localhost:8080/reset-password/${resetToken}`;
+    console.log(transporter)
+
+    const _url = `http://localhost:5173/reset-password/${resetToken}`;
     //TODO: create better sounding email Body
     const mailBody = `
         <!DOCTYPE html>
@@ -23,7 +25,7 @@ const sendResetMail = function (email, resetToken) {
         </head>
         <body>
             <p>Please use the following link to reset your password:</p> <br>
-            <p><a href="${_url}">Booking Details</a></p> <br>
+            <p><a href="${_url}">Reset Password</a></p> <br>
             <p>Plese notice that the link expires after one hour. If you do not assign a new password within this time period, you will have to request the link again.</p>
         </body>
         </html>
