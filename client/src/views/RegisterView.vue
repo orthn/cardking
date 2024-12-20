@@ -104,14 +104,11 @@ const goToLogin = () => {
 <style scoped>
 /* Container */
 .container {
-  height: 100vh;
-  width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-  background-size: 400% 400%;
-  animation: gradient-animation 12s ease infinite;
+  width: 100%;
+  max-width: 400px;
 }
 
 .card {
@@ -120,7 +117,7 @@ const goToLogin = () => {
   max-width: 400px;
   padding: 2rem;
   background-color: var(--card-bg-color);
-  border-radius: 12px;
+  border-radius: 20px;
   box-shadow: 0 10px 30px var(--shadow-color);
   display: flex;
   flex-direction: column;
@@ -229,7 +226,6 @@ const goToLogin = () => {
   box-shadow: 0 4px 12px var(--highlight-color);
 }
 
-/* Register Text */
 .register-text {
   font-size: 0.85rem;
   text-align: center;
@@ -246,18 +242,5 @@ const goToLogin = () => {
 
 .link:hover {
   color: var(--highlight-color);
-}
-
-/* Dynamischer Hintergrundgradient */
-@keyframes gradient-animation {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
 }
 </style>
