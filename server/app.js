@@ -7,9 +7,10 @@ let connectDB = require('./controllers/dbManager');
 let cors = require('cors');
 
 require('dotenv').config({path: path.join(__dirname, '.env')});
-//default router
-let router = require('./routes/index');
+
+let index = require('./routes/index');
 let users = require('./routes/users');
+let cards = require('./routes/cards');
 
 let app = express();
 
@@ -24,33 +25,24 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 
-class User {
-    constructor(id, name, username, email, password, goal) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.goal = goal;
-    }
-    check() {
-        if (this.name !== null && this.name !== "" && this.name !== undefined) {
-            return true
-        } else return false
-    }
-}
+//Connecting database
+connectDB()
+    .then(r => console.log('MongoDB Atlas connected.'))
+    .catch(err => {
+        console.log("Mongo URI:", process.env.MONGO_URI);
+        console.error('Database connection error:', err.message);
+        process.exit(1); // Exit the app if unable to connect
+    });
 
-connectDB();
+//localhost:3000/
+app.use('/', index);
 
-
-//localhost/
-
-app.use('/', router);
+//localhost:3000/users
 app.use('/users', users);
 
+//localhost:3000/cards
+app.use('/cards', cards);
 
-
-//app.use('/users', users);
-console.log("http://localhost:6000/users");
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
     next(createError(404));
@@ -59,8 +51,7 @@ app.use(function (req, res, next) {
 // error handler
 app.use(function (err, req, res, next) {
     res.status(err.status || 500).json({
-        message: err.message,
-        error: req.app.get('env') === 'development' ? err : {}
+        message: err.message, error: req.app.get('env') === 'development' ? err : {}
     });
     /*
     // set locals, only providing error in development
@@ -72,7 +63,6 @@ app.use(function (err, req, res, next) {
     res.render('error');
      */
 });
-
 
 
 module.exports = app;
