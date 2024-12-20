@@ -10,32 +10,42 @@ const messageType = ref('info')
 const emit = defineEmits(['goToRegister','goToResetRequest','loggedIn'])
 
 const handleLogin = async () => {
-  message.value = ''
+  message.value = '';
   try {
     const response = await fetch('http://localhost:3000/users/login', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ username: username.value, password: password.value })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: username.value, password: password.value }),
     });
 
-    const data = await response.text()
+    const data = await response.text();
     if (!response.ok) {
-      message.value = data || 'Fehler beim Login.'
-      messageType.value = 'error'
-      return
+      message.value = data || 'Fehler beim Login.';
+      messageType.value = 'error';
+
+      setTimeout(() => {
+        message.value = '';
+      }, 3000);
+      return;
     }
 
-    message.value = 'Login erfolgreich!'
-    messageType.value = 'success'
+    message.value = 'Login erfolgreich!';
+    messageType.value = 'success';
 
-    emit('loggedIn')
+    setTimeout(() => {
+      message.value = '';
+    }, 3000);
 
+    emit('loggedIn');
   } catch (err) {
-    message.value = 'Netzwerkfehler: ' + err.message
-    messageType.value = 'error'
-  }
-}
+    message.value = 'Netzwerkfehler: ' + err.message;
+    messageType.value = 'error';
 
+    setTimeout(() => {
+      message.value = '';
+    }, 3000);
+  }
+};
 
 const goToRegister = () => {
   emit('goToRegister')
@@ -48,7 +58,9 @@ const goToRegister = () => {
       <h2 class="title">Welcome future CardKing!</h2>
       <p class="subtitle">Please sign in to continue</p>
 
-      <MessageBox :message="message" :type="messageType" />
+      <transition name="fade">
+        <MessageBox v-if="message" :message="message" :type="messageType" />
+      </transition>
 
       <form @submit.prevent="handleLogin" class="form">
         <div class="form-group">
@@ -203,4 +215,29 @@ const goToRegister = () => {
 .link:hover {
   color: var(--highlight-color);
 }
+
+.message-box {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: auto;
+  max-width: 90%;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-enter-from {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.fade-leave-to {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
 </style>
