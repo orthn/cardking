@@ -4,8 +4,9 @@ import LoginView from './views/LoginView.vue';
 import RegisterView from './views/RegisterView.vue';
 import ResetPasswordRequestView from './views/ResetPasswordRequestView.vue';
 import ResetPasswordView from './views/ResetPasswordView.vue';
+import DashboardView from './views/Dashboard.vue';
 
-const currentView = ref('login'); // 'login', 'register', 'resetRequest', 'resetPassword'
+const currentView = ref('login');
 const resetToken = ref(null);
 
 const currentTheme = ref('light');
@@ -36,6 +37,7 @@ const changeView = (view, token = null) => {
           class="auth-view"
           @goToRegister="changeView('register')"
           @goToResetRequest="changeView('resetRequest')"
+          @loggedIn="changeView('dashboard')"
         />
       </transition>
       <transition name="slide-right">
@@ -58,6 +60,12 @@ const changeView = (view, token = null) => {
           class="auth-view"
           :token="resetToken"
           @goToLogin="changeView('login')"
+        />
+      </transition>
+      <transition name="slide-right">
+        <DashboardView
+            v-if="currentView === 'dashboard'"
+            class="auth-view"
         />
       </transition>
     </div>

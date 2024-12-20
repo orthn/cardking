@@ -1,37 +1,49 @@
 <script setup>
 import { ref } from 'vue'
+import MessageBox from "@/components/MessageBox.vue";
 
 const name = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 
+const message = ref('')
+const messageType = ref('info')
 const handleRegister = async () => {
+  message.value = ''
   if (password.value !== confirmPassword.value) {
-    alert('Passwörter stimmen nicht überein!');
-    return;
+    message.value = 'Passwörter stimmen nicht überein!'
+    messageType.value = 'error'
+    return
   }
 
-  const response = await fetch('http://localhost:3000/users/register', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      username: name.value,
-      email: email.value,
-      password: password.value,
-      goal: undefined
-    })
-  });
+  try {
+    const response = await fetch('http://localhost:3000/users/register', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        username: name.value,
+        email: email.value,
+        password: password.value,
+        goal: undefined
+      })
+    });
 
-  const data = await response.json();
-  if (!response.ok) {
-    alert('Fehler bei der Registrierung: ' + data.error);
-    return;
+    const data = await response.json();
+    if (!response.ok) {
+      message.value = data.error || 'Fehler bei der Registrierung'
+      messageType.value = 'error'
+      return;
+    }
+
+    message.value = 'Registrierung erfolgreich!'
+    messageType.value = 'success'
+    // Optional: automatisch zum Login wechseln, z.B.:
+    // emit('goToLogin')
+  } catch (err) {
+    message.value = 'Netzwerkfehler: ' + err.message
+    messageType.value = 'error'
   }
-
-  console.log('Registrierung erfolgreich:', data);
-  // Eventuell automatisch zum Login wechseln
-  // emit('goToLogin') oder Router-Navigation
 }
 
 const emit = defineEmits(['goToLogin'])
@@ -44,6 +56,9 @@ const goToLogin = () => {
   <div class="container">
     <div class="card">
       <h2 class="title">Create Account</h2>
+
+      <MessageBox :message="message" :type="messageType" />
+
       <form @submit.prevent="handleRegister" class="form">
         <div class="form-group">
           <label for="name">Username</label>

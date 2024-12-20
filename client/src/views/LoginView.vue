@@ -1,28 +1,42 @@
 <script setup>
 import { ref } from 'vue'
+import MessageBox from "@/components/MessageBox.vue";
 
 const username = ref('')
 const password = ref('')
+const message = ref('')
+const messageType = ref('info')
+
+const emit = defineEmits(['goToRegister','goToResetRequest','loggedIn'])
 
 const handleLogin = async () => {
-  const response = await fetch('http://localhost:3000/users/login', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ username: username.value, password: password.value })
-  });
+  message.value = ''
+  try {
+    const response = await fetch('http://localhost:3000/users/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ username: username.value, password: password.value })
+    });
 
-  const data = await response.json();
-  if (!response.ok) {
-    alert('Fehler beim Login: ' + data.error);
-    return;
+    const data = await response.text()
+    if (!response.ok) {
+      message.value = data || 'Fehler beim Login.'
+      messageType.value = 'error'
+      return
+    }
+
+    message.value = 'Login erfolgreich!'
+    messageType.value = 'success'
+
+    emit('loggedIn')
+
+  } catch (err) {
+    message.value = 'Netzwerkfehler: ' + err.message
+    messageType.value = 'error'
   }
-
-  console.log('Login erfolgreich:', data);
-  // weiterleitung
 }
 
 
-const emit = defineEmits(['goToRegister','goToResetRequest'])
 const goToRegister = () => {
   emit('goToRegister')
 }
@@ -33,13 +47,16 @@ const goToRegister = () => {
     <div class="card">
       <h2 class="title">Welcome future CardKing!</h2>
       <p class="subtitle">Please sign in to continue</p>
+
+      <MessageBox :message="message" :type="messageType" />
+
       <form @submit.prevent="handleLogin" class="form">
         <div class="form-group">
           <input
-            id="email"
+            id="username"
             class="form-control"
-            type="email"
-            v-model="email"
+            type="username"
+            v-model="username"
             required
             placeholder="Username"
           />
