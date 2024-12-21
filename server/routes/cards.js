@@ -1,22 +1,24 @@
-let express = require('express');
-const mongoose = require("mongoose");
-let router = express.Router();
+let express = require('express')
+let router = express.Router()
 
-let Card = require("../models/card");
-const User = require("../models/userSchema");
+let Card = require("../models/cardSchema")
 
 router.get('/', function (req, res) {
-    res.send("WIP: Default Cards Page");
+    res.send("WIP: Default Cards Page")
 })
 
-// POST: Creating a card
+/**
+ * Creating a new card.
+ * If no category is specified the default "General" category will be applied.
+ * POST: localhost:3000/cards/create
+ */
 router.post('/create', async function (req, res) {
-    const {question, type, answers, correctAnswer} = req.body;
+    const {question, type, answers, correctAnswer, category} = req.body
 
-    if (!question) return res.status(400).send("Question is required");
-    if (!type) return res.status(400).send("Type is required");
-    if (!answers) return res.status(400).send("Answers is required");
-    if (!correctAnswer) return res.status(400).send("Correct Answers is required");
+    if (!question) return res.status(400).send("Question is required")
+    if (!type) return res.status(400).send("Type is required")
+    if (!answers) return res.status(400).send("Answers is required")
+    if (!correctAnswer) return res.status(400).send("Correct Answers is required")
 
     let card
 
@@ -26,7 +28,8 @@ router.post('/create', async function (req, res) {
                 question: question,
                 type: 'true_false',
                 answers: answers,               // ['true', 'false']
-                correctAnswer: correctAnswer    // 'true'
+                correctAnswer: correctAnswer,   // 'true'
+                category: category
             })
             break
         case 'single_choice':
@@ -34,7 +37,8 @@ router.post('/create', async function (req, res) {
                 question: question,
                 type: 'single_choice',
                 answers: answers,               // ['A', 'B', 'C', 'D']
-                correctAnswer: correctAnswer    // 'A'
+                correctAnswer: correctAnswer,   // 'A'
+                category: category
             })
             break
         case 'multiple_choice':
@@ -42,13 +46,14 @@ router.post('/create', async function (req, res) {
                 question: question,
                 type: 'multiple_choice',
                 answers: answers,               // ['A', 'B', 'C', 'D']
-                correctAnswer: correctAnswer    // ['A', 'B', 'D']
+                correctAnswer: correctAnswer,   // ['A', 'B', 'D']
+                category: category
             })
             break
     }
 
     await card.save()
-        .then(r => {
+        .then(() => {
             console.log('Card created & saved successfully!')
             return res.status(201).send({message: "Card created successfully"})
         })
@@ -58,17 +63,36 @@ router.post('/create', async function (req, res) {
         })
 })
 
-// POST: Endpoint for checking if a correct answer was selected
+/**
+ * Check if an answer to a card is correct. Card is identified by its ID.
+ * POST: localhost:3000/cards/check
+ */
 router.post('/check', async function (req, res) {
-    const {question, answer} = req.body;
+    const {id, answer} = req.body
 
-    if (!question) return res.status(400).send("Question is required");
+    if (!id) return res.status(400).send("ID of the card is required")
+    if (!answer) return res.status(400).send("Answer is required")
 
-    const card = await Card.findOne({question})
-    if (!card) return res.status(404).send("Card not found");
+    const card = await Card.findOne({_id: id}, null, null)
+    if (!card) return res.status(404).send("Card not found")
 
-    if (answer === card.correctAnswer) return res.status(200).send(`Answer to question ${question} is correct`);
-    else return res.status(200).send(`Correct answer to question ${question} is ${card.correctAnswer}`);
+    if (answer === card.correctAnswer) return res.status(200).send(`Answer to question "${card.question}" is correct`)
+    else return res.status(200).send(`Wrong: Correct answer to question "${card.question}" is "${card.correctAnswer}"`)
 })
 
-module.exports = router;
+/**
+ * Retrieve Cards for a given category.
+ * If no category is specified or found, all cards will be returned.
+ * GET: localhost:3000/cards/category
+ */
+router.get('/category', async function (req, res) {
+    const {category} = req.body
+
+    let cards
+
+    if (!category) cards = await Card.find({}, null, null)
+    else cards = await Card.find({category: category}, null, null)
+    return res.status(200).send(cards)
+})
+
+module.exports = router
