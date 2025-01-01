@@ -16,6 +16,11 @@
   --muted-text-color: #A5A5AF; /* Neutraler Grauton für dezente Texte */
   --font-family-default: 'Inter', Arial, sans-serif;
   --font-family-heading: 'Inter', sans-serif;
+  --spacing-xs: 0.25rem; /* Sehr kleiner Abstand */
+  --spacing-sm: 0.5rem;  /* Kleiner Abstand */
+  --spacing-md: 1rem;    /* Mittlerer Abstand */
+  --spacing-lg: 2rem;    /* Großer Abstand */
+  --spacing-xl: 3rem;    /* Sehr großer Abstand */
 }
 
 [data-theme='dark'] {
@@ -34,4 +39,9 @@
   --muted-text-color: #5a5a5a; /* Dezentes Grau für weniger wichtige Texte */
   --font-family-default: 'Inter', Arial, sans-serif;
   --font-family-heading: 'Inter', sans-serif;
+  --spacing-xs: 0.25rem; /* Sehr kleiner Abstand */
+  --spacing-sm: 0.5rem;  /* Kleiner Abstand */
+  --spacing-md: 1rem;    /* Mittlerer Abstand */
+  --spacing-lg: 2rem;    /* Großer Abstand */
+  --spacing-xl: 3rem;    /* Sehr großer Abstand */
 }

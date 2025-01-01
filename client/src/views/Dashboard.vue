@@ -1,89 +1,83 @@
-<script setup>
-import { ref, onMounted } from 'vue';
-
-const currentTheme = ref(localStorage.getItem('theme') || 'light');
-
-const setTheme = (theme) => {
-  currentTheme.value = theme;
-  document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('theme', theme);
-};
-
-onMounted(() => {
-  setTheme(currentTheme.value);
-});
-</script>
-
 <template>
-  <div class="container">
-    <div class="card">
-      <h2 class="title">Welcome to the Dashboard!</h2>
-      <p class="subtitle">Du bist erfolgreich eingeloggt!</p>
-      <button
-          @click="setTheme(currentTheme === 'light' ? 'dark' : 'light')"
-          class="btn"
-      >
-        Switch to {{ currentTheme === 'light' ? 'Dark' : 'Light' }} Mode
-      </button>
+  <div>
+    <div class="dashboard">
+      <!-- Linker Bereich: Statistiken -->
+      <div class="dashboard-sidebar">
+        <h3>Statistiken</h3>
+        <Statistics />
+      </div>
+
+      <!-- Hauptbereich: Lernkarten und Kategorien -->
+      <div class="dashboard-main">
+        <h3>Übersicht</h3>
+        <div>
+          <p>Hier könnten Kartenübersichten oder Kategorien angezeigt werden.</p>
+        </div>
+      </div>
+
+      <!-- Rechter Bereich: Aktionen -->
+      <div class="dashboard-actions">
+        <h3>Aktionen</h3>
+        <button class="btn">Quiz starten</button>
+        <button class="btn">Kategorie erstellen</button>
+      </div>
     </div>
   </div>
 </template>
 
+<script>
+import Statistics from './Statistics.vue';
+
+export default {
+  name: 'Dashboard',
+  components: {
+    Statistics,
+  },
+};
+</script>
+
 <style scoped>
-.container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100vh;
+.dashboard {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr; /* Drei Spalten */
+  gap: var(--spacing-md, 1rem); /* Abstand zwischen den Bereichen */
+  padding: var(--spacing-lg, 2rem); /* Außenabstand */
+  font-family: var(--font-family-default); /* Hauptschriftart */
+  color: var(--text-color); /* Textfarbe */
 }
 
-.card {
-  font-family: var(--font-family-heading);
-  width: 100%;
-  max-width: 400px;
-  padding: 2rem;
-  background-color: var(--card-bg-color);
-  border-radius: 20px;
-  box-shadow: 0 10px 30px var(--shadow-color);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: background-color 0.3s, box-shadow 0.3s;
+.dashboard-sidebar,
+.dashboard-main,
+.dashboard-actions {
+  background-color: var(--card-bg-color); /* Kartenhintergrund */
+  border-radius: var(--border-radius, 8px); /* Abgerundete Ecken */
+  padding: var(--spacing-md, 1rem); /* Innenabstand */
+  box-shadow: 0 6px 8px var(--shadow-color); /* Schatteneffekt */
 }
 
-.title {
-  font-family: var(--font-family-heading);
-  font-size: 2rem;
-  font-weight: 800;
-  color: var(--text-color);
-  margin-bottom: 0.5rem;
-  text-align: center;
-}
-
-.subtitle {
-  font-family: var(--font-family-heading);
-  font-size: 1rem;
-  color: var(--subtitle-color);
-  text-align: center;
-  margin-bottom: 1.5rem;
+.dashboard-sidebar h3,
+.dashboard-main h3,
+.dashboard-actions h3 {
+  font-family: var(--font-family-heading); /* Schrift für Überschriften */
+  color: var(--text-color); /* Haupttextfarbe */
+  margin-bottom: var(--spacing-sm, 0.5rem); /* Abstand unter Überschrift */
 }
 
 .btn {
-  font-family: var(--font-family-heading);
-  background-color: var(--button-bg-color);
-  color: var(--button-text-color);
-  padding: 0.7rem 1rem;
+  display: block;
+  margin: var(--spacing-sm, 0.5rem) 0;
+  padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
+  background-color: var(--button-bg-color); /* Button-Farbe */
+  color: var(--button-text-color); /* Button-Textfarbe */
   border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: bold;
+  border-radius: var(--border-radius, 8px); /* Abgerundete Buttons */
   cursor: pointer;
+  text-align: center;
   transition: background-color 0.3s, box-shadow 0.3s;
 }
 
 .btn:hover {
-  background-color: var(--highlight-color);
-  box-shadow: 0 6px 15px var(--highlight-color);
+  background-color: var(--highlight-color); /* Hover-Farbe */
+  box-shadow: 0 6px 15px var(--highlight-color); /* Hover-Schatten */
 }
 </style>
