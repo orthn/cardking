@@ -6,6 +6,7 @@ let jwt = require('jsonwebtoken');
 const {sendResetMail} = require("../controllers/mailHandler");
 let secretKey = process.env.JWT_SECRET;
 
+
 //GET: Personal user dashboard
 router.get('/', function (req, res, next) {
     res.send("WIP: Default Users Page");
@@ -60,8 +61,22 @@ router.post('/login', async function (req, res) {
     }
 
     let check = await bcrypt.compare(password, dbUser.password);
-    if (check) return res.status(200).send("User is authenticated");
+    if (check) {
+        req.session.userId = dbUser._id;
+        console.log(req.session.userId);
+        return res.status(200).send("User is authenticated");
+    }
     else return res.status(401).send("Invalid credentials");
+})
+
+router.post('/logout', async function (req, res){
+    req.session.destroy(err => {
+        if (err) {
+            return res.status(500).json({ message: 'Could not log out' });
+        }
+        res.clearCookie('connect.sid'); // Clear session cookie
+        res.json({ message: 'Logged out' });
+    });
 })
 
 router.post('/reset-password', async function (req, res) {

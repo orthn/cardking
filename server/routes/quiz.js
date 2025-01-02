@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const card = require('cards');
+const User = require('../models/userSchema')
 
 const secretKey = process.env.JWT_SECRET;
 
@@ -22,8 +23,13 @@ router.get('/', function (req, res, next) {
  * Generates a quiz for an user and returns the quizId with JWT
  * POST: localhost:3000/quiz/startQuiz
  */
-router.get('/startQuiz', function (req, res){
-    const { userId } = req.body;
+router.get('/startQuiz', async function (req, res){
+    if (!req.session.userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const userId = await User.findOne(req.session.userId);
+
     const quizId = createQuizForUser(userId);
 
     const token = jwt.sign(

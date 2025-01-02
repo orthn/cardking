@@ -15,6 +15,7 @@ const handleLogin = async () => {
     const response = await fetch('http://localhost:3000/users/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',     //session management
       body: JSON.stringify({ username: username.value, password: password.value }),
     });
 
