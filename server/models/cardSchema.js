@@ -53,6 +53,26 @@ const cardSchema = new mongoose.Schema({
         default: 'General', // Default category if none is provided
         required: true,
     },
+    efactor: { // easiness factor of a card
+        type: Number,
+        default: 2.5, // easy = 2.5 --> hard = 1.3, always start with easy classification
+        required: true
+    },
+    interval: {
+        type: Number,
+        default: 0.0,
+        required: true
+    },
+    successfulReview: {
+        type: Number,
+        default: 0,
+        required:true
+    },
+    nextReview: {
+        type: Date,
+        default: Date.now,
+        required: true
+    }
 });
 
 module.exports = mongoose.model("Card", cardSchema);

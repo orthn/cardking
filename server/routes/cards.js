@@ -96,7 +96,7 @@ router.get('/category', async function (req, res) {
     return res.status(200).send(cards)
 })
 
-export async function checkAnswer(cardId, answer) {
+async function checkAnswer(cardId, answer) {
     if (!cardId) return { status: 400, message: "ID of the card is required" };
     if (!answer) return { status: 400, message: "Answer is required" };
 
@@ -105,5 +105,6 @@ export async function checkAnswer(cardId, answer) {
 
     if (answer === card.correctAnswer) return { status: 200, message: `Answer to question "${card.question}" is correct` };
     else return { status: 200, message: `Wrong: Correct answer to question "${card.question}" is "${card.correctAnswer}"` };
-};
-module.exports = router
+}
+
+module.exports = router, checkAnswer

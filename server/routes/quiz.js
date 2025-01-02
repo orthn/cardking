@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const card = require('cards');
-const User = require('../models/userSchema')
+const User = require('../models/userSchema');
+const Category = require('../models/categorySchema');
 
 const secretKey = process.env.JWT_SECRET;
 
@@ -15,13 +16,30 @@ function getNextCard(quizId, currentCard) {
     return undefined;
 }
 
-router.get('/', function (req, res, next) {
+router.get('/', function (req, res) {
     res.send("WIP: Default Quiz Page");
 });
 
 /**
- * Generates a quiz for an user and returns the quizId with JWT
- * POST: localhost:3000/quiz/startQuiz
+ * Returns all categories a user has
+ * GET: localhost:3000/quiz/categories
+ */
+router.get('categories', async function(req, res){
+    const userId = req.session.userId;
+    if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    let categories = await Category.find({userId: userId}, null, null);
+
+    if (categories) return res.status(200).json(categories)
+    else return res.status(204).json({message: 'No categories found'})
+});
+
+
+/**
+ * Generates a quiz for a user and returns the quizId with JWT
+ * GET: localhost:3000/quiz/startQuiz
  */
 router.get('/startQuiz', async function (req, res){
     if (!req.session.userId) {
