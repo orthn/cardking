@@ -25,7 +25,6 @@ const sendPasswordReset = async () => {
   }
 };
 
-const emit = defineEmits(['goToLogin']);
 </script>
 
 <template>
@@ -47,18 +46,12 @@ const emit = defineEmits(['goToLogin']);
         <div class="actions">
           <button type="submit" class="btn">Senden</button>
         </div>
-        <p class="message-text">{{ message }}</p>
       </form>
-      <p class="message-text">{{ message }}</p>
-        <p class="back-to-login-text">
-        <a href="#" class="link" @click.prevent="$emit('goToLogin')">Zurück zum Login</a>
-      </p>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* Styling aus der Login-Komponente übernommen */
 .container {
   display: flex;
   justify-content: center;
@@ -145,15 +138,22 @@ const emit = defineEmits(['goToLogin']);
   text-align: center;
   color: var(--muted-text-color);
 }
+
 .back-to-login-text {
-    font-family: var(--font-family-heading);
-  font-size: 1rem;
-  color: var(--link-color);
-  font-weight: 600;
-  text-align: center;
-  margin-bottom: 1rem;
   margin-top: 1rem;
+  font-size: 0.85rem;
   text-align: center;
-  visibility: visible;
 }
+
+.link {
+  color: var(--link-color);
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+.link:hover {
+  color: var(--highlight-color);
+}
+
 </style>

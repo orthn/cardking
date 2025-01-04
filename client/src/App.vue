@@ -6,19 +6,33 @@ import ResetPasswordRequestView from './views/ResetPasswordRequestView.vue';
 import ResetPasswordView from './views/ResetPasswordView.vue';
 import DashboardView from './views/Dashboard.vue';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import EditUserModal from './components/EditUserModal.vue';
 
-const currentView = ref('login');
+const currentView = ref('null');
 const resetToken = ref(null);
-
+const showEditModal = ref(false);
 const currentTheme = ref('light');
+const message = ref('');
+const messageType = ref('info'); // 'success' oder 'error'
 
 const setTheme = (theme) => {
   currentTheme.value = theme;
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('theme', theme);
 };
-
 onMounted(() => {
+  // Aktuelle URL analysieren
+  const url = new URL(window.location.href);
+
+  // Prüfen, ob die URL das Muster "/reset-password/:token" enthält
+  if (url.pathname.startsWith('/reset-password/')) {
+    currentView.value = 'resetPassword';
+    resetToken.value = url.pathname.split('/reset-password/')[1]; // Token extrahieren
+  } else {
+    currentView.value = 'login'; // Standardansicht ist Login
+  }
+
+  // Theme aus dem lokalen Speicher laden
   const savedTheme = localStorage.getItem('theme') || 'light';
   setTheme(savedTheme);
 });
@@ -27,11 +41,36 @@ const changeView = (view, token = null) => {
   currentView.value = view;
   resetToken.value = token;
 };
+
+const openEditModal = () => {
+  showEditModal.value = true;
+};
+
+const closeEditModal = () => {
+  showEditModal.value = false;
+};
+const handleLogout = async () => {
+  try {
+    const response = await fetch('http://localhost:3000/users/logout', {
+      method: 'POST',
+      credentials: 'include', // Wichtig für Cookies
+    });
+    if (response.ok) {
+      // Zurück zur Login-Seite navigieren
+     window.location.href = window.location.origin;
+    }
+  } catch (error) {
+  }
+};
 </script>
 
 <template>
   <div class="bg">
     <div class="view-container">
+      <div v-if="currentView === 'resetPassword'">
+        <ResetPasswordView :token="resetToken" />
+      </div>
+      <template v-else>
       <transition name="slide-left">
         <LoginView
           v-if="currentView === 'login'"
@@ -69,6 +108,7 @@ const changeView = (view, token = null) => {
             class="auth-view"
         />
       </transition>
+    </template>
     </div>
     <button
   @click="setTheme(currentTheme === 'light' ? 'dark' : 'light')"
@@ -78,15 +118,16 @@ const changeView = (view, token = null) => {
   <i v-else class="fas fa-sun"></i>
 </button>
 
-        <!-- Profile and Settings Buttons -->
-        <div v-if="currentView === 'dashboard'" class="top-right-buttons">
-      <button class="icon-btn">
-        <i class="fas fa-user-circle"></i>
-      </button>
-      <button class="icon-btn">
-        <i class="fas fa-cog"></i>
-      </button>
-    </div>
+<!-- Profile and Settings Buttons -->
+    <div v-if="currentView === 'dashboard'" class="top-right-buttons">
+    <button class="icon-btn" @click="openEditModal">
+      <i class="fas fa-user-circle"></i>
+    </button>
+    <EditUserModal v-if="showEditModal" @close="closeEditModal" />
+    <button class="icon-btn logout-btn" @click="handleLogout">
+      <i class="fas fa-sign-out-alt"></i>
+    </button>  
+  </div>
   </div>
 </template>
 

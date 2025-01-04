@@ -1,159 +1,189 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 
-const email = ref('');
+const password = ref('');
 const message = ref('');
+const messageType = ref('info');
+const token = ref(null);
 
-const sendPasswordReset = async () => {
+onMounted(() => {
+  // Token direkt aus der URL auslesen
+  const url = new URL(window.location.href);
+  if (url.pathname.startsWith('/reset-password/')) {
+    token.value = url.pathname.split('/reset-password/')[1]; // Token extrahieren
+  } else {
+    message.value = 'Ungültiger Link.';
+    messageType.value = 'error';
+  }
+});
+
+const resetPassword = async () => {
   message.value = '';
   try {
-    const response = await fetch('http://localhost:3000/users/reset-password', {
+    const response = await fetch(`http://localhost:3000/users/reset-password/${token.value}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value }),
+      body: JSON.stringify({ newPassword: password.value }),
     });
 
-    if (!response.ok) {
-      const data = await response.json();
-      message.value = data.error || 'Fehler beim Senden der E-Mail.';
+    // Status überprüfen
+    if (!response.ok) { 
+      // Versuchen, die Antwort als JSON zu parsen
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch (parseError) {
+        // Falls JSON-Parsing fehlschlägt, eine generische Fehlermeldung setzen
+        message.value = 'Fehler beim Zurücksetzen des Passworts.';
+        messageType.value = 'error';
+        return;
+      }
+
+      // Fehlernachricht aus JSON verwenden
+      message.value = errorData.error || 'Fehler beim Zurücksetzen des Passworts.';
+      messageType.value = 'error';
       return;
     }
 
-    message.value = 'Eine E-Mail zum Zurücksetzen des Passworts wurde gesendet.';
+    // Erfolgreiche Antwort (falls keine JSON-Daten vorhanden sind, Erfolgsmeldung setzen)
+    message.value = 'Passwort erfolgreich zurückgesetzt.';
+    messageType.value = 'success';
+    setTimeout(() => {
+      window.location.href = window.location.origin; // Anpassen, falls der Login-Path anders ist
+    }, 2000);
   } catch (error) {
+    // Netzwerk- oder andere Fehler
     message.value = 'Netzwerkfehler: ' + error.message;
+    messageType.value = 'error';
   }
 };
-
 </script>
 
 <template>
   <div class="container">
     <div class="card">
       <h2 class="title">Passwort zurücksetzen</h2>
-      <p class="subtitle">Gib deine E-Mail-Adresse ein, um einen Link zum Zurücksetzen deines Passworts zu erhalten.</p>
-      <form @submit.prevent="sendPasswordReset" class="form">
-        <div class="form-group">
-          <input
-            id="email"
-            class="form-control"
-            type="email"
-            v-model="email"
-            required
-            placeholder="Deine E-Mail-Adresse"
-          />
-        </div>
-        <div class="actions">
-          <button type="submit" class="btn">Senden</button>
-        </div>
+      <p class="subtitle">Bitte gib dein neues Passwort ein.</p>
+      <form @submit.prevent="resetPassword" class="form">
+        <input
+          type="password"
+          v-model="password"
+          id="password"
+          class="form-input"
+          placeholder="Neues Passwort"
+          required
+        />
+        <button type="submit" class="btn">Passwort zurücksetzen</button>
       </form>
+      <p v-if="message" :class="`message ${messageType}`">{{ message }}</p>
     </div>
   </div>
 </template>
 
 <style scoped>
+/* Container für die gesamte Ansicht */
 .container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
   max-width: 400px;
+  margin: 2rem auto;
+  padding: 1rem;
+  background: var(--card-bg-color, #ffffff);
+  box-shadow: 0 2px 10px var(--shadow-color, rgba(0, 0, 0, 0.1));
+  border-radius: var(--radius-md, 8px);
 }
 
+/* Styling der Karte */
 .card {
-  font-family: var(--font-family-heading);
-  width: 100%;
-  max-width: 400px;
-  padding: 2rem;
-  background-color: var(--card-bg-color);
-  border-radius: 20px;
-  box-shadow: 0 10px 30px var(--shadow-color);
+  padding: 1.5rem;
+}
+
+/* Titelüberschrift */
+.title {
+  font-family: var(--font-family-heading, 'Inter', sans-serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-color, #015249);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Untertitel */
+.subtitle {
+  font-family: var(--font-family-default, 'Inter', sans-serif);
+  font-size: 1rem;
+  color: var(--muted-text-color, #a5a5af);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Formular-Styling */
+.form {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  transition: background-color 0.3s, box-shadow 0.3s;
+  gap: 1rem;
 }
 
-.title {
-  font-family: var(--font-family-heading);
-  font-size: 2rem;
-  font-weight: 800;
-  color: var(--text-color);
-  margin-bottom: 0.5rem;
-  text-align: center;
+.form-label {
+  font-size: 0.875rem;
+  color: var(--text-color, #015249);
+  font-weight: 500;
 }
 
-.subtitle {
-  font-family: var(--font-family-heading);
+.form-input {
+  padding: 0.75rem;
   font-size: 1rem;
-  color: var(--subtitle-color);
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.form-group {
+  border: 1px solid var(--input-border-color, #77C9D4);
+  border-radius: var(--radius-sm, 4px);
+  background-color: var(--input-bg-color, #ffffff);
+  color: var(--text-color, #015249);
   width: 100%;
-  margin-bottom: 1.5rem;
 }
 
-.form-control {
-  font-family: var(--font-family-heading);
-  width: 100%;
-  padding: 0.7rem 1rem;
-  background-color: var(--input-bg-color);
-  border: 1px solid var(--input-border-color);
-  border-radius: 6px;
-  font-size: 1rem;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.form-control:focus {
+.form-input:focus {
   outline: none;
-  border-color: var(--highlight-color);
-  box-shadow: 0 0 6px var(--highlight-color);
+  border-color: var(--highlight-color, #77C9D4);
+  box-shadow: 0 0 5px var(--highlight-color, #77C9D4);
 }
 
+/* Button-Styling */
 .btn {
-  font-family: var(--font-family-heading);
-  width: 100%;
-  background-color: var(--button-bg-color);
-  color: var(--button-text-color);
-  padding: 0.7rem 1rem;
-  border: none;
-  border-radius: 6px;
+  padding: 0.75rem;
   font-size: 1rem;
-  font-weight: bold;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-md, 8px);
+  background-color: var(--button-bg-color, #57BC90);
+  color: var(--button-text-color, #ffffff);
   cursor: pointer;
-  transition: background-color 0.3s, box-shadow 0.3s;
+  text-align: center;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .btn:hover {
-  background-color: var(--highlight-color);
-  box-shadow: 0 6px 15px var(--highlight-color);
+  background-color: var(--highlight-color, #77C9D4);
+  transform: scale(1.05);
 }
 
-.message-text {
+.btn:disabled {
+  background-color: var(--muted-text-color, #a5a5af);
+  cursor: not-allowed;
+}
+
+/* Nachrichtentypen */
+.message {
   margin-top: 1rem;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  padding: 0.5rem;
   text-align: center;
-  color: var(--muted-text-color);
+  border-radius: var(--radius-sm, 4px);
 }
 
-.back-to-login-text {
-  margin-top: 1rem;
-  font-size: 0.85rem;
-  text-align: center;
+.message.success {
+  background-color: var(--button-bg-color, #57BC90);
+  color: var(--button-text-color, #ffffff);
 }
 
-.link {
-  color: var(--link-color);
-  text-decoration: none;
-  font-weight: bold;
-  transition: color 0.3s;
+.message.error {
+  background-color: var(--danger-color, #dc3545);
+  color: #ffffff;
 }
-
-.link:hover {
-  color: var(--highlight-color);
-}
-
 </style>

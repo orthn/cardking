@@ -109,7 +109,7 @@ router.post('/reset-password/:token', async function (req, res) {
     let {newPassword} = req.body;
 
     if (!newPassword) {
-        res.status(400).send("New password is required");
+        return res.status(400).send("New password is required");
     }
 
     try {
