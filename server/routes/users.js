@@ -72,7 +72,6 @@ router.post('/login', async function (req, res) {
     let check = await bcrypt.compare(password, dbUser.password);
     if (check) {
         req.session.userId = dbUser._id;
-        console.log(req.session.userId);
         return res.status(200).send("User is authenticated");
     }
     else return res.status(401).send("Invalid credentials");

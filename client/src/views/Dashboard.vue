@@ -54,7 +54,7 @@ export default {
 
     const fetchCategories = async () => {
       try {
-        const response = await fetch('http://localhost:3000/cards/categories', {
+        const response = await fetch('http://localhost:3000/dashboard/categories', {
           method: 'GET',
           credentials: 'include',
         });

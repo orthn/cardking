@@ -13,6 +13,8 @@ require('dotenv').config({path: path.join(__dirname, '.env')})
 let index = require('./routes/index')
 let users = require('./routes/users')
 let cards = require('./routes/cards')
+let quiz = require('./routes/quiz')
+let dashboard = require('./routes/dashboard')
 
 let app = express()
 
@@ -66,6 +68,12 @@ app.use('/users', users)
 
 //localhost:3000/cards
 app.use('/cards', cards)
+
+//localhost:3000/quiz
+app.use('/quiz', quiz)
+
+//localhost:3000/dashboard
+app.use('/dashboard', dashboard)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

@@ -6,6 +6,11 @@ const categorySchema = new mongoose.Schema({
         required: true,
         default: 'General'
     },
+    cardCount: {
+        type: Number,
+        required: true,
+        default: 0
+    },
     userId: {
         type: String,
         required: true

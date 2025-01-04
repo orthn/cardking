@@ -63,7 +63,7 @@ const cardSchema = new mongoose.Schema({
         default: 0.0,
         required: true
     },
-    successfulReview: {
+    reviews: {
         type: Number,
         default: 0,
         required:true
