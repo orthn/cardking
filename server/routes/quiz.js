@@ -1,13 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const jwt = require('jsonwebtoken');
-const card = require('./cards');
 const Card = require("../models/cardSchema")
-const User = require('../models/userSchema');
-const bcrypt = require('bcrypt');
 const constants = require("node:constants");
 
-const secretKey = process.env.JWT_SECRET;
+
 
 router.get('/', function (req, res) {
     res.send("WIP: Default Quiz Page");
@@ -23,18 +19,20 @@ router.get('/startQuiz', async function (req, res) {
         return res.status(401).json({message: 'Unauthorized'});
     }
 
-    const userId = await User.findOne(req.session.userId);
-
     const {category} = req.body;
+
+    if (!category) {
+        return res.status(400).json({ message: 'Category is required' });
+    }
 
     // Fetch user's cards in the selected category
     const userCards = await Card.find({category});
 
     if (!userCards || userCards.length === 0) {
-        return res.status(304).json({message: 'No cards available for the selected category'});
+        return res.status(204).json({message: 'No cards available for the selected category'});
     }
-    if (!userCards.length <= 10) {
-        return res.status(304).json({message: 'Not enough cards available for the category'});
+    if (!userCards.length < 10) {
+        return res.status(400).json({message: 'Not enough cards available for the category'});
     }
 
     const now = new Date();
@@ -58,7 +56,7 @@ router.get('/startQuiz', async function (req, res) {
     if (selectedCards && selectedCards.length === 10) {
         res.status(200).json({selectedCards});
     } else {
-        res.status(404).json({message: 'Error during quiz creation'})
+        res.status(500).json({message: 'Error during quiz creation'})
     }
 });
 
@@ -69,8 +67,6 @@ router.get('/startQuiz', async function (req, res) {
  *  expected body:
  */
 router.post('submitAnswers', async function (req, res) {
-    const token = req.headers.authorization;
-
     const {cards} = req.body;
 
     const bulkUpdates = [];
