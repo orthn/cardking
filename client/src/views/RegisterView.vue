@@ -161,6 +161,7 @@ const goToLogin = () => {
 /* Formular */
 .form-group {
   width: 100%;
+  color: var(--text-color);
   margin-bottom: 1.5rem;
   position: relative; /* Ermöglicht die Positionierung für dekorative Elemente */
 }

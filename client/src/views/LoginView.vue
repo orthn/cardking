@@ -83,6 +83,9 @@ const goToRegister = () => {
             required
             placeholder="Password"
           />
+          <p class="forgot-password-text">
+        <a href="#" @click.prevent="$emit('goToResetRequest')">Forgot password?</a>
+      </p>
         </div>
         <div class="actions">
           <button type="submit" class="btn">Login</button>
@@ -92,16 +95,11 @@ const goToRegister = () => {
         Don't have an account?
         <a href="#" class="link" @click.prevent="goToRegister">Register</a>
       </p>
-      <p class="forgot-password-text">
-        <a href="#" class="link" @click.prevent="$emit('goToResetRequest')">Passwort vergessen?</a>
-      </p>
-
     </div>
   </div>
 </template>
 
 <style scoped>
-/* Container */
 .container {
   display: flex;
   justify-content: center;
@@ -124,7 +122,6 @@ const goToRegister = () => {
   transition: background-color 0.3s, box-shadow 0.3s;
 }
 
-/* Titel und Untertitel */
 .title {
   font-family: var(--font-family-heading);
   font-size: 2rem;
@@ -141,10 +138,18 @@ const goToRegister = () => {
   text-align: center;
   margin-bottom: 1.5rem;
 }
+.forgot-password-text {
+  font-size: 0.85rem;
+  color: var(--muted-text-color);
+  margin-top: 0.2rem;
+}
+.forgot-password-text:hover {
+  color: var(--highlight-color);
+}
 
-/* Formular */
 .form-group {
   width: 100%;
+  color: var(--text-color);
   margin-bottom: 1.5rem;
 }
 
@@ -173,7 +178,6 @@ const goToRegister = () => {
   box-shadow: 0 0 6px var(--highlight-color);
 }
 
-/* Button */
 .btn {
   font-family: var(--font-family-heading);
   width: 100%;
@@ -198,7 +202,6 @@ const goToRegister = () => {
   box-shadow: 0 4px 12px var(--highlight-color);
 }
 
-/* Register Text */
 .register-text {
   font-size: 0.85rem;
   text-align: center;

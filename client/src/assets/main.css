@@ -9,6 +9,7 @@
   --input-bg-color: #fff; /* Neutraler Grauton */
   --input-border-color: #77C9D4; /* Helles Türkis für Input-Ränder */
   --button-bg-color: #57BC90; /* Frisches Grün für Buttons */
+  --secondary-button-bg-color: #015249;
   --button-text-color: #ffffff; /* Weiß bleibt unverändert */
   --link-color: #015249; /* Dunkelgrün für Links */
   --shadow-color: rgba(1, 82, 73, 0.1); /* Leichter Schatten in Dunkelgrün */
@@ -29,9 +30,10 @@
   --card-bg-color: #111214;  /* Tiefes Schwarz für Kartenhintergrund */
   --text-color: #cdc5b8;     /* Helles Beige für Text */
   --subtitle-color: #cdc5b8; /* Gleiches helles Beige für Untertitel */
-  --input-bg-color: #cdc5b8; /* Sehr dunkles Grau für Inputs */
+  --input-bg-color: #111214; /* Sehr dunkles Grau für Inputs */
   --input-border-color: #cdc5b8; /* Helles Beige für Input-Ränder */
   --button-bg-color: #d83129; /* Kräftiges Rot für Buttons */
+  --secondary-button-bg-color: #015249;
   --button-text-color: #111214; /* Tiefes Schwarz für Button-Text */
   --link-color: #d83129; /* Kräftiges Rot für Links */
   --shadow-color: rgba(17, 18, 20, 0.5); /* Leichter Schatten in Schwarz */

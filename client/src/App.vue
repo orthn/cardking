@@ -20,6 +20,27 @@ const setTheme = (theme) => {
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('theme', theme);
 };
+
+const checkSession = async () => {
+  try {
+    const response = await fetch('http://localhost:3000/users/me', {
+      method: 'GET',
+      credentials: 'include', // Session-Cookie senden
+    });
+
+    if (response.ok) {
+      // Benutzer ist eingeloggt, Dashboard anzeigen
+      currentView.value = 'dashboard';
+    } else {
+      // Benutzer nicht eingeloggt, Login anzeigen
+      currentView.value = 'login';
+    }
+  } catch (error) {
+    console.error('Fehler beim Überprüfen der Session:', error);
+    currentView.value = 'login'; // Fallback zur Login-Seite
+  }
+};
+
 onMounted(() => {
   // Aktuelle URL analysieren
   const url = new URL(window.location.href);
@@ -29,7 +50,7 @@ onMounted(() => {
     currentView.value = 'resetPassword';
     resetToken.value = url.pathname.split('/reset-password/')[1]; // Token extrahieren
   } else {
-    currentView.value = 'login'; // Standardansicht ist Login
+    checkSession(); // Session-Check ausführen
   }
 
   // Theme aus dem lokalen Speicher laden
@@ -49,6 +70,7 @@ const openEditModal = () => {
 const closeEditModal = () => {
   showEditModal.value = false;
 };
+
 const handleLogout = async () => {
   try {
     const response = await fetch('http://localhost:3000/users/logout', {
@@ -57,9 +79,10 @@ const handleLogout = async () => {
     });
     if (response.ok) {
       // Zurück zur Login-Seite navigieren
-     window.location.href = window.location.origin;
+      window.location.href = window.location.origin;
     }
   } catch (error) {
+    console.error('Fehler beim Logout:', error);
   }
 };
 </script>
@@ -71,63 +94,55 @@ const handleLogout = async () => {
         <ResetPasswordView :token="resetToken" />
       </div>
       <template v-else>
-      <transition name="slide-left">
-        <LoginView
-          v-if="currentView === 'login'"
-          class="auth-view"
-          @goToRegister="changeView('register')"
-          @goToResetRequest="changeView('resetRequest')"
-          @loggedIn="changeView('dashboard')"
-        />
-      </transition>
-      <transition name="slide-right">
-        <RegisterView
-          v-if="currentView === 'register'"
-          class="auth-view"
-          @goToLogin="changeView('login')"
-        />
-      </transition>
-      <transition name="slide-left">
-        <ResetPasswordRequestView
-          v-if="currentView === 'resetRequest'"
-          class="auth-view"
-          @goToLogin="changeView('login')"
-        />
-      </transition>
-      <transition name="slide-right">
-        <ResetPasswordView
-          v-if="currentView === 'resetPassword'"
-          class="auth-view"
-          :token="resetToken"
-          @goToLogin="changeView('login')"
-        />
-      </transition>
-      <transition name="slide-right">
-        <DashboardView
+        <transition name="slide-left">
+          <LoginView
+            v-if="currentView === 'login'"
+            class="auth-view"
+            @goToRegister="changeView('register')"
+            @goToResetRequest="changeView('resetRequest')"
+            @loggedIn="changeView('dashboard')"
+          />
+        </transition>
+        <transition name="slide-right">
+          <RegisterView
+            v-if="currentView === 'register'"
+            class="auth-view"
+            @goToLogin="changeView('login')"
+          />
+        </transition>
+        <transition name="slide-left">
+          <ResetPasswordRequestView
+            v-if="currentView === 'resetRequest'"
+            class="auth-view"
+            @goToLogin="changeView('login')"
+          />
+        </transition>
+        <transition name="slide-right">
+          <DashboardView
             v-if="currentView === 'dashboard'"
             class="auth-view"
-        />
-      </transition>
-    </template>
+          />
+        </transition>
+      </template>
     </div>
     <button
-  @click="setTheme(currentTheme === 'light' ? 'dark' : 'light')"
-  class="theme-switch-btn"
->
-  <i v-if="currentTheme === 'light'" class="fas fa-moon"></i>
-  <i v-else class="fas fa-sun"></i>
-</button>
-
-<!-- Profile and Settings Buttons -->
-    <div v-if="currentView === 'dashboard'" class="top-right-buttons">
-    <button class="icon-btn" @click="openEditModal">
-      <i class="fas fa-user-circle"></i>
+      @click="setTheme(currentTheme === 'light' ? 'dark' : 'light')"
+      class="theme-switch-btn"
+    >
+      <i v-if="currentTheme === 'light'" class="fas fa-moon"></i>
+      <i v-else class="fas fa-sun"></i>
     </button>
-    <EditUserModal v-if="showEditModal" @close="closeEditModal" />
-    <button class="icon-btn logout-btn" @click="handleLogout">
-      <i class="fas fa-sign-out-alt"></i>
-    </button>  
-  </div>
+
+    <!-- Profile and Settings Buttons -->
+    <div v-if="currentView === 'dashboard'" class="top-right-buttons">
+      <button class="icon-btn" @click="openEditModal">
+        <i class="fas fa-user-circle"></i>
+      </button>
+      <EditUserModal v-if="showEditModal" @close="closeEditModal" />
+      <button class="icon-btn logout-btn" @click="handleLogout">
+        <i class="fas fa-sign-out-alt"></i>
+      </button>  
+    </div>
   </div>
 </template>
 
@@ -172,7 +187,6 @@ const handleLogout = async () => {
 .view-container {
   position: relative;
   width: 100%;
-  max-width: 400px;
   height: auto;
   display: flex;
   justify-content: center;

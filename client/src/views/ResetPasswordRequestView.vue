@@ -24,14 +24,17 @@ const sendPasswordReset = async () => {
     message.value = 'Netzwerkfehler: ' + error.message;
   }
 };
-
+const emit = defineEmits(['goToLogin'])
+const goToLogin = () => {
+  emit('goToLogin')
+}
 </script>
 
 <template>
   <div class="container">
     <div class="card">
-      <h2 class="title">Passwort zurücksetzen</h2>
-      <p class="subtitle">Gib deine E-Mail-Adresse ein, um einen Link zum Zurücksetzen deines Passworts zu erhalten.</p>
+      <h2 class="title">Reset Password</h2>
+      <p class="subtitle">Enter your email address to receive a link to reset your password.</p>
       <form @submit.prevent="sendPasswordReset" class="form">
         <div class="form-group">
           <input
@@ -40,13 +43,17 @@ const sendPasswordReset = async () => {
             type="email"
             v-model="email"
             required
-            placeholder="Deine E-Mail-Adresse"
+            placeholder="E-Mail"
           />
         </div>
         <div class="actions">
-          <button type="submit" class="btn">Senden</button>
+          <button type="submit" class="btn">Send</button>
         </div>
       </form>
+      <p class="register-text">
+        Back to 
+        <a href="#" class="link" @click.prevent="goToLogin">Login</a>
+      </p>
     </div>
   </div>
 </template>
@@ -93,9 +100,15 @@ const sendPasswordReset = async () => {
 
 .form-group {
   width: 100%;
+  color: var(--text-color);
   margin-bottom: 1.5rem;
 }
-
+.register-text {
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--muted-text-color);
+  margin-top: 1.5rem;
+}
 .form-control {
   font-family: var(--font-family-heading);
   width: 100%;

@@ -12,6 +12,15 @@ router.get('/', function (req, res, next) {
     res.send("WIP: Default Users Page");
 });
 
+//GET: Session ID
+router.get('/me', (req, res) => {
+    if (!req.session || !req.session.userId) {
+        return res.status(401).send({ message: 'Nicht eingeloggt' });
+    }
+    res.status(200).send({ userId: req.session.userId });
+});
+
+
 //POST: Creating new User object
 router.post('/register', async function (req, res) {
     try {

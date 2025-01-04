@@ -46,10 +46,10 @@ const resetPassword = async () => {
     }
 
     // Erfolgreiche Antwort (falls keine JSON-Daten vorhanden sind, Erfolgsmeldung setzen)
-    message.value = 'Passwort erfolgreich zurückgesetzt.';
+    message.value = 'Password reset successfully.';
     messageType.value = 'success';
     setTimeout(() => {
-      window.location.href = window.location.origin; // Anpassen, falls der Login-Path anders ist
+      window.location.href = window.location.origin;
     }, 2000);
   } catch (error) {
     // Netzwerk- oder andere Fehler
@@ -62,8 +62,8 @@ const resetPassword = async () => {
 <template>
   <div class="container">
     <div class="card">
-      <h2 class="title">Passwort zurücksetzen</h2>
-      <p class="subtitle">Bitte gib dein neues Passwort ein.</p>
+      <h2 class="title">Reset Password</h2>
+      <p class="subtitle">Type in your new Password</p>
       <form @submit.prevent="resetPassword" class="form">
         <input
           type="password"
@@ -73,7 +73,7 @@ const resetPassword = async () => {
           placeholder="Neues Passwort"
           required
         />
-        <button type="submit" class="btn">Passwort zurücksetzen</button>
+        <button type="submit" class="btn">Reset Password</button>
       </form>
       <p v-if="message" :class="`message ${messageType}`">{{ message }}</p>
     </div>
@@ -124,24 +124,24 @@ const resetPassword = async () => {
 
 .form-label {
   font-size: 0.875rem;
-  color: var(--text-color, #015249);
+  color: var(--text-color);
   font-weight: 500;
 }
 
 .form-input {
   padding: 0.75rem;
   font-size: 1rem;
-  border: 1px solid var(--input-border-color, #77C9D4);
+  border: 1px solid var(--input-border-color);
   border-radius: var(--radius-sm, 4px);
-  background-color: var(--input-bg-color, #ffffff);
+  background-color: var(--input-bg-color);
   color: var(--text-color, #015249);
   width: 100%;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: var(--highlight-color, #77C9D4);
-  box-shadow: 0 0 5px var(--highlight-color, #77C9D4);
+  border-color: var(--highlight-color);
+  box-shadow: 0 0 5px var(--highlight-color);
 }
 
 /* Button-Styling */
@@ -151,20 +151,20 @@ const resetPassword = async () => {
   font-weight: 600;
   border: none;
   border-radius: var(--radius-md, 8px);
-  background-color: var(--button-bg-color, #57BC90);
-  color: var(--button-text-color, #ffffff);
+  background-color: var(--button-bg-color);
+  color: var(--button-text-color);
   cursor: pointer;
   text-align: center;
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .btn:hover {
-  background-color: var(--highlight-color, #77C9D4);
+  background-color: var(--highlight-color);
   transform: scale(1.05);
 }
 
 .btn:disabled {
-  background-color: var(--muted-text-color, #a5a5af);
+  background-color: var(--muted-text-color);
   cursor: not-allowed;
 }
 
@@ -178,12 +178,12 @@ const resetPassword = async () => {
 }
 
 .message.success {
-  background-color: var(--button-bg-color, #57BC90);
-  color: var(--button-text-color, #ffffff);
+  background-color: var(--button-bg-color);
+  color: var(--button-text-color);
 }
 
 .message.error {
-  background-color: var(--danger-color, #dc3545);
+  background-color: var(--danger-color);
   color: #ffffff;
 }
 </style>
