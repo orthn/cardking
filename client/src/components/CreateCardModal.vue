@@ -45,32 +45,64 @@
             </div>
   
             <!-- Answer Cards -->
-            <div class="form-group full-width">
+            <div v-if="card.type !== 'true_false'" class="form-group full-width">
               <label class="form-label">Answers:</label>
-              <div class="answer-grid">
-                <div
-                  v-for="(answer, index) in card.answers"
-                  :key="index"
-                  class="answer-card"
-                  :class="{ correct: card.correctAnswer.includes(index) }"
-                  @click="toggleAnswer(index)"
-                >
-                  <input
-                    v-model="card.answers[index]"
+              <div v-for="(answer, index) in card.answers" :key="index" class="form-group">
+                <input
                     type="text"
-                    class="form-input answer-text"
+                    v-model="card.answers[index]"
+                    class="form-input"
                     :placeholder="`Answer ${index + 1}`"
                     required
-                  />
-                </div>
+                />
+                <input
+                    type="checkbox"
+                    v-if="card.type === 'multiple_choice'"
+                    :checked="card.correctAnswer.includes(index)"
+                    @change="toggleAnswer(index)"
+                />
+                <input
+                    type="radio"
+                    v-if="card.type === 'single_choice'"
+                    name="correctAnswer"
+                    :value="index"
+                    :checked="card.correctAnswer[0] === index"
+                    @change="toggleAnswer(index)"
+                />
               </div>
             </div>
-  
-            <!-- Actions -->
-            <div class="form-actions">
-              <button type="submit" class="btn">Save Card</button>
-              <button type="button" class="btn close-btn" @click="closeModal">Close</button>
+
+            <!-- True/False Selection -->
+            <div v-else class="form-group full-width">
+              <label class="form-label">Select the correct answer:</label>
+              <div class="form-group true-false-group">
+                <input
+                    type="radio"
+                    id="true"
+                    name="correctAnswer"
+                    value="True"
+                    :checked="card.correctAnswer[0] === 'True'"
+                    @change="toggleAnswer('True')"
+                />
+                <label for="true" class="true-false-label">True</label>
+              </div>
+              <div class="form-group true-false-group">
+                <input
+                    type="radio"
+                    id="false"
+                    name="correctAnswer"
+                    value="False"
+                    :checked="card.correctAnswer[0] === 'False'"
+                    @change="toggleAnswer('False')"
+                />
+                <label for="false" class="true-false-label">False</label>
+              </div>
             </div>
+
+
+            <!-- Submit -->
+            <button type="submit" class="btn">Create Card</button>
+
           </form>
         </div>
       </div>
@@ -96,24 +128,23 @@
           question: "",
           category: "",
           type: "true_false",
-          answers: [],
+          answers: ["True", "False"],
           correctAnswer: [],
         },
+        message: "",
       };
     },
     methods: {
       updateAnswerFields() {
-        this.card.answers = [];
         this.card.correctAnswer = [];
         if (this.card.type === "true_false") {
           this.card.answers = ["True", "False"];
-          this.card.correctAnswer = [0];
         } else {
           this.card.answers = ["", "", "", ""];
         }
       },
       toggleAnswer(index) {
-        if (this.card.type === "single_choice") {
+        if (this.card.type === "single_choice" || this.card.type === "true_false") {
           this.card.correctAnswer = [index];
         } else if (this.card.type === "multiple_choice") {
           if (this.card.correctAnswer.includes(index)) {
@@ -125,30 +156,58 @@
       },
       async submitForm() {
         try {
+          console.log("Submitting form with data:", this.card);
+
+          if (!this.card.question || !this.card.category || !this.card.type) {
+            this.message = "All fields are required.";
+            console.error("Validation error: Missing required fields.");
+            return;
+          }
+
+          if (this.card.type === "true_false" && this.card.correctAnswer.length === 0) {
+            this.message = "Please select True or False.";
+            console.error("Validation error: No answer selected for True/False question.");
+            return;
+          }
+
           const cardData = {
-            ...this.card,
+            question: this.card.question,
+            category: this.card.category,
+            type: this.card.type,
+            answers: this.card.answers,
             correctAnswer:
-              this.card.type === "multiple_choice"
-                ? this.card.correctAnswer.map((index) => this.card.answers[index])
-                : this.card.answers[this.card.correctAnswer[0]],
+                this.card.type === "multiple_choice"
+                    ? this.card.correctAnswer.map((index) => this.card.answers[index])
+                    : this.card.type === "single_choice"
+                        ? this.card.answers[this.card.correctAnswer[0]]
+                        : this.card.correctAnswer[0],
           };
-  
+
+          console.log("Payload being sent to server:", JSON.stringify(cardData));
+
           const response = await fetch("http://localhost:3000/cards/create", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(cardData),
           });
-  
+
           if (!response.ok) {
-            alert("Failed to create the card.");
+            const errorText = await response.text();
+            this.message = "Failed to create the card. Server responded with status " + response.status + ": " + errorText;
+            console.error("Server error:", response, errorText);
             return;
           }
-  
-          alert("Card created successfully!");
+
+          const responseData = await response.json();
+          console.log("Server response:", responseData);
+
+          this.message = "Card created successfully!";
+          console.log("Card created successfully:", cardData);
           this.resetForm();
           this.closeModal();
         } catch (err) {
-          alert("Network error: " + err.message);
+          this.message = "Network error: " + err.message;
+          console.error("Error during form submission:", err);
         }
       },
       resetForm() {
@@ -156,7 +215,7 @@
           question: "",
           category: "",
           type: "true_false",
-          answers: [],
+          answers: ["True", "False"],
           correctAnswer: [],
         };
       },
@@ -209,6 +268,16 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
+  }
+
+  .true-false-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
+  }
+  .true-false-label {
+    font-size: 16px;
   }
   
   .form-label {

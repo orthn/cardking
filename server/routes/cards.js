@@ -14,54 +14,35 @@ router.get('/', function (req, res) {
  */
 router.post('/create', async function (req, res) {
     const {question, type, answers, correctAnswer, category} = req.body
+    console.log("Received data:", { question, type, answers, correctAnswer, category });
+
+    if (type === 'true_false') {
+        if (!Array.isArray(answers) || answers.length !== 2 || answers[0] !== 'True' || answers[1] !== 'False') {
+            console.error("Validation failed for answers:", answers);
+            return res.status(400).send("Answers must be ['True', 'False'] for true/false questions.");
+        }
+
+        if (correctAnswer !== 'True' && correctAnswer !== 'False') {
+            console.error("Validation failed for correctAnswer:", correctAnswer);
+            return res.status(400).send("CorrectAnswer must be 'True' or 'False' for true/false questions.");
+        }
+    }
 
     if (!question) return res.status(400).send("Question is required")
     if (!type) return res.status(400).send("Type is required")
     if (!answers) return res.status(400).send("Answers is required")
     if (!correctAnswer) return res.status(400).send("Correct Answers is required")
 
-    let card
-
-    switch (type) {
-        case 'true_false':
-            card = new Card({
-                question: question,
-                type: 'true_false',
-                answers: answers,               // ['true', 'false']
-                correctAnswer: correctAnswer,   // 'true'
-                category: category
-            })
-            break
-        case 'single_choice':
-            card = new Card({
-                question: question,
-                type: 'single_choice',
-                answers: answers,               // ['A', 'B', 'C', 'D']
-                correctAnswer: correctAnswer,   // 'A'
-                category: category
-            })
-            break
-        case 'multiple_choice':
-            card = new Card({
-                question: question,
-                type: 'multiple_choice',
-                answers: answers,               // ['A', 'B', 'C', 'D']
-                correctAnswer: correctAnswer,   // ['A', 'B', 'D']
-                category: category
-            })
-            break
+    try {
+        const card = new Card({ question, type, answers, correctAnswer, category });
+        await card.save();
+        console.log("Card created successfully:", card);
+        res.status(201).send({ message: "Card created successfully" });
+    } catch (error) {
+        console.error("Error saving card:", error);
+        res.status(500).send({ message: "Error saving card: " + error.message });
     }
-
-    await card.save()
-        .then(() => {
-            console.log('Card created & saved successfully!')
-            return res.status(201).send({message: "Card created successfully"})
-        })
-        .catch(err => {
-            console.log(`Error saving card: ${err.message}`)
-            return res.status(500).send({message: `Error saving card: ${err.message}`})
-        })
-})
+});
 
 /**
  * Check if an answer to a card is correct. Card is identified by its ID.

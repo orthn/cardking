@@ -15,7 +15,7 @@ const cardSchema = new mongoose.Schema({
         validate: {
             validator: function (v) {
                 if (this.type === 'true_false') {
-                    return Array.isArray(v) && v.length === 2 && v.includes('true') && v.includes('false');
+                    return Array.isArray(v) && v.length === 2 && v.includes('True') && v.includes('False');
                 }
                 if (this.type === 'single_choice') {
                     return Array.isArray(v) && v.length > 0;
@@ -35,7 +35,7 @@ const cardSchema = new mongoose.Schema({
         validate: {
             validator: function (v) {
                 if (this.type === 'true_false') {
-                    return v === 'true' || v === 'false';
+                    return v === 'True' || v === 'False';
                 }
                 if (this.type === 'single_choice') {
                     return typeof v === 'string' && this.answers.includes(v);
