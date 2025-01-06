@@ -2,6 +2,7 @@ let express = require('express')
 let router = express.Router()
 
 let Card = require("../models/cardSchema")
+let Category = require("../models/categorySchema");
 
 router.get('/', function (req, res) {
     res.send("WIP: Default Cards Page")
@@ -13,34 +14,48 @@ router.get('/', function (req, res) {
  * POST: localhost:3000/cards/create
  */
 router.post('/create', async function (req, res) {
-    const {question, type, answers, correctAnswer, category} = req.body
-    console.log("Received data:", { question, type, answers, correctAnswer, category });
+    const { question, type, answers, correctAnswer, category } = req.body;
 
-    if (type === 'true_false') {
-        if (!Array.isArray(answers) || answers.length !== 2 || answers[0] !== 'True' || answers[1] !== 'False') {
-            console.error("Validation failed for answers:", answers);
-            return res.status(400).send("Answers must be ['True', 'False'] for true/false questions.");
-        }
+    // Holen der userId aus der Session
+    const userId = req.session.userId;
 
-        if (correctAnswer !== 'True' && correctAnswer !== 'False') {
-            console.error("Validation failed for correctAnswer:", correctAnswer);
-            return res.status(400).send("CorrectAnswer must be 'True' or 'False' for true/false questions.");
-        }
+    if (!userId) {
+        return res.status(401).send("User is not authenticated. Please log in.");
     }
 
-    if (!question) return res.status(400).send("Question is required")
-    if (!type) return res.status(400).send("Type is required")
-    if (!answers) return res.status(400).send("Answers is required")
-    if (!correctAnswer) return res.status(400).send("Correct Answers is required")
+    if (!question) return res.status(400).send("Question is required");
+    if (!type) return res.status(400).send("Type is required");
+    if (!answers) return res.status(400).send("Answers are required");
+    if (!correctAnswer) return res.status(400).send("CorrectAnswer is required");
 
     try {
+        // 1. Erstelle die Karte
         const card = new Card({ question, type, answers, correctAnswer, category });
         await card.save();
-        console.log("Card created successfully:", card);
-        res.status(201).send({ message: "Card created successfully" });
+
+        // 2. Finde oder erstelle die Kategorie
+        let categoryDoc = await Category.findOne({ category, userId });
+
+        if (!categoryDoc) {
+            // Falls die Kategorie nicht existiert, erstelle sie
+            categoryDoc = new Category({
+                category,
+                userId,
+                cardCount: 0,
+                cards: [],
+            });
+        }
+
+        // 3. Füge die Karten-ID zur Kategorie hinzu
+        categoryDoc.cards.push(card._id);
+        categoryDoc.cardCount = categoryDoc.cards.length;
+        await categoryDoc.save();
+
+        console.log("Card created and added to category successfully:", card);
+        res.status(201).send({ message: "Card created successfully", card });
     } catch (error) {
-        console.error("Error saving card:", error);
-        res.status(500).send({ message: "Error saving card: " + error.message });
+        console.error("Error saving card or category:", error);
+        res.status(500).send({ message: "Error: " + error.message });
     }
 });
 

@@ -4,17 +4,22 @@ const categorySchema = new mongoose.Schema({
     category: {
         type: String,
         required: true,
-        default: 'General'
+        default: 'General',
     },
     cardCount: {
         type: Number,
         required: true,
-        default: 0
+        default: 0,
     },
     userId: {
         type: String,
-        required: true
-    }
-})
+        required: true,
+    },
+    cards: {
+        type: [mongoose.Schema.Types.ObjectId], 
+        ref: 'Card',
+        default: [],
+    },
+});
 
-module.exports = mongoose.model("Category", categorySchema);
+module.exports = mongoose.model('Category', categorySchema);

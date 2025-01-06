@@ -7,16 +7,22 @@
         <Statistics />
       </div>
 
-      <!-- Main Section: Cards and Categories -->
-      <div class="dashboard-main">
+     <!-- Main Section: Cards and Categories -->
+     <div class="dashboard-main">
         <h3>Overview</h3>
         <div>
           <p v-if="categories.length === 0">Loading categories...</p>
-          <ul v-else class="category-list">
-            <li v-for="category in categories" :key="category._id" class="category-item">
+          <div v-else class="category-grid">
+            <div
+              v-for="category in categories"
+              :key="category._id"
+              class="category-box"
+              :class="{ selected: selectedCategory === category.category }"
+              @click="selectCategory(category.category)"
+            >
               {{ category.category }}
-            </li>
-          </ul>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -32,7 +38,7 @@
     <CreateCardModal
       :show="showModal"
       :categories="categories"
-      @close="showModal = false"
+      @close="handleModalClose"
     />
   </div>
 </template>
@@ -51,6 +57,7 @@ export default {
   setup() {
     const categories = ref([]);
     const showModal = ref(false);
+    const selectedCategory = ref(null); // Speichert die ausgewählte Kategorie
 
     const fetchCategories = async () => {
       try {
@@ -66,20 +73,69 @@ export default {
         console.error(error.message);
       }
     };
+    const selectCategory = (category) => {
+      if (selectedCategory.value === category) {
+        selectedCategory.value = null; // Deselektiere, wenn dieselbe Kategorie angeklickt wird
+      } else {
+        selectedCategory.value = category; // Setze die neue Kategorie
+      }
+    };
+
+    const handleModalClose = () => {
+      showModal.value = false;
+      fetchCategories();
+    };
 
     onMounted(() => {
       fetchCategories();
     });
 
     return {
+      selectedCategory,
       categories,
       showModal,
+      handleModalClose,
+      fetchCategories,
+      selectCategory,
     };
   },
 };
 </script>
 
 <style scoped>
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, max-content));
+  gap: 1rem;
+  justify-content: center;
+}
+
+.category-box {
+  padding: 0.5rem 1rem;
+  background-color: var(--card-bg-color, #f9f9f9);
+  border: 1px solid var(--input-border-color, #ddd);
+  border-radius: var(--radius-sm, 4px);
+  text-align: center;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+  cursor: pointer;
+}
+
+.category-box:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px var(--highlight-color); /* Hover-Schatten */
+
+}
+
+.category-box.selected {
+  background-color: var(--highlight-color, #57bc90); /* Farbe bei Auswahl */
+  color: white; /* Textfarbe bei Auswahl */
+  border-color: var(--highlight-color, #57bc90);
+  box-shadow: 0 6px 15px var(--highlight-color); /* Hover-Schatten */
+
+}
+
 .dashboard {
   display: grid;
   grid-template-columns: 2fr 2fr 1fr; /* Drei Spalten */
