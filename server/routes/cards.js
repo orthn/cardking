@@ -139,28 +139,39 @@ router.get('/category', async function (req, res) {
     try {
         const userId = req.session.userId;
 
-        const {category} = req.body;
+        const category = req.query.category;
+
 
         let cards;
         let categoryEntries;
 
         if (!category) {
-            categoryEntries = await Category.findOne({userId});
-            const categoryIds = categoryEntries.map(category => category._id);
-            cards = await Card.find({categoryId: { $in: categoryIds }});
-        }
-        else {
-            categoryEntries = await Category.findOne({category, userId});
-            if (!categoryEntries) {
-                return res.status(404).send({ message: "Category not found" });
+            categoryEntries = await Category.find({ userId });
+
+            if (!categoryEntries || categoryEntries.length === 0) {
+                return res.status(404).json({ message: "No categories found" });
             }
-            cards = await Card.find({categoryId: categoryEntries._id});
+
+            const categoryIds = categoryEntries.map(category => category._id);
+            cards = await Card.find({ categoryId: { $in: categoryIds } });
+        } else {
+            categoryEntries = await Category.findOne({ category, userId });
+
+            if (!categoryEntries) {
+                return res.status(404).json({ message: "Category not found" });
+            }
+
+            cards = await Card.find({ categoryId: categoryEntries._id });
+            console.log(cards);
         }
+
         return res.status(200).send(cards)
     } catch (err) {
         console.error(err);
         return res.status(500).send({ message: 'Internal server error', error: err.message });
     }
 })
+
+
 
 module.exports = router

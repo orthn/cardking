@@ -31,6 +31,13 @@
         <h3>Actions</h3>
         <button class="btn">Start Quiz</button>
         <button class="btn" @click="showModal = true">Create Card</button>
+        <button
+            class="btn"
+            @click="openEditQuestionsModal"
+            :disabled="!selectedCategory"
+        >
+          Edit Selected Category
+        </button>
       </div>
     </div>
 
@@ -40,6 +47,19 @@
       :categories="categories"
       @close="handleModalClose"
     />
+
+    <EditQuestionsModal
+        v-if="isEditQuestionsModalVisible"
+        :isVisible="isEditQuestionsModalVisible"
+        :categoryName="selectedCategory"
+        :questions="selectedCategoryQuestions"
+        :selectedQuestion="selectedQuestion"
+        @save="updateQuestions"
+        @close="isEditQuestionsModalVisible = false"
+    />
+
+
+
   </div>
 </template>
 
@@ -47,17 +67,35 @@
 import { ref, onMounted } from 'vue';
 import Statistics from './Statistics.vue';
 import CreateCardModal from '../components/CreateCardModal.vue';
+import EditQuestionsModal from '../components/EditQuestionsModal.vue';
+import { mockCategories, mockQuestions } from './mockData';
 
 export default {
   name: 'Dashboard',
   components: {
     Statistics,
     CreateCardModal,
+    EditQuestionsModal,
   },
   setup() {
     const categories = ref([]);
     const showModal = ref(false);
-    const selectedCategory = ref(null); // Speichert die ausgewählte Kategorie
+    const selectedCategory = ref(null);
+    const selectedCategoryQuestions = ref([]); // Fragen der gewählten Kategorie
+    const isEditQuestionsModalVisible = ref(false);
+
+    const selectCategory = (category) => {
+      if (selectedCategory.value === category) {
+        selectedCategory.value = null; // Deselektiere, wenn dieselbe Kategorie angeklickt wird
+      } else {
+        selectedCategory.value = category; // Setze die neue Kategorie
+      }
+    };
+
+    const selectQuestion = (question) => {
+      selectedQuestion.value = JSON.parse(JSON.stringify(question));
+      isEditQuestionsModalVisible.value = true;
+    };
 
     const fetchCategories = async () => {
       try {
@@ -68,37 +106,89 @@ export default {
 
         if (!response.ok) throw new Error('Failed to fetch categories');
 
-        categories.value = await response.json();
+        categories.value = await response.json(); // Hier kommen Kategorien mit IDs rein
+        console.log('Fetched categories:', categories.value);
       } catch (error) {
         console.error(error.message);
       }
     };
-    const selectCategory = (category) => {
-      if (selectedCategory.value === category) {
-        selectedCategory.value = null; // Deselektiere, wenn dieselbe Kategorie angeklickt wird
-      } else {
-        selectedCategory.value = category; // Setze die neue Kategorie
+
+    const fetchCategoryQuestions = async (categoryId) => {
+      try {
+        const response = await fetch(`http://localhost:3000/cards/category?category=${categoryId}`, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error("Category not found");
+          }
+          throw new Error("Failed to fetch questions");
+        }
+
+        selectedCategoryQuestions.value = await response.json();
+        console.log("Fetched questions:", selectedCategoryQuestions.value);
+      } catch (error) {
+        console.error("Error fetching questions:", error.message);
       }
     };
 
-    const handleModalClose = () => {
-      showModal.value = false;
-      fetchCategories();
+
+
+    const openEditQuestionsModal = async () => {
+      if (!selectedCategory.value) return;
+      await fetchCategoryQuestions(selectedCategory.value); // Fragen abrufen
+      isEditQuestionsModalVisible.value = true; // Modal öffnen
     };
 
-    onMounted(() => {
-      fetchCategories();
-    });
 
-    return {
-      selectedCategory,
-      categories,
-      showModal,
-      handleModalClose,
-      fetchCategories,
-      selectCategory,
+    const updateQuestions = async (updatedQuestion) => {
+      const questionIndex = selectedCategoryQuestions.value.findIndex(
+          (q) => q._id === updatedQuestion._id
+      );
+      if (questionIndex !== -1) {
+        selectedCategoryQuestions.value[questionIndex] = updatedQuestion;
+      }
+
+      // Änderungen an das Backend senden
+      try {
+        const response = await fetch(`http://localhost:3000/cards/update/${updatedQuestion._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedQuestion),
+          credentials: "include",
+        });
+
+        if (!response.ok) throw new Error("Failed to update question");
+        console.log("Question updated successfully!");
+      } catch (error) {
+        console.error("Error updating question:", error.message);
+      }
     };
-  },
+
+const handleModalClose = () => {
+  showModal.value = false;
+  fetchCategories();
+};
+
+onMounted(() => {
+  fetchCategories();
+});
+
+return {
+  selectedCategory,
+  categories,
+  showModal,
+  handleModalClose,
+  fetchCategories,
+  selectCategory,
+  isEditQuestionsModalVisible,
+  openEditQuestionsModal,
+  selectedCategoryQuestions,
+  updateQuestions,
+};
+},
 };
 </script>
 
