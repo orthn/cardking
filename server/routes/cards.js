@@ -47,15 +47,12 @@ router.post('/create', async function (req, res) {
     if (!answers) return res.status(400).send("Answers are required");
     if (!correctAnswer) return res.status(400).send("CorrectAnswer is required");
 
-    console.log('halli')
-    console.log(category)
     try {
         // 1. Find or create category
         let categoryDoc = await Category.findOne({ category, userId });
 
 
         if (!categoryDoc) {
-            console.log('drinnen')
             // If the category does not exist, create it
             categoryDoc = new Category({
                 category,
@@ -136,13 +133,31 @@ function validateCardType(type, answers, correctAnswer) {
  * GET: localhost:3000/cards/category
  */
 router.get('/category', async function (req, res) {
-    const {category} = req.body
+    try {
+        const userId = req.session.userId;
 
-    let cards
+        const {category} = req.body;
 
-    if (!category) cards = await Card.find({}, null, null)
-    else cards = await Card.find({category: category}, null, null)
-    return res.status(200).send(cards)
+        let cards;
+        let categoryEntries;
+
+        if (!category) {
+            categoryEntries = await Category.findOne({userId});
+            const categoryIds = categoryEntries.map(category => category._id);
+            cards = await Card.find({categoryId: { $in: categoryIds }});
+        }
+        else {
+            categoryEntries = await Category.findOne({category, userId});
+            if (!categoryEntries) {
+                return res.status(404).send({ message: "Category not found" });
+            }
+            cards = await Card.find({categoryId: categoryEntries._id});
+        }
+        return res.status(200).send(cards)
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send({ message: 'Internal server error', error: err.message });
+    }
 })
 
 module.exports = router
