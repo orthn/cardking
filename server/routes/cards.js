@@ -35,7 +35,7 @@ router.get('/get', async function (req, res) {
 router.post('/create', async function (req, res) {
     const { question, type, answers, correctAnswer, category } = req.body;
 
-    // Holen der userId aus der Session
+    // get userID from session
     const userId = req.session.userId;
 
     if (!userId) {
@@ -47,28 +47,30 @@ router.post('/create', async function (req, res) {
     if (!answers) return res.status(400).send("Answers are required");
     if (!correctAnswer) return res.status(400).send("CorrectAnswer is required");
 
+    console.log('halli')
+    console.log(category)
     try {
-        // 1. Erstelle die Karte
-        const card = new Card({ question, type, answers, correctAnswer, category });
-        await card.save();
-
-        // 2. Finde oder erstelle die Kategorie
+        // 1. Find or create category
         let categoryDoc = await Category.findOne({ category, userId });
 
+
         if (!categoryDoc) {
-            // Falls die Kategorie nicht existiert, erstelle sie
+            console.log('drinnen')
+            // If the category does not exist, create it
             categoryDoc = new Category({
                 category,
-                userId,
                 cardCount: 0,
-                cards: [],
+                userId
             });
+            await categoryDoc.save();
         }
 
-        // 3. Füge die Karten-ID zur Kategorie hinzu
-        categoryDoc.cards.push(card._id);
-        categoryDoc.cardCount = categoryDoc.cards.length;
-        await categoryDoc.save();
+        categoryId = categoryDoc._id;
+
+        // 3. create the card and hand over the category ID
+        const card = new Card({ question, type, answers, correctAnswer, categoryId });
+        await card.save();
+
 
         console.log("Card created and added to category successfully:", card);
         res.status(201).send({ message: "Card created successfully", card });

@@ -48,10 +48,9 @@ const cardSchema = new mongoose.Schema({
             message: 'Correct answer is invalid for the specified card type.',
         },
     },
-    category: {
+    categoryId: {
         type: String,
-        default: 'General', // Default category if none is provided
-        required: true,
+        required: true
     },
     efactor: { // easiness factor of a card
         type: Number,

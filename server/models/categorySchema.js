@@ -15,11 +15,6 @@ const categorySchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    cards: {
-        type: [mongoose.Schema.Types.ObjectId], 
-        ref: 'Card',
-        default: [],
-    },
 });
 
 module.exports = mongoose.model('Category', categorySchema);
