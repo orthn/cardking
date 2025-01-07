@@ -59,7 +59,7 @@ router.post('/create', async function (req, res) {
             // If the category does not exist, create it
             categoryDoc = new Category({
                 category,
-                cardCount: 0,
+                cardCount: 1,
                 userId
             });
             await categoryDoc.save();
