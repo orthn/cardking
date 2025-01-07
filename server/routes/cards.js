@@ -9,6 +9,25 @@ router.get('/', function (req, res) {
 })
 
 /**
+ * Retrieve a card by its ID
+ * GET: localhost:3000/cards/:id
+ */
+router.get('/get', async function (req, res) {
+    const {id} = req.body
+
+    try {
+        if (!id) return res.status(400).send("ID cannot be empty")
+
+        const card = await Card.findById(id, null, null)
+        if (!card) return res.status(404).send("No cards found with this id")
+
+        return res.status(200).send(card)
+    } catch (error) {
+        return res.status(500).send({message: error.message})
+    }
+})
+
+/**
  * Creating a new card.
  * If no category is specified the default "General" category will be applied.
  * POST: localhost:3000/cards/create
@@ -57,25 +76,57 @@ router.post('/create', async function (req, res) {
         console.error("Error saving card or category:", error);
         res.status(500).send({ message: "Error: " + error.message });
     }
-});
+})
 
 /**
- * Check if an answer to a card is correct. Card is identified by its ID.
- * POST: localhost:3000/cards/check
- * TODO: really needed? (FG)
+ * Updating an already existing card
+ * PUT: localhost:3000/cards/update/:id
  */
-/*router.post('/check', async function (req, res) {
-    const {id, answer} = req.body
+router.put('/update/:id', async function (req, res) {
+    const {id} = req.params
+    const {question, type, answers, correctAnswer, category} = req.body
 
-    if (!id) return res.status(400).send("ID of the card is required")
-    if (!answer) return res.status(400).send("Answer is required")
+    try {
+        // Validate input
+        let error = validateCardType(type, answers, correctAnswer)
+        if (error) return res.status(400).send({message: error})
 
-    const card = await Card.findOne({_id: id}, null, null)
-    if (!card) return res.status(404).send("Card not found")
+        // Find the card by ID and update it
+        const updatedCard = await Card.findByIdAndUpdate(
+            {_id: id},
+            {question, type, answers, correctAnswer, category},
+            null
+        )
 
-    if (answer === card.correctAnswer) return res.status(200).send(`Answer to question "${card.question}" is correct`)
-    else return res.status(200).send(`Wrong: Correct answer to question "${card.question}" is "${card.correctAnswer}"`)
-})*/
+        // If the card was not found
+        if (!updatedCard) {
+            return res.status(404).send({message: `Card with ID ${id} not found.`})
+        }
+
+        return res.status(200).send({message: "Card updated successfully.", updatedCard})
+    } catch (error) {
+        return res.status(500).send({message: "Error updating card: " + error.message})
+    }
+})
+
+/**
+ * Validating card type and needed answer configuration
+ * @param type type of the card e.g., "true_false"
+ * @param answers array of answers
+ * @param correctAnswer the correct answer
+ * @returns {string} Only if an error occurred, otherwise nothing
+ */
+function validateCardType(type, answers, correctAnswer) {
+    if (type === 'true_false') {
+        if (!Array.isArray(answers) || answers.length !== 2 || answers[0] !== 'True' || answers[1] !== 'False') {
+            return "Answers must be ['True', 'False'] for true/false questions."
+        }
+
+        if (correctAnswer !== 'True' && correctAnswer !== 'False') {
+            return "CorrectAnswer must be 'True' or 'False' for true/false questions."
+        }
+    }
+}
 
 /**
  * Retrieve Cards for a given category.
