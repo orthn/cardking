@@ -49,7 +49,10 @@ router.post('/create', async function (req, res) {
 
     try {
         // 1. Find or create category
-        let categoryDoc = await Category.findOne({ category, userId });
+        let categoryDoc = await Category.findOneAndUpdate(
+            { category, userId },
+            {$inc: { cardCount: 1 } },  // Increment cardCount by 1
+            null);
 
 
         if (!categoryDoc) {
