@@ -26,7 +26,9 @@ router.get('/startQuiz', async function (req, res) {
     }
 
     // Fetch user's cards in the selected category
-    const userCards = await Card.find({category});
+    const userCards = await Card.find({categoryId: category});
+
+    console.log(userCards);
 
     if (!userCards || userCards.length === 0) {
         return res.status(204).json({message: 'No cards available for the selected category'});
