@@ -155,13 +155,13 @@ router.get('/category', async function (req, res) {
             const categoryIds = categoryEntries.map(category => category._id);
             cards = await Card.find({ categoryId: { $in: categoryIds } });
         } else {
-            categoryEntries = await Category.findOne({ category, userId });
+            //categoryEntries = await Category.findOne({ category, userId });
 
-            if (!categoryEntries) {
-                return res.status(404).json({ message: "Category not found" });
-            }
+            //if (!categoryEntries) {
+            //    return res.status(404).json({ message: "Category not found" });
+            //}
 
-            cards = await Card.find({ categoryId: categoryEntries._id });
+            cards = await Card.find({ categoryId: category });
             console.log(cards);
         }
 

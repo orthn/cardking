@@ -14,14 +14,15 @@
           <p v-if="categories.length === 0">Loading categories...</p>
           <div v-else class="category-grid">
             <div
-              v-for="category in categories"
-              :key="category._id"
-              class="category-box"
-              :class="{ selected: selectedCategory === category.category }"
-              @click="selectCategory(category.category)"
-            >
-              {{ category.category }}
-            </div>
+  v-for="category in categories"
+  :key="category._id"
+  class="category-box"
+  :class="{ selected: selectedCategory === category._id }"
+  @click="selectCategory(category)"
+>
+  {{ category.category }}
+</div>
+
           </div>
         </div>
       </div>
@@ -29,7 +30,14 @@
       <!-- Right Section: Actions -->
       <div class="dashboard-actions">
         <h3>Actions</h3>
-        <button class="btn">Start Quiz</button>
+        <button
+  class="btn"
+  @click="$emit('startQuiz',selectedCategory )"
+  :disabled="!selectedCategory"
+>
+  Start Quiz
+</button>
+
         <button class="btn" @click="showModal = true">Create Card</button>
         <button
             class="btn"
@@ -94,12 +102,12 @@ export default {
     const currentEditingQuestion = ref(null);
 
     const selectCategory = (category) => {
-      if (selectedCategory.value === category) {
-        selectedCategory.value = null;
-      } else {
-        selectedCategory.value = category;
-      }
-    };
+  if (selectedCategory.value === category._id) {
+    selectedCategory.value = null; // Deselect
+  } else {
+    selectedCategory.value = category._id; // Speichere nur die ID
+  }
+  };
 
     const updateQuestion = async (updatedQuestion) => {
       try {
