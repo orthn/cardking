@@ -139,28 +139,73 @@ router.get('/category', async function (req, res) {
     try {
         const userId = req.session.userId;
 
-        const {category} = req.body;
+        const category = req.query.category;
+
 
         let cards;
         let categoryEntries;
 
         if (!category) {
-            categoryEntries = await Category.findOne({userId});
-            const categoryIds = categoryEntries.map(category => category._id);
-            cards = await Card.find({categoryId: { $in: categoryIds }});
-        }
-        else {
-            categoryEntries = await Category.findOne({category, userId});
-            if (!categoryEntries) {
-                return res.status(404).send({ message: "Category not found" });
+            categoryEntries = await Category.find({ userId });
+
+            if (!categoryEntries || categoryEntries.length === 0) {
+                return res.status(404).json({ message: "No categories found" });
             }
-            cards = await Card.find({categoryId: categoryEntries._id});
+
+            const categoryIds = categoryEntries.map(category => category._id);
+            cards = await Card.find({ categoryId: { $in: categoryIds } });
+        } else {
+            categoryEntries = await Category.findOne({ category, userId });
+
+            if (!categoryEntries) {
+                return res.status(404).json({ message: "Category not found" });
+            }
+
+            cards = await Card.find({ categoryId: categoryEntries._id });
+            console.log(cards);
         }
+
         return res.status(200).send(cards)
     } catch (err) {
         console.error(err);
         return res.status(500).send({ message: 'Internal server error', error: err.message });
     }
 })
+
+
+/**
+ * Delete a card by its ID
+ * DELETE: localhost:3000/cards/delete/:id
+ */
+router.delete('/delete/:id', async function (req, res) {
+
+    const { id } = req.params;
+
+    console.log('Received ID to delete:', id);
+
+    try {
+        const deletedCard = await Card.findByIdAndDelete(id);
+
+        if (!deletedCard) {
+            return res.status(404).send({ message: `Card with ID ${id} not found.` });
+        }
+
+        await Category.findByIdAndUpdate(
+            deletedCard.categoryId,
+            { $inc: { cardCount: -1 } }
+        );
+
+        console.log('Card deleted successfully:', deletedCard);
+
+        return res.status(200).send({ message: "Card deleted successfully.", deletedCard });
+    } catch (error) {
+        console.error('Error deleting card:', error);
+        return res.status(500).send({ message: "Error deleting card: " + error.message });
+    }
+});
+
+
+
+
 
 module.exports = router

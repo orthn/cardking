@@ -32,6 +32,13 @@
         <h3>Actions</h3>
         <button class="btn" :disabled="!selectedCategory" @click="$emit('startQuiz', selectedCategory?.id)">Start Quiz</button>
         <button class="btn" @click="showModal = true">Create Card</button>
+        <button
+            class="btn"
+            @click="openShowQuestionsModal"
+            :disabled="!selectedCategory"
+        >
+          Show Questions
+        </button>
       </div>
     </div>
 
@@ -41,6 +48,26 @@
       :categories="categories"
       @close="handleModalClose"
     />
+
+    <ShowQuestionsModal
+        v-if="isShowQuestionsModalVisible"
+        :isVisible="isShowQuestionsModalVisible"
+        :categoryName="selectedCategory"
+        :questions="selectedCategoryQuestions"
+        @edit-question="openEditQuestionModal"
+        @close="isShowQuestionsModalVisible = false"
+    />
+
+
+    <EditQuestionModal
+        v-if="isEditQuestionModalVisible"
+        :isVisible="isEditQuestionModalVisible"
+        :question="currentEditingQuestion"
+        @save="updateQuestion"
+        @deleted="handleQuestionDeleted"
+    @close="closeEditQuestionModal"
+    />
+
   </div>
 </template>
 
@@ -48,18 +75,71 @@
 import { ref, onMounted } from 'vue';
 import Statistics from './Statistics.vue';
 import CreateCardModal from '../components/CreateCardModal.vue';
-
+import ShowQuestionsModal from '../components/ShowQuestionsModal.vue';
+import EditQuestionModal from "@/components/EditQuestionModal.vue";
 export default {
   name: 'Dashboard',
   emits: ['startQuiz'],
   components: {
     Statistics,
     CreateCardModal,
+    ShowQuestionsModal,
+    EditQuestionModal
   },
   setup() {
     const categories = ref([]);
     const showModal = ref(false);
-    const selectedCategory = ref(null); // Speichert die ausgewählte Kategorie
+    const selectedCategory = ref(null);
+    const selectedCategoryQuestions = ref([]);
+    const isShowQuestionsModalVisible = ref(false);
+    const isEditQuestionModalVisible = ref(false);
+    const currentEditingQuestion = ref(null);
+
+    const selectCategory = (category) => {
+      if (selectedCategory.value === category) {
+        selectedCategory.value = null;
+      } else {
+        selectedCategory.value = category;
+      }
+    };
+
+    const updateQuestion = async (updatedQuestion) => {
+      try {
+        const response = await fetch(`http://localhost:3000/cards/update/${updatedQuestion._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question: updatedQuestion.question,
+            type: updatedQuestion.type,
+            answers: updatedQuestion.answers,
+            correctAnswer: updatedQuestion.correctAnswer,
+            category: updatedQuestion.categoryId,
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || "Failed to update question");
+        }
+
+        const updatedCard = await response.json();
+        console.log("Question updated successfully:", updatedCard);
+
+        const index = selectedCategoryQuestions.value.findIndex(
+            (question) => question._id === updatedQuestion._id
+        );
+
+        if (index !== -1) {
+          selectedCategoryQuestions.value[index] = updatedCard.updatedCard;
+        }
+
+        closeEditQuestionModal();
+      } catch (error) {
+        console.error("Error updating question:", error.message);
+        alert("An error occurred while updating the question: " + error.message);
+      }
+    };
+
 
     const fetchCategories = async () => {
       try {
@@ -70,38 +150,95 @@ export default {
 
         if (!response.ok) throw new Error('Failed to fetch categories');
 
-        categories.value = await response.json();
+        categories.value = await response.json(); // Hier kommen Kategorien mit IDs rein
+        console.log('Fetched categories:', categories.value);
       } catch (error) {
         console.error(error.message);
       }
     };
-    const selectCategory = (category) => {
-  if (selectedCategory.value?.id === category._id) {
-    selectedCategory.value = null; // Deselektiere, wenn dieselbe Kategorie angeklickt wird
-  } else {
-    selectedCategory.value = { id: category._id, name: category.category }; // Speichere ID und Name
-  }
-};
+
+    const fetchCategoryQuestions = async (categoryId) => {
+      try {
+        const response = await fetch(`http://localhost:3000/cards/category?category=${categoryId}`, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error("Category not found");
+          }
+          throw new Error("Failed to fetch questions");
+        }
+
+        selectedCategoryQuestions.value = await response.json();
+        console.log("Fetched questions:", selectedCategoryQuestions.value);
+      } catch (error) {
+        console.error("Error fetching questions:", error.message);
+      }
+    };
+
+
+    const openShowQuestionsModal = async () => {
+      if (!selectedCategory.value) return;
+      await fetchCategoryQuestions(selectedCategory.value);
+      isShowQuestionsModalVisible.value = true;
+    };
+    const openEditQuestionModal = (question) => {
+      currentEditingQuestion.value = question;
+      isEditQuestionModalVisible.value = true;
+    };
+
+    const closeEditQuestionModal = () => {
+      currentEditingQuestion.value = null;
+      isEditQuestionModalVisible.value = false;
+      return;
+    };
+
+    const handleQuestionDeleted = async () => {
+      try {
+        closeEditQuestionModal();
+        await fetchCategoryQuestions(selectedCategory.value);
+        isShowQuestionsModalVisible.value = true;
+        console.log('Questions reloaded and modal updated after deletion.');
+        return;
+      } catch (error) {
+        console.error('Error handling question deletion:', error.message);
+        return;
+      }
+    };
+
+
+
 
 
     const handleModalClose = () => {
-      showModal.value = false;
-      fetchCategories();
-    };
+  showModal.value = false;
+  fetchCategories();
+};
 
-    onMounted(() => {
-      fetchCategories();
-    });
+onMounted(() => {
+  fetchCategories();
+});
 
-    return {
-      selectedCategory,
-      categories,
-      showModal,
-      handleModalClose,
-      fetchCategories,
-      selectCategory,
-    };
-  },
+return {
+  selectedCategory,
+  categories,
+  showModal,
+  handleModalClose,
+  fetchCategories,
+  selectCategory,
+  isShowQuestionsModalVisible,
+  openShowQuestionsModal,
+  selectedCategoryQuestions,
+  isEditQuestionModalVisible,
+  openEditQuestionModal,
+  closeEditQuestionModal,
+  currentEditingQuestion,
+  updateQuestion,
+  handleQuestionDeleted,
+};
+},
 };
 </script>
 

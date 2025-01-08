@@ -12,11 +12,17 @@ router.get('/categories', async function(req, res){
         return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    let categories = await Category.find({userId: userId}, null, null);
-
-    console.log(categories)
-    if (categories) return res.status(200).json(categories)
-    else return res.status(204).json({message: 'No categories found'})
+    try {
+        const categories = await Category.find({ userId: userId });
+        if (!categories || categories.length === 0) {
+            return res.status(204).json([]); // wenn keine Kategorien vorhanden sind
+        }
+        res.status(200).json(categories);
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 });
+
 
 module.exports = router
