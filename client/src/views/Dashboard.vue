@@ -7,18 +7,18 @@
         <Statistics />
       </div>
 
-      <!-- Main Section: Cards and Categories -->
-      <div class="dashboard-main">
+     <!-- Main Section: Cards and Categories -->
+     <div class="dashboard-main">
         <h3>Overview</h3>
         <div>
           <p v-if="categories.length === 0">Loading categories...</p>
           <div v-else class="category-grid">
             <div
-                v-for="category in categories"
-                :key="category._id"
-                class="category-box"
-                :class="{ selected: selectedCategory === category.category }"
-                @click="selectCategory(category.category)"
+              v-for="category in categories"
+              :key="category._id"
+              class="category-box"
+              :class="{ selected: selectedCategory === category.category }"
+              @click="selectCategory(category.category)"
             >
               {{ category.category }}
             </div>
@@ -41,11 +41,11 @@
       </div>
     </div>
 
-
+  
     <CreateCardModal
-        :show="showModal"
-        :categories="categories"
-        @close="handleModalClose"
+      :show="showModal"
+      :categories="categories"
+      @close="handleModalClose"
     />
 
     <ShowQuestionsModal
@@ -64,7 +64,7 @@
         :question="currentEditingQuestion"
         @save="updateQuestion"
         @deleted="handleQuestionDeleted"
-        @close="closeEditQuestionModal"
+    @close="closeEditQuestionModal"
     />
 
   </div>
@@ -211,32 +211,32 @@ export default {
 
 
     const handleModalClose = () => {
-      showModal.value = false;
-      fetchCategories();
-    };
+  showModal.value = false;
+  fetchCategories();
+};
 
-    onMounted(() => {
-      fetchCategories();
-    });
+onMounted(() => {
+  fetchCategories();
+});
 
-    return {
-      selectedCategory,
-      categories,
-      showModal,
-      handleModalClose,
-      fetchCategories,
-      selectCategory,
-      isShowQuestionsModalVisible,
-      openShowQuestionsModal,
-      selectedCategoryQuestions,
-      isEditQuestionModalVisible,
-      openEditQuestionModal,
-      closeEditQuestionModal,
-      currentEditingQuestion,
-      updateQuestion,
-      handleQuestionDeleted,
-    };
-  },
+return {
+  selectedCategory,
+  categories,
+  showModal,
+  handleModalClose,
+  fetchCategories,
+  selectCategory,
+  isShowQuestionsModalVisible,
+  openShowQuestionsModal,
+  selectedCategoryQuestions,
+  isEditQuestionModalVisible,
+  openEditQuestionModal,
+  closeEditQuestionModal,
+  currentEditingQuestion,
+  updateQuestion,
+  handleQuestionDeleted,
+};
+},
 };
 </script>
 
