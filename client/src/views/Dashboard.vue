@@ -63,10 +63,9 @@
         :isVisible="isEditQuestionModalVisible"
         :question="currentEditingQuestion"
         @save="updateQuestion"
-        @close="closeEditQuestionModal"
+        @deleted="handleQuestionDeleted"
+    @close="closeEditQuestionModal"
     />
-
-
 
   </div>
 </template>
@@ -191,7 +190,23 @@ export default {
     const closeEditQuestionModal = () => {
       currentEditingQuestion.value = null;
       isEditQuestionModalVisible.value = false;
+      return;
     };
+
+    const handleQuestionDeleted = async () => {
+      try {
+        closeEditQuestionModal();
+        await fetchCategoryQuestions(selectedCategory.value);
+        isShowQuestionsModalVisible.value = true;
+        console.log('Questions reloaded and modal updated after deletion.');
+        return;
+      } catch (error) {
+        console.error('Error handling question deletion:', error.message);
+        return;
+      }
+    };
+
+
 
 
 
@@ -218,7 +233,8 @@ return {
   openEditQuestionModal,
   closeEditQuestionModal,
   currentEditingQuestion,
-  updateQuestion
+  updateQuestion,
+  handleQuestionDeleted,
 };
 },
 };

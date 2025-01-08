@@ -173,5 +173,39 @@ router.get('/category', async function (req, res) {
 })
 
 
+/**
+ * Delete a card by its ID
+ * DELETE: localhost:3000/cards/delete/:id
+ */
+router.delete('/delete/:id', async function (req, res) {
+
+    const { id } = req.params;
+
+    console.log('Received ID to delete:', id);
+
+    try {
+        const deletedCard = await Card.findByIdAndDelete(id);
+
+        if (!deletedCard) {
+            return res.status(404).send({ message: `Card with ID ${id} not found.` });
+        }
+
+        await Category.findByIdAndUpdate(
+            deletedCard.categoryId,
+            { $inc: { cardCount: -1 } }
+        );
+
+        console.log('Card deleted successfully:', deletedCard);
+
+        return res.status(200).send({ message: "Card deleted successfully.", deletedCard });
+    } catch (error) {
+        console.error('Error deleting card:', error);
+        return res.status(500).send({ message: "Error deleting card: " + error.message });
+    }
+});
+
+
+
+
 
 module.exports = router

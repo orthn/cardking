@@ -5,6 +5,13 @@
       <label>Question:</label>
       <input v-model="editableQuestion.question" type="text" />
 
+      <label>Category:</label>
+      <select v-model="editableQuestion.categoryId">
+        <option v-for="category in categories" :key="category._id" :value="category._id">
+          {{ category.category }}
+        </option>
+      </select>
+
       <!-- Multiple Choice -->
       <div v-if="editableQuestion.type === 'multiple_choice'" class="edit-section">
         <h4>Multiple Choice</h4>
@@ -63,6 +70,7 @@
       <!-- Actions -->
       <div class="actions">
         <button @click="saveChanges" class="btn save-btn">Save</button>
+        <button @click="deleteQuestion" class="btn delete-btn">Delete</button>
         <button @click="$emit('close')" class="btn cancel-btn">Cancel</button>
       </div>
     </div>
@@ -70,28 +78,96 @@
 </template>
 
 <script>
+import { ref, onMounted } from 'vue';
 export default {
   props: {
     isVisible: Boolean,
     question: Object,
   },
-  data() {
-    return {
-      editableQuestion: JSON.parse(JSON.stringify(this.question)),
-    };
-  },
-  methods: {
-    toggleCorrectAnswer(answer) {
-      const index = this.editableQuestion.correctAnswer.indexOf(answer);
-      if (index === -1) {
-        this.editableQuestion.correctAnswer.push(answer);
-      } else {
-        this.editableQuestion.correctAnswer.splice(index, 1);
+  setup(props, { emit }) {
+    const editableQuestion = ref({ ...props.question });
+    const categories = ref([]);
+
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/dashboard/categories', {
+          method: 'GET',
+          credentials: 'include',
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch categories');
+        }
+        categories.value = await response.json();
+      } catch (error) {
+        console.error('Error fetching categories:', error);
       }
-    },
-    saveChanges() {
-      this.$emit("save", this.editableQuestion);
-    },
+    };
+
+    const toggleCorrectAnswer = (answer) => {
+      const index = editableQuestion.value.correctAnswer.indexOf(answer);
+      if (index === -1) {
+        editableQuestion.value.correctAnswer.push(answer);
+      } else {
+        editableQuestion.value.correctAnswer.splice(index, 1);
+      }
+    };
+
+    const saveChanges = () => {
+      emit('save', editableQuestion.value);
+    };
+
+
+/*
+    const deleteQuestion = async () => {
+      console.log('Deleting question with ID:', editableQuestion.value._id);
+      try {
+        const response = await fetch(`http://localhost:3000/cards/delete/${editableQuestion.value._id}`, {
+          method: 'DELETE',
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to delete the question');
+        }
+        console.log('Question deleted successfully');
+        emit('delete', editableQuestion.value._id);
+      } catch (error) {
+        console.error('Error deleting question:', error);
+      }
+    };
+*/
+
+    const deleteQuestion = async () => {
+      console.log('Deleting question with ID:', editableQuestion.value._id);
+      try {
+        const response = await fetch(`http://localhost:3000/cards/delete/${editableQuestion.value._id}`, {
+          method: 'DELETE',
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to delete the question');
+        }
+        console.log('Question deleted successfully');
+        emit('deleted');
+      } catch (error) {
+        console.error('Error deleting question:', error);
+      }
+    };
+
+
+    onMounted(fetchCategories);
+
+    return {
+      editableQuestion,
+      categories,
+      fetchCategories,
+      toggleCorrectAnswer,
+      saveChanges,
+      deleteQuestion,
+    };
   },
 };
 </script>
@@ -179,6 +255,12 @@ export default {
 .save-btn {
   background-color: var(--highlight-color, #57bc90);
   color: var(--button-text-color, white);
+}
+
+.delete-btn {
+  background-color: var(--warning-color, #f0ad4e);
+  color: var(--button-text-color, white);
+  margin-left: 0.5rem;
 }
 
 .cancel-btn {
