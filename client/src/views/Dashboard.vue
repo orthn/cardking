@@ -33,10 +33,10 @@
         <button class="btn" @click="showModal = true">Create Card</button>
         <button
             class="btn"
-            @click="openEditQuestionsModal"
+            @click="openShowQuestionsModal"
             :disabled="!selectedCategory"
         >
-          Edit Selected Category
+          Show Questions
         </button>
       </div>
     </div>
@@ -48,14 +48,22 @@
       @close="handleModalClose"
     />
 
-    <EditQuestionsModal
-        v-if="isEditQuestionsModalVisible"
-        :isVisible="isEditQuestionsModalVisible"
+    <ShowQuestionsModal
+        v-if="isShowQuestionsModalVisible"
+        :isVisible="isShowQuestionsModalVisible"
         :categoryName="selectedCategory"
         :questions="selectedCategoryQuestions"
-        :selectedQuestion="selectedQuestion"
-        @save="updateQuestions"
-        @close="isEditQuestionsModalVisible = false"
+        @edit-question="openEditQuestionModal"
+        @close="isShowQuestionsModalVisible = false"
+    />
+
+
+    <EditQuestionModal
+        v-if="isEditQuestionModalVisible"
+        :isVisible="isEditQuestionModalVisible"
+        :question="currentEditingQuestion"
+        @save="updateQuestion"
+        @close="closeEditQuestionModal"
     />
 
 
@@ -67,35 +75,70 @@
 import { ref, onMounted } from 'vue';
 import Statistics from './Statistics.vue';
 import CreateCardModal from '../components/CreateCardModal.vue';
-import EditQuestionsModal from '../components/EditQuestionsModal.vue';
-import { mockCategories, mockQuestions } from './mockData';
-
+import ShowQuestionsModal from '../components/ShowQuestionsModal.vue';
+import EditQuestionModal from "@/components/EditQuestionModal.vue";
 export default {
   name: 'Dashboard',
   components: {
     Statistics,
     CreateCardModal,
-    EditQuestionsModal,
+    ShowQuestionsModal,
+    EditQuestionModal
   },
   setup() {
     const categories = ref([]);
     const showModal = ref(false);
     const selectedCategory = ref(null);
-    const selectedCategoryQuestions = ref([]); // Fragen der gewählten Kategorie
-    const isEditQuestionsModalVisible = ref(false);
+    const selectedCategoryQuestions = ref([]);
+    const isShowQuestionsModalVisible = ref(false);
+    const isEditQuestionModalVisible = ref(false);
+    const currentEditingQuestion = ref(null);
 
     const selectCategory = (category) => {
       if (selectedCategory.value === category) {
-        selectedCategory.value = null; // Deselektiere, wenn dieselbe Kategorie angeklickt wird
+        selectedCategory.value = null;
       } else {
-        selectedCategory.value = category; // Setze die neue Kategorie
+        selectedCategory.value = category;
       }
     };
 
-    const selectQuestion = (question) => {
-      selectedQuestion.value = JSON.parse(JSON.stringify(question));
-      isEditQuestionsModalVisible.value = true;
+    const updateQuestion = async (updatedQuestion) => {
+      try {
+        const response = await fetch(`http://localhost:3000/cards/update/${updatedQuestion._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question: updatedQuestion.question,
+            type: updatedQuestion.type,
+            answers: updatedQuestion.answers,
+            correctAnswer: updatedQuestion.correctAnswer,
+            category: updatedQuestion.categoryId,
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || "Failed to update question");
+        }
+
+        const updatedCard = await response.json();
+        console.log("Question updated successfully:", updatedCard);
+
+        const index = selectedCategoryQuestions.value.findIndex(
+            (question) => question._id === updatedQuestion._id
+        );
+
+        if (index !== -1) {
+          selectedCategoryQuestions.value[index] = updatedCard.updatedCard;
+        }
+
+        closeEditQuestionModal();
+      } catch (error) {
+        console.error("Error updating question:", error.message);
+        alert("An error occurred while updating the question: " + error.message);
+      }
     };
+
 
     const fetchCategories = async () => {
       try {
@@ -135,39 +178,24 @@ export default {
     };
 
 
-
-    const openEditQuestionsModal = async () => {
+    const openShowQuestionsModal = async () => {
       if (!selectedCategory.value) return;
-      await fetchCategoryQuestions(selectedCategory.value); // Fragen abrufen
-      isEditQuestionsModalVisible.value = true; // Modal öffnen
+      await fetchCategoryQuestions(selectedCategory.value);
+      isShowQuestionsModalVisible.value = true;
+    };
+    const openEditQuestionModal = (question) => {
+      currentEditingQuestion.value = question;
+      isEditQuestionModalVisible.value = true;
+    };
+
+    const closeEditQuestionModal = () => {
+      currentEditingQuestion.value = null;
+      isEditQuestionModalVisible.value = false;
     };
 
 
-    const updateQuestions = async (updatedQuestion) => {
-      const questionIndex = selectedCategoryQuestions.value.findIndex(
-          (q) => q._id === updatedQuestion._id
-      );
-      if (questionIndex !== -1) {
-        selectedCategoryQuestions.value[questionIndex] = updatedQuestion;
-      }
 
-      // Änderungen an das Backend senden
-      try {
-        const response = await fetch(`http://localhost:3000/cards/update/${updatedQuestion._id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedQuestion),
-          credentials: "include",
-        });
-
-        if (!response.ok) throw new Error("Failed to update question");
-        console.log("Question updated successfully!");
-      } catch (error) {
-        console.error("Error updating question:", error.message);
-      }
-    };
-
-const handleModalClose = () => {
+    const handleModalClose = () => {
   showModal.value = false;
   fetchCategories();
 };
@@ -183,10 +211,14 @@ return {
   handleModalClose,
   fetchCategories,
   selectCategory,
-  isEditQuestionsModalVisible,
-  openEditQuestionsModal,
+  isShowQuestionsModalVisible,
+  openShowQuestionsModal,
   selectedCategoryQuestions,
-  updateQuestions,
+  isEditQuestionModalVisible,
+  openEditQuestionModal,
+  closeEditQuestionModal,
+  currentEditingQuestion,
+  updateQuestion
 };
 },
 };
