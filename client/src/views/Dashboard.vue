@@ -11,18 +11,17 @@
      <div class="dashboard-main">
         <h3>Overview</h3>
         <div>
-          <p v-if="categories.length === 0">No Categories</p>
+          <p v-if="categories.length === 0">Loading categories...</p>
           <div v-else class="category-grid">
             <div
-  v-for="category in categories"
-  :key="category._id"
-  class="category-box"
-  :class="{ selected: selectedCategory?.id === category._id }"
-  @click="selectCategory(category)"
->
-  {{ category.category }}
-</div>
-
+              v-for="category in categories"
+              :key="category._id"
+              class="category-box"
+              :class="{ selected: selectedCategory === category.category }"
+              @click="selectCategory(category.category)"
+            >
+              {{ category.category }}
+            </div>
           </div>
         </div>
       </div>
@@ -30,7 +29,7 @@
       <!-- Right Section: Actions -->
       <div class="dashboard-actions">
         <h3>Actions</h3>
-        <button class="btn" :disabled="!selectedCategory" @click="$emit('startQuiz', selectedCategory?.id)">Start Quiz</button>
+        <button class="btn">Start Quiz</button>
         <button class="btn" @click="showModal = true">Create Card</button>
         <button
             class="btn"
@@ -79,7 +78,6 @@ import ShowQuestionsModal from '../components/ShowQuestionsModal.vue';
 import EditQuestionModal from "@/components/EditQuestionModal.vue";
 export default {
   name: 'Dashboard',
-  emits: ['startQuiz'],
   components: {
     Statistics,
     CreateCardModal,
