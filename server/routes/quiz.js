@@ -19,28 +19,25 @@ router.get('/startQuiz', async function (req, res) {
         return res.status(401).json({message: 'Unauthorized'});
     }
 
-    const {category} = req.body;
-
+    const {category} = req.query;
     if (!category) {
-        return res.status(400).json({ message: 'Category is required' });
+        return res.status(400).json({ message: 'Category is required'});
     }
-
+    
     // Fetch user's cards in the selected category
-    const userCards = await Card.find({category});
+    const userCards = await Card.find({categoryId: category});
 
     if (!userCards || userCards.length === 0) {
         return res.status(204).json({message: 'No cards available for the selected category'});
     }
-    if (!userCards.length < 10) {
+    if (userCards.length < 10) {
         return res.status(400).json({message: 'Not enough cards available for the category'});
     }
 
     const now = new Date();
 
-    // Step 1: Select cards where nextReview is due
     const dueCards = userCards.filter(card => new Date(card.nextReview) <= now);
 
-    // Step 2: If not enough due cards, include the closest review dates
     const remainingSlots = 10 - dueCards.length;
     let additionalCards = [];
     if (remainingSlots > 0) {
@@ -50,7 +47,6 @@ router.get('/startQuiz', async function (req, res) {
             .slice(0, remainingSlots); // Fill the remaining slots
     }
 
-    // Combine due cards and additional cards
     const selectedCards = [...dueCards, ...additionalCards].slice(0, 10);
 
     if (selectedCards && selectedCards.length === 10) {
@@ -155,3 +151,4 @@ router.post('submitAnswers', async function (req, res) {
 
 
 module.exports = router
+

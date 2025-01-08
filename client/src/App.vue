@@ -5,6 +5,7 @@ import RegisterView from './views/RegisterView.vue';
 import ResetPasswordRequestView from './views/ResetPasswordRequestView.vue';
 import ResetPasswordView from './views/ResetPasswordView.vue';
 import DashboardView from './views/Dashboard.vue';
+import QuizView from './views/QuizView.vue'; 
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import EditUserModal from './components/EditUserModal.vue';
 
@@ -14,6 +15,12 @@ const showEditModal = ref(false);
 const currentTheme = ref('light');
 const message = ref('');
 const messageType = ref('info'); // 'success' oder 'error'
+const selectedCategory = ref(null);
+
+const handleStartQuiz = (category) => {
+  selectedCategory.value = category;
+  changeView('quiz');
+};
 
 const setTheme = (theme) => {
   currentTheme.value = theme;
@@ -121,6 +128,15 @@ const handleLogout = async () => {
           <DashboardView
             v-if="currentView === 'dashboard'"
             class="auth-view"
+            @startQuiz="handleStartQuiz"
+          />
+        </transition>
+        <transition name="slide-left">
+          <QuizView
+            v-if="currentView === 'quiz'"
+            class="auth-view"
+            :category="selectedCategory"
+            @backToDashboard="changeView('dashboard')"
           />
         </transition>
       </template>
@@ -164,25 +180,24 @@ const handleLogout = async () => {
   position: fixed;
   top: 10px;
   left: 10px;
-  width: 50px; /* Einheitliche Breite für runde Buttons */
-  height: 50px; /* Einheitliche Höhe */
+  width: 50px;
+  height: 50px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1.5rem; /* Schriftgröße oder Icon-Größe */
-  color: var(--button-text-color); /* Konsistente Textfarbe */
-  background-color: var(--button-bg-color); /* Hintergrundfarbe */
+  font-size: 1.5rem;
+  color: var(--button-text-color);
+  background-color: var(--button-bg-color);
   border: none;
-  border-radius: 50%; /* Runde Form */
+  border-radius: 50%;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .theme-switch-btn:hover {
-  background-color: var(--highlight-color); /* Hover-Farbe */
-  transform: scale(1.1); /* Leichte Vergrößerung beim Hover */
+  background-color: var(--highlight-color);
+  transform: scale(1.1);
 }
-
 
 .view-container {
   position: relative;
@@ -232,35 +247,34 @@ const handleLogout = async () => {
   transform: translateX(100%);
   opacity: 0;
 }
-/* Top-right buttons for profile and settings */
+
 .top-right-buttons {
   position: fixed;
   top: 10px;
   right: 10px;
   display: flex;
-  gap: var(--spacing-sm); /* Abstand zwischen Buttons */
+  gap: var(--spacing-sm);
 }
 
 .icon-btn {
-  background: var(--button-bg-color); /* Hintergrundfarbe */
-  color: var(--button-text-color); /* Textfarbe */
+  background: var(--button-bg-color);
+  color: var(--button-text-color);
   border: none;
-  border-radius: 50%; /* Runde Buttons */
-  width: 50px; /* Größe */
-  height: 50px; /* Größe */
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1.5rem; /* Icon-Größe */
+  font-size: 1.5rem;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .icon-btn:hover {
-  background-color: var(--highlight-color); /* Hover-Farbe */
-  transform: scale(1.1); /* Leichtes Vergrößern beim Hover */
+  background-color: var(--highlight-color);
+  transform: scale(1.1);
 }
-
 
 @keyframes gradient-animation {
   0% {

@@ -11,17 +11,18 @@
      <div class="dashboard-main">
         <h3>Overview</h3>
         <div>
-          <p v-if="categories.length === 0">Loading categories...</p>
+          <p v-if="categories.length === 0">No Categories</p>
           <div v-else class="category-grid">
             <div
-              v-for="category in categories"
-              :key="category._id"
-              class="category-box"
-              :class="{ selected: selectedCategory === category.category }"
-              @click="selectCategory(category.category)"
-            >
-              {{ category.category }}
-            </div>
+  v-for="category in categories"
+  :key="category._id"
+  class="category-box"
+  :class="{ selected: selectedCategory?.id === category._id }"
+  @click="selectCategory(category)"
+>
+  {{ category.category }}
+</div>
+
           </div>
         </div>
       </div>
@@ -29,7 +30,7 @@
       <!-- Right Section: Actions -->
       <div class="dashboard-actions">
         <h3>Actions</h3>
-        <button class="btn">Start Quiz</button>
+        <button class="btn" :disabled="!selectedCategory" @click="$emit('startQuiz', selectedCategory?.id)">Start Quiz</button>
         <button class="btn" @click="showModal = true">Create Card</button>
       </div>
     </div>
@@ -50,6 +51,7 @@ import CreateCardModal from '../components/CreateCardModal.vue';
 
 export default {
   name: 'Dashboard',
+  emits: ['startQuiz'],
   components: {
     Statistics,
     CreateCardModal,
@@ -74,12 +76,13 @@ export default {
       }
     };
     const selectCategory = (category) => {
-      if (selectedCategory.value === category) {
-        selectedCategory.value = null; // Deselektiere, wenn dieselbe Kategorie angeklickt wird
-      } else {
-        selectedCategory.value = category; // Setze die neue Kategorie
-      }
-    };
+  if (selectedCategory.value?.id === category._id) {
+    selectedCategory.value = null; // Deselektiere, wenn dieselbe Kategorie angeklickt wird
+  } else {
+    selectedCategory.value = { id: category._id, name: category.category }; // Speichere ID und Name
+  }
+};
+
 
     const handleModalClose = () => {
       showModal.value = false;
