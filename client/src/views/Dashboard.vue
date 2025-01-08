@@ -7,22 +7,21 @@
         <Statistics />
       </div>
 
-     <!-- Main Section: Cards and Categories -->
-     <div class="dashboard-main">
+      <!-- Main Section: Cards and Categories -->
+      <div class="dashboard-main">
         <h3>Overview</h3>
         <div>
-          <p v-if="categories.length === 0">No Categories</p>
+          <p v-if="categories.length === 0">Loading categories...</p>
           <div v-else class="category-grid">
             <div
-  v-for="category in categories"
-  :key="category._id"
-  class="category-box"
-  :class="{ selected: selectedCategory?.id === category._id }"
-  @click="selectCategory(category)"
->
-  {{ category.category }}
-</div>
-
+                v-for="category in categories"
+                :key="category._id"
+                class="category-box"
+                :class="{ selected: selectedCategory === category.category }"
+                @click="selectCategory(category.category)"
+            >
+              {{ category.category }}
+            </div>
           </div>
         </div>
       </div>
@@ -30,7 +29,7 @@
       <!-- Right Section: Actions -->
       <div class="dashboard-actions">
         <h3>Actions</h3>
-        <button class="btn" :disabled="!selectedCategory" @click="$emit('startQuiz', selectedCategory?.id)">Start Quiz</button>
+        <button class="btn">Start Quiz</button>
         <button class="btn" @click="showModal = true">Create Card</button>
         <button
             class="btn"
@@ -42,11 +41,11 @@
       </div>
     </div>
 
-  
+
     <CreateCardModal
-      :show="showModal"
-      :categories="categories"
-      @close="handleModalClose"
+        :show="showModal"
+        :categories="categories"
+        @close="handleModalClose"
     />
 
     <ShowQuestionsModal
@@ -65,7 +64,7 @@
         :question="currentEditingQuestion"
         @save="updateQuestion"
         @deleted="handleQuestionDeleted"
-    @close="closeEditQuestionModal"
+        @close="closeEditQuestionModal"
     />
 
   </div>
@@ -79,7 +78,6 @@ import ShowQuestionsModal from '../components/ShowQuestionsModal.vue';
 import EditQuestionModal from "@/components/EditQuestionModal.vue";
 export default {
   name: 'Dashboard',
-  emits: ['startQuiz'],
   components: {
     Statistics,
     CreateCardModal,
@@ -213,32 +211,32 @@ export default {
 
 
     const handleModalClose = () => {
-  showModal.value = false;
-  fetchCategories();
-};
+      showModal.value = false;
+      fetchCategories();
+    };
 
-onMounted(() => {
-  fetchCategories();
-});
+    onMounted(() => {
+      fetchCategories();
+    });
 
-return {
-  selectedCategory,
-  categories,
-  showModal,
-  handleModalClose,
-  fetchCategories,
-  selectCategory,
-  isShowQuestionsModalVisible,
-  openShowQuestionsModal,
-  selectedCategoryQuestions,
-  isEditQuestionModalVisible,
-  openEditQuestionModal,
-  closeEditQuestionModal,
-  currentEditingQuestion,
-  updateQuestion,
-  handleQuestionDeleted,
-};
-},
+    return {
+      selectedCategory,
+      categories,
+      showModal,
+      handleModalClose,
+      fetchCategories,
+      selectCategory,
+      isShowQuestionsModalVisible,
+      openShowQuestionsModal,
+      selectedCategoryQuestions,
+      isEditQuestionModalVisible,
+      openEditQuestionModal,
+      closeEditQuestionModal,
+      currentEditingQuestion,
+      updateQuestion,
+      handleQuestionDeleted,
+    };
+  },
 };
 </script>
 
