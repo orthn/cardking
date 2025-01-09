@@ -22,6 +22,8 @@
   --spacing-md: 1rem;    /* Mittlerer Abstand */
   --spacing-lg: 2rem;    /* Großer Abstand */
   --spacing-xl: 3rem;    /* Sehr großer Abstand */
+  --correct-color: #57BC90;    /* Frisches Grün für korrekte Antworten */
+  --incorrect-color: #d83129;
 }
 
 [data-theme='dark'] {
@@ -46,4 +48,6 @@
   --spacing-md: 1rem;    /* Mittlerer Abstand */
   --spacing-lg: 2rem;    /* Großer Abstand */
   --spacing-xl: 3rem;    /* Sehr großer Abstand */
+  --correct-color: #ffb339;    /* Helles Beige für korrekte Antworten im dunklen Thema */
+  --incorrect-color: #d83129; 
 }
