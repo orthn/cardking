@@ -1,6 +1,5 @@
 <template>
   <div class="quiz-container">
-    <!-- Fehlernachricht -->
     <p v-if="errorMessage">{{ errorMessage }}</p>
 
     <!-- Quiz -->
@@ -36,7 +35,8 @@
 
     <!-- Quiz-Ergebnis mit Navigation -->
     <div v-else-if="userAnswers.length > 0" class="results-container">
-      <h2>Quiz Results</h2>
+      <h2 class="padding">Quiz Results</h2>
+      <p class="padding"><strong>Total Correct:</strong> {{ correctCount }} / {{ quizData.length }}</p>
       <div class="result-item">
         <p><strong>Question {{ resultIndex + 1 }}:</strong> {{ userAnswers[resultIndex].question }}</p>
         <p>
@@ -79,6 +79,7 @@ const currentIndex = ref(0);
 const userAnswers = ref([]);
 const isQuizComplete = ref(false);
 const resultIndex = ref(0);
+const correctCount = ref(0);
 
 const props = defineProps({
   category: String,
@@ -117,13 +118,17 @@ const submitAnswer = (answer) => {
       selectedAnswers.value.push(answer);
     }
   } else {
+    const isCorrect = Array.isArray(currentCard.correctAnswer)
+      ? currentCard.correctAnswer.includes(answer)
+      : answer === currentCard.correctAnswer;
+
+    if (isCorrect) correctCount.value++;
+
     userAnswers.value.push({
       question: currentCard.question,
       selectedAnswer: answer,
       correctAnswer: currentCard.correctAnswer,
-      isCorrect: Array.isArray(currentCard.correctAnswer)
-        ? currentCard.correctAnswer.includes(answer)
-        : answer === currentCard.correctAnswer,
+      isCorrect,
     });
 
     if (currentIndex.value < quizData.value.length - 1) {
@@ -137,11 +142,16 @@ const submitAnswer = (answer) => {
 const finalizeMultipleChoice = () => {
   const currentCard = quizData.value[currentIndex.value];
 
+  const isCorrect =
+    JSON.stringify([...selectedAnswers.value].sort()) === JSON.stringify(currentCard.correctAnswer.sort());
+
+  if (isCorrect) correctCount.value++;
+
   userAnswers.value.push({
     question: currentCard.question,
     selectedAnswer: [...selectedAnswers.value],
     correctAnswer: currentCard.correctAnswer,
-    isCorrect: JSON.stringify([...selectedAnswers.value].sort()) === JSON.stringify(currentCard.correctAnswer.sort()),
+    isCorrect,
   });
 
   selectedAnswers.value = [];
@@ -194,19 +204,22 @@ onMounted(() => {
   background-color: var(--highlight-color);
   box-shadow: 0 6px 15px var(--highlight-color);
 }
-
+.padding{
+  padding: var(--spacing-xs);  
+}
 /* Quizkarten */
 .quiz-card {
   display: flex;
   flex-direction: column;
+  font-size: var(--font-size-lg);
   width: 100%;
   max-width: 600px;
   padding: var(--spacing-lg);
   background-color: var(--card-bg-color);
-  border: 1px solid var(--input-border-color);
-  border-radius: var(--border-radius);
   box-shadow: 0 6px 8px var(--shadow-color);
   animation: fadeIn 0.3s ease-in-out;
+  word-wrap: break-word; 
+  overflow-wrap: break-word;
 }
 
 .quiz-card p {
@@ -220,13 +233,14 @@ onMounted(() => {
 .answers-container {
   display: grid;
   gap: var(--spacing-sm);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .answers-container.grid-two {
   grid-template-columns: repeat(2, 1fr);
 }
 
-/* Buttons für Antworten */
 .answer-btn {
   padding: var(--spacing-sm) var(--spacing-md);
   font-size: var(--font-size-md);
@@ -236,6 +250,10 @@ onMounted(() => {
   border-radius: var(--border-radius);
   cursor: pointer;
   transition: background-color 0.3s, box-shadow 0.3s;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  text-align: center;
+  white-space: normal;
 }
 
 .answer-btn:hover {
@@ -261,6 +279,7 @@ onMounted(() => {
   border-radius: var(--border-radius);
   box-shadow: 0 6px 8px var(--shadow-color);
   animation: fadeIn 0.3s ease-in-out;
+  color: var(--text-color);
 }
 
 /* Ergebnisse */
@@ -277,16 +296,18 @@ onMounted(() => {
 .result-item p {
   margin: var(--spacing-xs) 0;
   color: var(--text-color);
+  word-wrap: break-word; 
+  overflow-wrap: break-word;
+  padding: var(--spacing-xs);
 }
 
-/* Korrekte und falsche Antworten */
 .correct {
-  color: var(--button-bg-color);
+  color: var(--correct-color);
   font-weight: bold;
 }
 
 .incorrect {
-  color: red;
+  color: var(--incorrect-color);
   font-weight: bold;
 }
 
@@ -312,8 +333,7 @@ onMounted(() => {
 }
 
 .nav-arrow.disabled {
-  color: var(--disabled-bg-color);
-  cursor: not-allowed;
+  color: var(--card-bg-color);
 }
 
 /* Home-Button */

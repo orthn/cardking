@@ -1,9 +1,7 @@
 <template>
-  <div v-if="isVisible" class="modal-backdrop">
+  <div v-if="isVisible" class="modal-backdrop"  @click="closeModal">
     <div class="modal">
-      <h3>Questions in {{ categoryName }}</h3>
-      <br>
-
+     <!-- <h3>Questions in {{ categoryName }}</h3>-->
       <div class="questions-list">
         <ul>
           <li
@@ -11,8 +9,13 @@
               :key="index"
               class="question-item"
           >
-            <span>{{ question.question }} ({{ question.type }})</span>
-            <button @click="editQuestion(question)" class="btn edit-btn">Edit</button>
+          <span class="question-text">{{ question.question }}</span>
+            <div class="question-meta">
+              <span class="question-type">Typ: {{ question.type }}</span>
+              <button @click="editQuestion(question)" class="btn edit-btn">
+                Edit
+              </button>
+            </div>
           </li>
         </ul>
       </div>
@@ -36,8 +39,12 @@ export default {
       this.$emit("edit-question", question);
       console.log("Formatted question: ", JSON.stringify(question, null, 2));
     },
+    closeModal() {
+      this.$emit("close");
+    },
   },
 };
+
 </script>
 
 <style scoped>
@@ -64,6 +71,9 @@ export default {
   width: 90%;
   display: flex;
   flex-direction: column;
+  max-height: 90%;
+  overflow: auto;
+
 }
 
 .questions-list ul {
@@ -73,16 +83,35 @@ export default {
 }
 
 .question-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 1rem;
+  display: grid;
+  grid-template-rows: auto auto; /* Zwei Zeilen: Frage und Meta */
+  grid-template-columns: 1fr auto; /* Zwei Spalten in der Meta-Zeile */
+  gap: 0.5rem; /* Abstand zwischen den Zeilen und Spalten */
+  padding: 1rem;
   background-color: var(--card-bg-color, #333);
   border: 1px solid var(--input-border-color, #444);
   border-radius: 8px;
   margin-bottom: 0.5rem;
 }
 
+.question-text {
+  grid-column: span 2; /* Frage nimmt beide Spalten ein */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal; /* Mehrzeilige Darstellung erlauben */
+}
+
+.question-meta {
+  display: flex;
+  justify-content: space-between; /* Typ links, Button rechts */
+  align-items: center;
+  grid-column: span 2; /* Meta-Daten nehmen beide Spalten ein */
+}
+
+.question-type {
+  font-size: 0.9rem;
+  color: var(--muted-text-color, #a5a5af); /* Dezenter Text für den Typ */
+}
 .actions {
   display: flex;
   justify-content: center;
