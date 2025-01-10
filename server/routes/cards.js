@@ -1,4 +1,7 @@
 let express = require('express')
+let multer = require('multer')
+let fs = require('fs')
+let path = require('path')
 let router = express.Router()
 
 let Card = require("../models/cardSchema")
@@ -215,15 +218,18 @@ router.get('/export', async function (req, res) {
             return res.status(404).send({message: "No categories found"})
         }
 
-        cards = await Card.find({ categoryId: { $in: categoryId } }, null, null)
+        cards = await Card.find({categoryId: {$in: categoryId}}, null, null)
         if (!cards || cards.length === 0) {
             return res.status(404).send({message: `No cards found.`})
         }
 
         const formatted = {
+            userId: userId,
+            category: category.category,
+            categoryId: categoryId,
+            cardCount: category.cardCount,
             cards: cards.map(card => ({
                 id: card._id.toString(),
-                category: category.category,
                 type: card.type,
                 question: card.question,
                 answers: card.answers,
@@ -235,8 +241,65 @@ router.get('/export', async function (req, res) {
         res.setHeader('Content-Type', 'application/json')
         return res.status(200).send(JSON.stringify(formatted, null, 2))
     } catch (error) {
-        console.error("Error exporting cards of category", error)
-        return res.status(500).send({message: 'Error exporting cards of category', error: error.message})
+        console.error("Error exporting cards", error)
+        return res.status(500).send({message: 'Error exporting cards', error: error.message})
+    }
+})
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/'); // Folder where files will be saved
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname)); // Rename file to avoid conflict
+    }
+});
+
+const upload = multer({storage: storage})
+
+router.post('/import', upload.single('file'), async function (req, res) {
+    try {
+        const {userId} = req.session.userId
+
+        if (!req.file) {
+            return res.status(404).send({message: "No file uploaded."})
+        }
+
+        const filePath = path.join(__dirname, 'uploads', req.file.filename)
+        const fileContent = fs.readFileSync(filePath, 'utf8')
+        const data = JSON.parse(fileContent)
+
+        if (!data.category || !data.categoryId || !Array.isArray(data.cards)) {
+            return res.status(400).send('Invalid file format');
+        }
+
+        const existingCategory = await Category.findOne({_id: data.categoryId, userId: data.userId}, null, null);
+
+        // Create category if not existent
+        if (!existingCategory) {
+            const categoryDoc = new Category({
+                category: data.category,
+                cardCount: 1,
+                userId: userId,
+            })
+            await categoryDoc.save()
+        }
+
+        const newCards = data.cards.map(cardData => {
+            return new Card({
+                categoryId: data.categoryId,
+                type: cardData.type,
+                question: cardData.question,
+                answers: cardData.answers,
+                correctAnswer: cardData.correctAnswer
+            });
+        });
+
+        const savedCards = await Card.insertMany(newCards);
+        return res.status(200).send({message: "Cards imported successfully", savedCards});
+    } catch (error) {
+        console.log("Error importing cards", error)
+        return res.status(500).send({message: 'Error importing cards', error: error.message})
     }
 })
 
