@@ -31,6 +31,40 @@ router.get('/get', async function (req, res) {
 })
 
 /**
+ * Checks if a category already exists and returns it if true
+ * Otherwise creates new and returns category
+ * @param category Name of the category
+ * @param userId ID of the user
+ */
+async function createCategoryIfNotExists(category, userId) {
+    try {
+        // Check if the category already exists for the user
+        let categoryDoc = await Category.findOneAndUpdate(
+            {category, userId},
+            {$inc: {cardCount: 1}},
+            null
+        )
+
+        // If category doesn't exist, create a new one
+        if (!categoryDoc) {
+            categoryDoc = new Category({
+                category,
+                cardCount: 1,
+                userId
+            });
+
+            // Save the new category to the database
+            await categoryDoc.save();
+        }
+
+        return categoryDoc;
+    } catch (error) {
+        console.error("Error creating or finding category:", error);
+        throw new Error("Error creating or finding category");
+    }
+}
+
+/**
  * Creating a new card.
  * If no category is specified the default "General" category will be applied.
  * POST: localhost:3000/cards/create
@@ -51,29 +85,12 @@ router.post('/create', async function (req, res) {
     if (!correctAnswer) return res.status(400).send("CorrectAnswer is required")
 
     try {
-        // 1. Find or create category
-        let categoryDoc = await Category.findOneAndUpdate(
-            {category, userId},
-            {$inc: {cardCount: 1}},  // Increment cardCount by 1
-            null)
+        const categoryDoc = createCategoryIfNotExists(category, userId)
+        const categoryId = categoryDoc.categoryId
 
-
-        if (!categoryDoc) {
-            // If the category does not exist, create it
-            categoryDoc = new Category({
-                category,
-                cardCount: 1,
-                userId
-            })
-            await categoryDoc.save()
-        }
-
-        categoryId = categoryDoc._id
-
-        // 3. create the card and hand over the category ID
+        // Create card and hand over the category ID
         const card = new Card({question, type, answers, correctAnswer, categoryId})
         await card.save()
-
 
         console.log("Card created and added to category successfully:", card)
         res.status(201).send({message: "Card created successfully", card})
@@ -173,6 +190,28 @@ router.get('/category', async function (req, res) {
     }
 })
 
+/**
+ * Create a new category for a user
+ * POST: localhost:3000/cards/category
+ */
+router.post('/category', async function (req, res) {
+    const {category} = req.body
+    const userId = req.session.userId
+
+    if (!userId) {
+        return res.status(401).send("User is not authenticated. Please log in.")
+    }
+
+    try {
+        const categoryDoc = createCategoryIfNotExists(category, userId)
+        const categoryId = categoryDoc.categoryId
+
+        return res.status(200).send({message: "Card created successfully.", categoryId})
+    } catch (error) {
+        console.error("Error creating or finding category:", error);
+        return res.status(500).send({message: "Error creating category:", error: error.message})
+    }
+})
 
 /**
  * Delete a card by its ID
@@ -196,8 +235,6 @@ router.delete('/delete/:id', async function (req, res) {
             {$inc: {cardCount: -1}}
         )
 
-        console.log('Card deleted successfully:', deletedCard)
-
         return res.status(200).send({message: "Card deleted successfully.", deletedCard})
     } catch (error) {
         console.error('Error deleting card:', error)
@@ -209,6 +246,7 @@ router.delete('/delete/:id', async function (req, res) {
  * Exporting cards of a category of a user
  * Provide the ID of the category. All cards will be retrieved from the database and formatted.
  * As soon as this is done the user (FE) should see a download start with the exported cards of the category.
+ * GET: localhost:3000/cards/export
  */
 router.get('/export', async function (req, res) {
     try {
@@ -270,7 +308,8 @@ const upload = multer({storage: storage})
 /**
  * Importing cards associated with a category. File should be uploaded by the user.
  * Checks if category already exists for the user and adds cards to this category, otherwise creates new category
- */
+ * GET: localhost:3000/cards/export
+ * */
 router.post('/import', upload.single('file'), async function (req, res) {
     try {
         const {userId} = req.session.userId
@@ -316,6 +355,5 @@ router.post('/import', upload.single('file'), async function (req, res) {
         return res.status(500).send({message: 'Error importing cards', error: error.message})
     }
 })
-
 
 module.exports = router
