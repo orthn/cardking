@@ -205,6 +205,11 @@ router.delete('/delete/:id', async function (req, res) {
     }
 })
 
+/**
+ * Exporting cards of a category of a user
+ * Provide the ID of the category. All cards will be retrieved from the database and formatted.
+ * As soon as this is done the user (FE) should see a download start with the exported cards of the category.
+ */
 router.get('/export', async function (req, res) {
     try {
         const userId = req.session.userId
@@ -213,16 +218,19 @@ router.get('/export', async function (req, res) {
         let cards
         let category
 
+        // Check if category exists and belongs to the user
         category = await Category.find({userId: userId, _id: categoryId}, null, null)
         if (!category) {
             return res.status(404).send({message: "No categories found"})
         }
 
+        // Retrieve all cards of this category
         cards = await Card.find({categoryId: {$in: categoryId}}, null, null)
         if (!cards || cards.length === 0) {
             return res.status(404).send({message: `No cards found.`})
         }
 
+        // Format the cards
         const formatted = {
             userId: userId,
             category: category.category,
@@ -237,6 +245,7 @@ router.get('/export', async function (req, res) {
             }))
         }
 
+        // Set headers and prepare for download
         res.setHeader('Content-Disposition', 'attachment filename="cards.json"')
         res.setHeader('Content-Type', 'application/json')
         return res.status(200).send(JSON.stringify(formatted, null, 2))
@@ -246,17 +255,22 @@ router.get('/export', async function (req, res) {
     }
 })
 
+// Needed wo allocate memory for the file the user uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/'); // Folder where files will be saved
+        cb(null, 'uploads/') // Folder where files will be saved
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname)); // Rename file to avoid conflict
+        cb(null, Date.now() + path.extname(file.originalname)) // Rename file to avoid conflict
     }
-});
+})
 
 const upload = multer({storage: storage})
 
+/**
+ * Importing cards associated with a category. File should be uploaded by the user.
+ * Checks if category already exists for the user and adds cards to this category, otherwise creates new category
+ */
 router.post('/import', upload.single('file'), async function (req, res) {
     try {
         const {userId} = req.session.userId
@@ -270,10 +284,10 @@ router.post('/import', upload.single('file'), async function (req, res) {
         const data = JSON.parse(fileContent)
 
         if (!data.category || !data.categoryId || !Array.isArray(data.cards)) {
-            return res.status(400).send('Invalid file format');
+            return res.status(400).send('Invalid file format')
         }
 
-        const existingCategory = await Category.findOne({_id: data.categoryId, userId: data.userId}, null, null);
+        const existingCategory = await Category.findOne({_id: data.categoryId, userId: data.userId}, null, null)
 
         // Create category if not existent
         if (!existingCategory) {
@@ -292,11 +306,11 @@ router.post('/import', upload.single('file'), async function (req, res) {
                 question: cardData.question,
                 answers: cardData.answers,
                 correctAnswer: cardData.correctAnswer
-            });
-        });
+            })
+        })
 
-        const savedCards = await Card.insertMany(newCards);
-        return res.status(200).send({message: "Cards imported successfully", savedCards});
+        const savedCards = await Card.insertMany(newCards)
+        return res.status(200).send({message: "Cards imported successfully", savedCards})
     } catch (error) {
         console.log("Error importing cards", error)
         return res.status(500).send({message: 'Error importing cards', error: error.message})
