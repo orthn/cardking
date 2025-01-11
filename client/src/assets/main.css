@@ -24,6 +24,9 @@
   --spacing-xl: 3rem;    /* Sehr großer Abstand */
   --correct-color: #57BC90;    /* Frisches Grün für korrekte Antworten */
   --incorrect-color: #d83129;
+  --save-color: #57BC90;   /* Frisches Grün */
+  --delete-color: #d83129; /* Kräftiges Rot */
+  --cancel-color: #A5A5AF; /* Neutraler Grauton */
 }
 
 [data-theme='dark'] {
@@ -36,10 +39,10 @@
   --input-border-color: #cdc5b8; /* Helles Beige für Input-Ränder */
   --button-bg-color: #d83129; /* Kräftiges Rot für Buttons */
   --secondary-button-bg-color: #015249;
-  --button-text-color: #111214; /* Tiefes Schwarz für Button-Text */
+  --button-text-color: #cdc5b8; /* Tiefes Schwarz für Button-Text */
   --link-color: #d83129; /* Kräftiges Rot für Links */
   --shadow-color: rgba(17, 18, 20, 0.5); /* Leichter Schatten in Schwarz */
-  --highlight-color: #d83129; /* Kräftiges Rot für Highlights */
+  --highlight-color: #c60a00; /* Kräftiges Rot für Highlights */
   --muted-text-color: #5a5a5a; /* Dezentes Grau für weniger wichtige Texte */
   --font-family-default: 'Inter', Arial, sans-serif;
   --font-family-heading: 'Inter', sans-serif;
@@ -50,4 +53,7 @@
   --spacing-xl: 3rem;    /* Sehr großer Abstand */
   --correct-color: #ffb339;    /* Helles Beige für korrekte Antworten im dunklen Thema */
   --incorrect-color: #d83129; 
+  --save-color: #ffb339;   /* Beige-Gelb für dunkles Thema */
+  --delete-color: #d83129; /* Kräftiges Rot */
+  --cancel-color: #5a5a5a; /* Dezentes Grau */
 }

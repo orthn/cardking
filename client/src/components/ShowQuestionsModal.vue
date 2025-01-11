@@ -19,10 +19,6 @@
           </li>
         </ul>
       </div>
-
-      <div class="actions">
-        <button @click="$emit('close')" class="btn cancel-btn">Cancel</button>
-      </div>
     </div>
   </div>
 </template>
@@ -60,6 +56,7 @@ export default {
   justify-content: center;
   z-index: 1000;
 }
+
 
 .modal {
   background-color: var(--card-bg-color, #1e1e1e);
@@ -128,16 +125,12 @@ export default {
 }
 
 .edit-btn {
-  background-color: var(--highlight-color, #57bc90);
-  color: var(--button-text-color, white);
-}
-
-.cancel-btn {
-  background-color: var(--danger-color, #dc3545);
-  color: var(--button-text-color, white);
+  background-color: var(--button-bg-color);
+  color: var(--button-text-color);
 }
 
 .btn:hover {
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  background-color: var(--highlight-color); /* Hover-Farbe */
+  box-shadow: 0 6px 15px var(--highlight-color); /* Hover-Schatten */
 }
 </style>
