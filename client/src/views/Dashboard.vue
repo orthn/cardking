@@ -9,7 +9,7 @@
 
      <!-- Main Section: Cards and Categories -->
      <div class="dashboard-main">
-        <h3>Overview</h3>
+        <h3>Categories</h3>
         <div>
           <p v-if="categories.length === 0">Loading categories...</p>
           <div v-else class="category-grid">
