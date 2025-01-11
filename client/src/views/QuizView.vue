@@ -71,7 +71,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch} from 'vue';
 
 const quizData = ref([]);
 const errorMessage = ref('');
@@ -106,10 +106,31 @@ const fetchQuiz = async () => {
   }
 };
 
+let startTime; // Stores the start time for a question
+
+const startTimer = () => {
+  startTime = Date.now();
+};
+
+// Call this function to calculate quality based on time and correctness
+const calculateQuality = (isCorrect, elapsedTime) => {
+  if (isCorrect) {
+    if (elapsedTime <= 3) return 5; // Perfect response
+    if (elapsedTime <= 7) return 4; // Correct after hesitation
+    return 3; // Correct with serious difficulty
+  } else {
+    if (elapsedTime <= 3) return 2; // Incorrect, but easy to recall
+    if (elapsedTime <= 7) return 1; // Incorrect, remembered correct answer
+    return 0; // Complete blackout
+  }
+};
+
 const selectedAnswers = ref([]); // Für Multiple Choice Antworten
 
 const submitAnswer = (answer) => {
   const currentCard = quizData.value[currentIndex.value];
+  const endTime = Date.now();
+  const elapsedTime = (endTime - startTime) / 1000; // Time in seconds
 
   if (currentCard.type === 'multiple_choice') {
     if (selectedAnswers.value.includes(answer)) {
@@ -124,34 +145,45 @@ const submitAnswer = (answer) => {
 
     if (isCorrect) correctCount.value++;
 
+    const quality = calculateQuality(isCorrect, elapsedTime);
+
     userAnswers.value.push({
+      cardId: currentCard._id,
       question: currentCard.question,
       selectedAnswer: answer,
       correctAnswer: currentCard.correctAnswer,
       isCorrect,
+      quality
     });
 
     if (currentIndex.value < quizData.value.length - 1) {
       currentIndex.value++;
     } else {
       isQuizComplete.value = true;
+      submitAnswers();
     }
   }
 };
 
 const finalizeMultipleChoice = () => {
   const currentCard = quizData.value[currentIndex.value];
+  const endTime = Date.now();
+  const elapsedTime = (endTime - startTime) / 1000; // Time in seconds
 
   const isCorrect =
     JSON.stringify([...selectedAnswers.value].sort()) === JSON.stringify(currentCard.correctAnswer.sort());
 
   if (isCorrect) correctCount.value++;
 
+  const quality = calculateQuality(isCorrect, elapsedTime);
+
   userAnswers.value.push({
+    cardId: currentCard._id,
     question: currentCard.question,
     selectedAnswer: [...selectedAnswers.value],
     correctAnswer: currentCard.correctAnswer,
     isCorrect,
+    quality
   });
 
   selectedAnswers.value = [];
@@ -160,6 +192,7 @@ const finalizeMultipleChoice = () => {
     currentIndex.value++;
   } else {
     isQuizComplete.value = true;
+    submitAnswers();
   }
 };
 
@@ -174,6 +207,28 @@ const previousResult = () => {
     resultIndex.value--;
   }
 };
+
+const submitAnswers = async () => {
+  try {
+    const response = await fetch(`http://localhost:3000/quiz/submitAnswers`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ cards: userAnswers.value }),
+    });
+  } catch (error) {
+    errorMessage.value = 'An error occurred while submitting the answers.'
+  }
+};
+
+// Watch for changes to currentIndex and reset the timer
+watch(currentIndex, (newIndex, oldIndex) => {
+  if (newIndex !== oldIndex) {
+    startTimer();
+  }
+});
 
 onMounted(() => {
   fetchQuiz();

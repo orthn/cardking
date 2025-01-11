@@ -62,7 +62,10 @@ router.get('/startQuiz', async function (req, res) {
  *  POST: localhost:3000/quiz/submitAnswers
  *  expected body:
  */
-router.post('submitAnswers', async function (req, res) {
+router.post('/submitAnswers', async function (req, res) {
+    // get userID from session
+    const userId = req.session.userId;
+
     const {cards} = req.body;
 
     const bulkUpdates = [];
