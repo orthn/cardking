@@ -216,7 +216,10 @@ const submitAnswers = async () => {
         'Content-Type': 'application/json',
       },
       credentials: 'include',
-      body: JSON.stringify({ cards: userAnswers.value }),
+      body: JSON.stringify({
+        cards: userAnswers.value,
+        correctCount: correctCount.value
+      })
     });
   } catch (error) {
     errorMessage.value = 'An error occurred while submitting the answers.'

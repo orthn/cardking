@@ -5,13 +5,15 @@ const statisticSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    cardCount: {
-        type: Number,
-        default: 0,
-    },
     completedQuizzes: {
         type: Number,
         default: 0,
+    },
+    streak: {
+        type: Number,
+    },
+    lastQuizDate: {
+        type: Date,
     },
     successRate: {
         type: Number,
