@@ -2,69 +2,61 @@
   <div v-if="isVisible" class="modal-backdrop">
     <div class="modal">
       <h3>Edit Question</h3>
-      <label>Question:</label>
-      <input v-model="editableQuestion.question" type="text" />
+      <label style="font-weight: bold;">Question:</label>
+      <textarea class="inputquestion" v-model="editableQuestion.question" type="text" />
 
-      <label>Category:</label>
+      <label style="font-weight: bold;">Category:</label>
       <select v-model="editableQuestion.categoryId">
         <option v-for="category in categories" :key="category._id" :value="category._id">
           {{ category.category }}
         </option>
       </select>
 
-      <!-- Multiple Choice -->
       <div v-if="editableQuestion.type === 'multiple_choice'" class="edit-section">
-        <h4>Multiple Choice</h4>
-        <div
-            v-for="(answer, index) in editableQuestion.answers"
-            :key="index"
-            class="answer-section"
-        >
-          <label>Option {{ index + 1 }}:</label>
+        <label style="font-weight: bold; padding-bottom: 0.5rem;">Multiple Choice</label>
+        <div v-for="(answer, index) in editableQuestion.answers" :key="index" class="answer-section">
           <div class="option-row">
-            <input
-                v-model="editableQuestion.answers[index]"
-                placeholder="Option text"
-            />
-            <input
-                type="checkbox"
-                :value="answer"
-                :checked="editableQuestion.correctAnswer.includes(answer)"
-                @change="toggleCorrectAnswer(answer)"
-            />
+            <input v-model="editableQuestion.answers[index]" placeholder="Option text" class="answer-input" />
+            <span class="icon-indicator">
+              <i :class="editableQuestion.correctAnswer.includes(answer) ? 'fas fa-check' : 'fas fa-times'"
+                @click.stop="toggleCorrectAnswer(answer)"></i>
+            </span>
           </div>
         </div>
       </div>
 
+
+
       <!-- Single Choice -->
       <div v-else-if="editableQuestion.type === 'single_choice'" class="edit-section">
-        <h4>Single Choice</h4>
-        <div
-            v-for="(answer, index) in editableQuestion.answers"
-            :key="index"
-            class="answer-section"
-        >
-          <label>Option {{ index + 1 }}:</label>
-          <input
-              v-model="editableQuestion.answers[index]"
-              placeholder="Option text"
-          />
-          <input
-              type="radio"
-              :value="answer"
-              v-model="editableQuestion.correctAnswer"
-          />
+        <label style="font-weight: bold; padding-bottom: 0.5rem;">Single Choice</label>
+        <div v-for="(answer, index) in editableQuestion.answers" :key="index" class="answer-section">
+          <div class="option-row">
+            <input v-model="editableQuestion.answers[index]" placeholder="Option text" class="answer-input" />
+            <span class="icon-indicator">
+              <i :class="editableQuestion.correctAnswer === answer ? 'fas fa-check' : 'fas fa-times'"
+                @click="setCorrectAnswer(answer)"></i>
+            </span>
+          </div>
         </div>
       </div>
 
+
+
+
       <!-- True/False -->
-      <div v-else-if="editableQuestion.type === 'true_false'" class="edit-section">
-        <h4>True/False</h4>
-        <label>Correct Answer:</label>
-        <select v-model="editableQuestion.correctAnswer">
-          <option value="True">True</option>
-          <option value="False">False</option>
-        </select>
+      <div v-else-if="editableQuestion.type === 'true_false'" class="edit-section true-false-section">
+        <label style="font-weight: bold;">True/False</label>
+        <div class="true-false-options">
+          <label class="true-false-label" :class="{ selected: editableQuestion.correctAnswer === 'True' }">
+            <input type="radio" value="True" v-model="editableQuestion.correctAnswer" />
+            <span>True</span>
+          </label>
+          <label class="true-false-label" :class="{ selected: editableQuestion.correctAnswer === 'False' }">
+            <input type="radio" value="False" v-model="editableQuestion.correctAnswer" />
+            <span>False</span>
+          </label>
+        </div>
       </div>
 
       <!-- Actions -->
@@ -102,7 +94,6 @@ export default {
         console.error('Error fetching categories:', error);
       }
     };
-
     const toggleCorrectAnswer = (answer) => {
       const index = editableQuestion.value.correctAnswer.indexOf(answer);
       if (index === -1) {
@@ -112,31 +103,36 @@ export default {
       }
     };
 
+    const setCorrectAnswer = (answer) => {
+      editableQuestion.value.correctAnswer = answer;
+    };
+
+
     const saveChanges = () => {
       emit('save', editableQuestion.value);
     };
 
 
-/*
-    const deleteQuestion = async () => {
-      console.log('Deleting question with ID:', editableQuestion.value._id);
-      try {
-        const response = await fetch(`http://localhost:3000/cards/delete/${editableQuestion.value._id}`, {
-          method: 'DELETE',
-          credentials: 'include',
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to delete the question');
-        }
-        console.log('Question deleted successfully');
-        emit('delete', editableQuestion.value._id);
-      } catch (error) {
-        console.error('Error deleting question:', error);
-      }
-    };
-*/
+    /*
+        const deleteQuestion = async () => {
+          console.log('Deleting question with ID:', editableQuestion.value._id);
+          try {
+            const response = await fetch(`http://localhost:3000/cards/delete/${editableQuestion.value._id}`, {
+              method: 'DELETE',
+              credentials: 'include',
+            });
+    
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.message || 'Failed to delete the question');
+            }
+            console.log('Question deleted successfully');
+            emit('delete', editableQuestion.value._id);
+          } catch (error) {
+            console.error('Error deleting question:', error);
+          }
+        };
+    */
 
     const deleteQuestion = async () => {
       console.log('Deleting question with ID:', editableQuestion.value._id);
@@ -167,12 +163,110 @@ export default {
       toggleCorrectAnswer,
       saveChanges,
       deleteQuestion,
+      setCorrectAnswer,
     };
   },
 };
 </script>
 
 <style scoped>
+.true-false-options {
+  display: flex;
+  justify-content: space-between;
+}
+
+.true-false-label {
+  flex: 1;
+  text-align: center;
+  color: var(--text-color);
+  padding: var(--spacing-sm);
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--radius-sm, 6px);
+  cursor: pointer;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.true-false-label input {
+  display: none;
+  /* Versteckt das echte Radio-Input */
+}
+
+.true-false-label.selected {
+  background-color: var(--highlight-color, #77C9D4);
+  border-color: var(--highlight-color, #77C9D4);
+  color: var(--button-text-color, #fff);
+}
+.true-false-label:not(:last-child) {
+  margin-right: var(--spacing-sm);
+}
+select {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--input-border-color, #444);
+  background: var(--card-bg-color, #333);
+  color: var(--text-color, white);
+  font-size: 1rem;
+  cursor: pointer;
+  appearance: none;
+  /* Entfernt Standard-Pfeile in einigen Browsern */
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--input-border-color, #444);
+  border-radius: 4px;
+  background: var(--card-bg-color, #333);
+  color: var(--text-color, white);
+  cursor: pointer;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.answer-input {
+  flex-grow: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-color, white);
+  font-size: 1rem;
+  outline: none;
+}
+
+.icon-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.icon-indicator i {
+  font-size: 1.2rem;
+}
+
+.icon-indicator:hover i {
+  transform: scale(1.2);
+  /* Vergrößerung beim Hover */
+}
+
+.icon-indicator i.fas.fa-check {
+  color: var(--correct-color, #57BC90);
+  /* Grün für korrekt */
+}
+
+.icon-indicator i.fas.fa-times {
+  color: var(--incorrect-color, #d83129);
+  /* Rot für falsch */
+}
+
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -208,10 +302,9 @@ export default {
 .modal label {
   display: block;
   margin-top: 1rem;
-  font-weight: bold;
 }
 
-.modal input {
+.inputquestion {
   width: 100%;
   padding: 0.5rem;
   margin-top: 0.5rem;
@@ -222,19 +315,8 @@ export default {
   font-size: 1rem;
 }
 
-.edit-section {
-  margin-top: 1rem;
-}
-
 .answer-section {
   margin-bottom: 1rem;
-}
-
-.option-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 0.5rem;
 }
 
 .actions {
@@ -253,19 +335,19 @@ export default {
 }
 
 .save-btn {
-  background-color: var(--highlight-color, #57bc90);
-  color: var(--button-text-color, white);
+  background-color: var(--save-color);
+  color: var(--button-text-color);
 }
 
 .delete-btn {
-  background-color: var(--warning-color, #f0ad4e);
-  color: var(--button-text-color, white);
+  background-color: var(--delete-color);
+  color: var(--button-text-color);
   margin-left: 0.5rem;
 }
 
 .cancel-btn {
-  background-color: var(--danger-color, #dc3545);
-  color: var(--button-text-color, white);
+  background-color: var(--cancel-color);
+  color: var(--button-text-color);
   margin-left: 0.5rem;
 }
 

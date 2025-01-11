@@ -139,6 +139,7 @@ const goToRegister = () => {
   margin-bottom: 1.5rem;
 }
 .forgot-password-text {
+  padding-top: 6px;
   font-size: 0.85rem;
   color: var(--muted-text-color);
   margin-top: 0.2rem;
