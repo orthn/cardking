@@ -18,6 +18,8 @@ let dashboard = require('./routes/dashboard')
 
 let app = express()
 
+require('./controllers/jobManager');
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'hbs')
@@ -29,7 +31,7 @@ app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
 const corsOptions = {
-    origin: 'http://localhost:5173',  // Frontend URL (adjust this as necessary)
+    origin: 'http://localhost:5173',  // Frontend URL
     credentials: true,  // Allow cookies/credentials
 };
 app.use(cors(corsOptions));

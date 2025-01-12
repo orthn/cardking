@@ -2,7 +2,10 @@ const express = require('express');
 const router = express.Router();
 const Card = require("../models/cardSchema")
 const constants = require("node:constants");
-
+const Category = require("../models/categorySchema");
+const Statistic = require("../models/statisticSchema");
+const { isSameDay, isSameWeek } = require('../controllers/jobManager')
+const User = require("../models/userSchema");
 
 
 router.get('/', function (req, res) {
@@ -57,13 +60,84 @@ router.get('/startQuiz', async function (req, res) {
 });
 
 
+async function updateStatistics(correctCount, userId){
+    try {
+        if (isNaN(correctCount) || correctCount < 0) {
+            throw new Error("Invalid correctCount value.");
+        }
+
+        const quizSuccessRate = (correctCount / 10 ) * 100;
+
+        let statistics = await Statistic.findOneAndUpdate(
+            {userId},
+            {
+                $inc: {completedQuizzes: 1},
+                //lastQuizDate: Date.now(),
+            },
+            {new: true}
+        )
+
+        // If category doesn't exist, create a new one
+        if (!statistics) {
+            statistics = new Statistic({
+                userId,
+                completedQuizzes: 1,
+                lastQuizDate: Date.now(),
+                successRate: quizSuccessRate,
+                streak: 1
+            });
+
+            // Save the new category to the database
+            await statistics.save();
+            return;
+        }
+
+        // update success rate
+        const previousSuccessRate = statistics.successRate || 0; // Default to 0 if undefined
+        const completedQuizzes = statistics.completedQuizzes;
+
+        const updatedSuccessRate =
+            (previousSuccessRate * (completedQuizzes - 1) + quizSuccessRate) / completedQuizzes;
+
+        statistics.successRate = updatedSuccessRate; // Update the success rate
+
+        //update streak
+        const currentDate = new Date(Date.now());
+
+        const user = await User.findOne({_id: userId}).select('goal');
+        const goal = user ? user.goal : null;
+
+        // for daily goal increment streak if lastQuizDate is not equal now
+        if (goal === 'daily' && !isSameDay(currentDate, statistics.lastQuizDate)) {
+                statistics.streak++;
+        }
+
+        // for weekly goal increment streak if lastQuizDate is not the same week as date.now
+        if (goal === 'weekly' && !isSameWeek(currentDate, statistics.lastQuizDate)) {
+                statistics.streak++;
+        }
+
+        statistics.lastQuizDate = currentDate;
+
+        await statistics.save();
+    } catch (error) {
+        console.error("Error creating or updating statistics:", error);
+        throw new Error("Error creating or updating statistics.")
+    }
+};
+
 /**
  *  Submit answer of current card and validate it
  *  POST: localhost:3000/quiz/submitAnswers
  *  expected body:
  */
-router.post('submitAnswers', async function (req, res) {
-    const {cards} = req.body;
+router.post('/submitAnswers', async function (req, res) {
+    // get userID from session
+    const userId = req.session.userId;
+
+    const {cards, correctCount} = req.body;
+
+    console.log(correctCount);
 
     const bulkUpdates = [];
     const errors = [];
@@ -129,6 +203,8 @@ router.post('submitAnswers', async function (req, res) {
         });
 
     }
+
+    let response;
     // Execute bulk updates
     try {
         if (bulkUpdates.length > 0) {
@@ -136,17 +212,22 @@ router.post('submitAnswers', async function (req, res) {
         }
 
         // Return success message and any errors encountered
-        const response = {
+        response = {
             message: "Cards updated successfully.",
             errors: errors.length > 0 ? errors : undefined, // Include errors if any
         };
-
-        return res.status(200).json(response);
     } catch (error) {
         console.error("Error updating cards:", error);
         return res.status(500).json({message: "Error updating cards: " + error.message});
     }
 
+    try {
+        await updateStatistics(correctCount, userId);
+    } catch (error) {
+        return res.status(500).json({message: "Error updating statistics: " + error.message});
+    }
+
+    return res.status(200).json(response);
 });
 
 

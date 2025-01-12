@@ -20,7 +20,8 @@ const userSchema = new mongoose.Schema({
         default: Date.now
     },
     goal: {
-        type: String
+        type: String,
+        enum: ['no_goal', 'daily', 'weekly']
     }
 });
 

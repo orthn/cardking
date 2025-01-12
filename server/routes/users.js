@@ -20,7 +20,7 @@ router.get('/', function (req, res, next) {
  */
 router.get('/me', function (req, res) {
     if (!req.session || !req.session.userId) {
-        return res.status(401).send({message: 'Nicht eingeloggt'})
+        return res.status(401).send({message: 'Not logged in'})
     }
     res.status(200).send({userId: req.session.userId})
 })
