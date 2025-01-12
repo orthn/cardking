@@ -43,7 +43,7 @@
     <CreateCardModal :show="showModal" :categories="categories" @close="handleModalClose" />
 
     <ShowQuestionsModal v-if="isShowQuestionsModalVisible" :isVisible="isShowQuestionsModalVisible"
-      :categoryName="selectedCategory" :questions="selectedCategoryQuestions" @edit-question="openEditQuestionModal"
+      :categoryName="selectedCategory" :categoryId="selectedCategory"  :questions="selectedCategoryQuestions" @edit-question="openEditQuestionModal"
       @close="isShowQuestionsModalVisible = false" />
 
 

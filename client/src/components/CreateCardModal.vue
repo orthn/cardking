@@ -7,32 +7,17 @@
           <!-- Question -->
           <div class="form-group full-width">
             <label for="question" class="form-label">Question:</label>
-            <textarea
-              id="question"
-              v-model="card.question"
-              class="form-input"
-              placeholder="Enter the question"
-              required
-            ></textarea>
+            <textarea id="question" v-model="card.question" class="form-input" placeholder="Enter the question"
+              required></textarea>
           </div>
 
           <!-- Category -->
           <div class="form-group full-width">
             <label for="category" class="form-label">Category:</label>
-            <input
-              id="category"
-              v-model="card.category"
-              list="category-list"
-              class="form-input"
-              placeholder="Enter or select a category"
-              required
-            />
+            <input id="category" v-model="card.category" list="category-list" class="form-input"
+              placeholder="Enter or select a category" required />
             <datalist id="category-list">
-              <option
-                v-for="category in categories"
-                :key="category._id"
-                :value="category.category"
-              >
+              <option v-for="category in categories" :key="category._id" :value="category.category">
                 {{ category.category }}
               </option>
             </datalist>
@@ -41,13 +26,7 @@
           <!-- Card Type -->
           <div class="form-group full-width">
             <label for="type" class="form-label">Card Type:</label>
-            <select
-              id="type"
-              v-model="card.type"
-              class="form-input"
-              required
-              @change="updateAnswerFields"
-            >
+            <select id="type" v-model="card.type" class="form-input" required @change="updateAnswerFields">
               <option value="true_false">True/False</option>
               <option value="single_choice">Single Choice</option>
               <option value="multiple_choice">Multiple Choice</option>
@@ -56,18 +35,12 @@
 
           <!-- True/False Selection -->
           <div v-if="card.type === 'true_false'" class="true-false-container">
-            <div
-              class="true-false-box"
-              :class="{ selected: card.correctAnswer[0] === 'True' }"
-              @click="toggleAnswer('True')"
-            >
+            <div class="true-false-box" :class="{ selected: card.correctAnswer[0] === 'True' }"
+              @click="toggleAnswer('True')">
               True
             </div>
-            <div
-              class="true-false-box"
-              :class="{ selected: card.correctAnswer[0] === 'False' }"
-              @click="toggleAnswer('False')"
-            >
+            <div class="true-false-box" :class="{ selected: card.correctAnswer[0] === 'False' }"
+              @click="toggleAnswer('False')">
               False
             </div>
           </div>
@@ -75,50 +48,32 @@
           <!-- Single Choice -->
           <div v-else-if="card.type === 'single_choice'" class="form-group full-width">
             <label class="form-label">Answers:</label>
-            <div
-              v-for="(answer, index) in card.answers"
-              :key="index"
-              class="option-row"
-            >
-              <input
-                type="text"
-                v-model="card.answers[index]"
-                class="answer-text"
-                :placeholder="`Answer ${index + 1}`"
-              />
-              <i
-                :class="card.correctAnswer[0] === index ? 'fas fa-check' : 'fas fa-times'"
-                class="icon-indicator"
-                @click.stop="toggleAnswer(index)"
-              ></i>
+            <div v-for="(answer, index) in card.answers" :key="index" class="option-row">
+              <input type="text" v-model="card.answers[index]" class="answer-text"
+                :placeholder="`Answer ${index + 1}`" />
+              <i :class="card.correctAnswer[0] === index ? 'fas fa-check' : 'fas fa-times'" class="icon-indicator"
+                @click.stop="toggleAnswer(index)"></i>
             </div>
           </div>
 
           <!-- Multiple Choice -->
           <div v-else-if="card.type === 'multiple_choice'" class="form-group full-width">
             <label class="form-label">Answers:</label>
-            <div
-              v-for="(answer, index) in card.answers"
-              :key="index"
-              class="option-row"
-            >
-              <input
-                type="text"
-                v-model="card.answers[index]"
-                class="answer-text"
-                :placeholder="`Answer ${index + 1}`"
-              />
-              <i
-                :class="card.correctAnswer.includes(index) ? 'fas fa-check' : 'fas fa-times'"
-                class="icon-indicator"
-                @click.stop="toggleAnswer(index)"
-              ></i>
+            <div v-for="(answer, index) in card.answers" :key="index" class="option-row">
+              <input type="text" v-model="card.answers[index]" class="answer-text"
+                :placeholder="`Answer ${index + 1}`" />
+              <i :class="card.correctAnswer.includes(index) ? 'fas fa-check' : 'fas fa-times'" class="icon-indicator"
+                @click.stop="toggleAnswer(index)"></i>
             </div>
           </div>
 
           <!-- Submit -->
           <button type="submit" class="btn">Create Card</button>
         </form>
+        <div class="imp">
+          <input type="file" ref="importFile" class="import-input" @change="handleFileSelect" />
+          <button class="importbtn" @click.prevent="importCards">Import</button>
+        </div>
       </div>
     </div>
   </transition>
@@ -150,6 +105,45 @@ export default {
     };
   },
   methods: {
+    handleFileSelect(event) {
+      const files = event.target.files;
+      if (files && files.length > 0) {
+        this.selectedFile = files[0];
+      }
+    },
+    async importCards() {
+      if (!this.selectedFile) {
+        this.message = "Please select a file to import.";
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", this.selectedFile);
+
+      try {
+        const response = await fetch("http://localhost:3000/cards/import", {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to import cards: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        this.message = "Cards imported successfully!";
+        console.log("Imported cards:", data);
+      } catch (error) {
+        this.message = `Error importing cards: ${error.message}`;
+        console.error(error);
+      } finally {
+        this.selectedFile = null;
+        if (this.$refs.importFile) {
+          this.$refs.importFile.value = ""; // Reset file input
+        }
+      }
+    },
     updateAnswerFields() {
       this.card.correctAnswer = [];
       if (this.card.type === "true_false") {
@@ -180,8 +174,8 @@ export default {
             this.card.type === "multiple_choice"
               ? this.card.correctAnswer.map((index) => this.card.answers[index])
               : this.card.type === "single_choice"
-              ? this.card.answers[this.card.correctAnswer[0]]
-              : this.card.correctAnswer[0],
+                ? this.card.answers[this.card.correctAnswer[0]]
+                : this.card.correctAnswer[0],
         };
 
         const response = await fetch("http://localhost:3000/cards/create", {
@@ -217,6 +211,12 @@ export default {
 </script>
 
 <style scoped>
+.imp{
+  display:flex;
+  justify-content: center;
+  padding-top: 1rem;
+}
+
 .true-false-container {
   display: flex;
   justify-content: space-between;
@@ -285,6 +285,7 @@ export default {
 .icon-indicator:hover {
   transform: scale(1.2);
 }
+
 .modal {
   position: fixed;
   top: 0;
@@ -391,6 +392,21 @@ export default {
   justify-content: space-between;
   gap: var(--spacing-sm);
 }
+.importbtn {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--cancel-color);
+  color: var(--button-text-color, #fff);
+  border: none;
+  border-radius: var(--border-radius, 8px);
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+.importbtn:hover {
+  background-color: var(--highlight-color, #77C9D4);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
 
 .btn {
   padding: var(--spacing-sm) var(--spacing-md);
@@ -400,6 +416,7 @@ export default {
   border-radius: var(--border-radius, 8px);
   font-weight: bold;
   cursor: pointer;
+  width: 100%;
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 

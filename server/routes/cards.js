@@ -251,7 +251,7 @@ router.delete('/delete/:id', async function (req, res) {
 router.get('/export', async function (req, res) {
     try {
         const userId = req.session.userId
-        const {categoryId} = req.body
+        const categoryId = req.query.categoryId
 
         let cards
         let category

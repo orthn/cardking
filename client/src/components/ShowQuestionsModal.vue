@@ -1,6 +1,7 @@
 <template>
   <div v-if="isVisible" class="modal-backdrop"  @click="closeModal">
-    <div class="modal">
+    <div class="modal" @click.stop>
+      <button class="exportbtn"  @click="exportQuestions">Export</button>
      <!-- <h3>Questions in {{ categoryName }}</h3>-->
       <div class="questions-list">
         <ul>
@@ -29,6 +30,7 @@ export default {
     isVisible: Boolean,
     categoryName: String,
     questions: Array,
+    categoryId: String,
   },
   methods: {
     editQuestion(question) {
@@ -38,12 +40,59 @@ export default {
     closeModal() {
       this.$emit("close");
     },
+    async exportQuestions() {
+      if (!this.categoryId) {
+        console.error("Category ID is required for export.");
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://localhost:3000/cards/export?categoryId=${this.categoryId}`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Export failed: ${response.statusText}`);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `export_${this.categoryName || "cards"}.json`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      } catch (error) {
+        console.error("Error exporting questions:", error);
+      }
+    },
   },
 };
 
 </script>
 
 <style scoped>
+.exportbtn{
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--cancel-color);
+  color: var(--button-text-color, #fff);
+  border: none;
+  border-radius: var(--border-radius, 8px);
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: 1rem;
+}
+.exportbtn:hover {
+  background-color: var(--highlight-color, #77C9D4);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
 .modal-backdrop {
   position: fixed;
   top: 0;
