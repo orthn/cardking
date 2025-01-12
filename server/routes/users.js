@@ -30,29 +30,24 @@ router.get('/me', function (req, res) {
  * GET: localhost:3000/users/data
  */
 router.get('/data', async function (req, res) {
+    const userID = req.session.userId;
+    if (!userID) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
     try {
-        if (!req.session || !req.session.userId) return res.status(401).send({message: 'Not logged in'})
-        const {userId, username} = req.query
-
-        if (!userId && !username) {
-            return res.status(400).send({message: 'userId or username is required'})
+        const dbUser = await User.findById(userID).select('username email');
+        if (!dbUser) {
+            return res.status(404).send({ message: 'User not found' });
         }
 
-        const dbUser = await User.findOne({
-            $or: [{_id: userId}, {username: username}]
-        })
-
-        if (!dbUser) return res.status(404).send(
-            {message: `Cannot find user with ID ${userId || 'N/A'} or username ${username || 'N/A'}`}
-        )
-
-
-        return res.status(200).send({user: dbUser})
+        return res.status(200).send({ user: dbUser });
     } catch (error) {
-        console.error(error)
-        return res.status(500).send({message: 'An error occurred while retrieving user data.'})
+        console.error(error);
+        return res.status(500).send({ message: 'An error occurred while retrieving user data.' });
     }
-})
+});
+
+
 
 /**
  * Update a already existing user object
