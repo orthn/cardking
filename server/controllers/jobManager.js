@@ -24,7 +24,7 @@ const isSameWeek = (date1, date2) => {
     return date2 >= start && date2 <= end;
 };
 console.log(new Date())
-const job = schedule.scheduleJob({hour: 15, minute: 30}, async function(){
+const jobReminderMail = schedule.scheduleJob({hour: 15, minute: 30}, async function(){
 
     try {
         const users = await User.find({goal:{ $ne: "no_goal" }});
@@ -45,8 +45,49 @@ const job = schedule.scheduleJob({hour: 15, minute: 30}, async function(){
             }
             }
     } catch (error) {
-        console.error('Issues occurred during job execution')
+        console.error('Issues occurred during job execution of email reminder')
     }
 });
 
-console.log('Job scheduled:', job);
+const jobSetBackStreakDaily = schedule.scheduleJob({hour:23, minute:59, second:30}, async function() {
+    try {
+        const users = await User.find({goal: 'daily' });
+        const date = new Date(Date.now());
+
+        if (users) {
+            for (const user of users) {
+                let statistic = await Statistic.findOne({userId: user._id});
+                if (!statistic) continue;
+                if (!isSameDay(date, statistic.lastQuizDate)) {
+                    statistic.streak = 0;
+                    await statistic.save();
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Issues occured during job execution of setting back the user streak')
+    }
+});
+
+//weekly job only executed on Sunday
+const jobSetBackStreakWeekly = schedule.scheduleJob({day: 0, hour:23, minute:59, second:30}, async function() {
+    try {
+        const users = await User.find({goal: 'weekly' });
+        const date = new Date(Date.now());
+
+        if (users) {
+            for (const user of users) {
+                let statistic = await Statistic.findOne({userId: user._id});
+                if (!isSameWeek(date, statistic.lastQuizDate)) {
+                    statistic.streak = 0;
+                    await statistic.save();
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Issues occured during job execution of setting back the user streak')
+    }
+});
+
+
+module.exports = {isSameDay, isSameWeek};

@@ -4,7 +4,8 @@ const Card = require("../models/cardSchema")
 const constants = require("node:constants");
 const Category = require("../models/categorySchema");
 const Statistic = require("../models/statisticSchema");
-
+const { isSameDay, isSameWeek } = require('../controllers/jobManager')
+const User = require("../models/userSchema");
 
 
 router.get('/', function (req, res) {
@@ -71,9 +72,9 @@ async function updateStatistics(correctCount, userId){
             {userId},
             {
                 $inc: {completedQuizzes: 1},
-                lastQuizDate: Date.now(),
+                //lastQuizDate: Date.now(),
             },
-            null
+            {new: true}
         )
 
         // If category doesn't exist, create a new one
@@ -83,12 +84,15 @@ async function updateStatistics(correctCount, userId){
                 completedQuizzes: 1,
                 lastQuizDate: Date.now(),
                 successRate: quizSuccessRate,
+                streak: 1
             });
 
             // Save the new category to the database
             await statistics.save();
+            return;
         }
 
+        // update success rate
         const previousSuccessRate = statistics.successRate || 0; // Default to 0 if undefined
         const completedQuizzes = statistics.completedQuizzes;
 
@@ -96,6 +100,25 @@ async function updateStatistics(correctCount, userId){
             (previousSuccessRate * (completedQuizzes - 1) + quizSuccessRate) / completedQuizzes;
 
         statistics.successRate = updatedSuccessRate; // Update the success rate
+
+        //update streak
+        const currentDate = new Date(Date.now());
+
+        const user = await User.findOne({_id: userId}).select('goal');
+        const goal = user ? user.goal : null;
+
+        // for daily goal increment streak if lastQuizDate is not equal now
+        if (goal === 'daily' && !isSameDay(currentDate, statistics.lastQuizDate)) {
+                statistics.streak++;
+        }
+
+        // for weekly goal increment streak if lastQuizDate is not the same week as date.now
+        if (goal === 'weekly' && !isSameWeek(currentDate, statistics.lastQuizDate)) {
+                statistics.streak++;
+        }
+
+        statistics.lastQuizDate = currentDate;
+
         await statistics.save();
     } catch (error) {
         console.error("Error creating or updating statistics:", error);
