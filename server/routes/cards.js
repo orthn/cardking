@@ -85,9 +85,8 @@ router.post('/create', async function (req, res) {
     if (!correctAnswer) return res.status(400).send("CorrectAnswer is required")
 
     try {
-        const categoryDoc = createCategoryIfNotExists(category, userId)
-        const categoryId = categoryDoc.categoryId
-
+        const categoryDoc = await createCategoryIfNotExists(category, userId)
+        const categoryId = categoryDoc._id
         // Create card and hand over the category ID
         const card = new Card({question, type, answers, correctAnswer, categoryId})
         await card.save()
