@@ -78,7 +78,6 @@ const goToLogin = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: background-color 0.3s, box-shadow 0.3s;
 }
 
 .title {
@@ -137,7 +136,6 @@ const goToLogin = () => {
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s, box-shadow 0.3s;
 }
 
 .btn:hover {

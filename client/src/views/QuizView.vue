@@ -255,7 +255,6 @@ onMounted(() => {
   border: none;
   border-radius: var(--border-radius);
   cursor: pointer;
-  transition: background-color 0.3s, box-shadow 0.3s;
 }
 
 .finalize-btn:hover {
@@ -307,7 +306,6 @@ onMounted(() => {
   border: none;
   border-radius: var(--border-radius);
   cursor: pointer;
-  transition: background-color 0.3s, box-shadow 0.3s;
   word-wrap: break-word;
   overflow-wrap: break-word;
   text-align: center;
@@ -407,7 +405,6 @@ onMounted(() => {
   align-items: center;
   font-size: 1.5rem;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .home-btn:hover {

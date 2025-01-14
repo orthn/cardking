@@ -191,7 +191,6 @@ const handleLogout = async () => {
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .theme-switch-btn:hover {
@@ -268,7 +267,6 @@ const handleLogout = async () => {
   align-items: center;
   font-size: 1.5rem;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .icon-btn:hover {

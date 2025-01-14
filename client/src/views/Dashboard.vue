@@ -296,7 +296,6 @@ export default {
   text-align: center;
   white-space: nowrap;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
   cursor: pointer;
 }
 
@@ -389,7 +388,6 @@ export default {
   /* Abgerundete Buttons */
   cursor: pointer;
   text-align: center;
-  transition: background-color 0.3s, box-shadow 0.3s;
 }
 
 .btn:hover {

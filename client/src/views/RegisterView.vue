@@ -137,7 +137,6 @@ const goToLogin = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: background-color 0.3s, box-shadow 0.3s;
 }
 
 /* Titel und Untertitel */
@@ -208,7 +207,6 @@ const goToLogin = () => {
   border: 1px solid var(--input-border-color);
   border-radius: 6px;
   font-size: 1rem;
-  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .form-control:focus {
@@ -229,7 +227,6 @@ const goToLogin = () => {
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s, box-shadow 0.3s;
 }
 
 .btn:hover {

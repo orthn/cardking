@@ -1,5 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
 
+*,
+*:before,
+*:after {
+  transition: background-color 0.2s ease-in, color 0.2s ease-in, border-color 0.2s ease-in, box-shadow 0.2s ease-in, transform 0.2s ease-in;
+}
+
 :root {
   --gradient-start: #77C9D4; /* Helles Türkis */
   --gradient-end: #57BC90;   /* Frisches Grün */
@@ -56,4 +62,7 @@
   --save-color: #ffb339;   /* Beige-Gelb für dunkles Thema */
   --delete-color: #d83129; /* Kräftiges Rot */
   --cancel-color: #5a5a5a; /* Dezentes Grau */
+}
+.cards .welcome-box .btn{
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
 }

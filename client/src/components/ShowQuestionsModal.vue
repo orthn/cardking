@@ -170,7 +170,6 @@ export default {
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s, box-shadow 0.3s;
 }
 
 .edit-btn {

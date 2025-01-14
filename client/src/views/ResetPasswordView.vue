@@ -155,7 +155,6 @@ const resetPassword = async () => {
   color: var(--button-text-color);
   cursor: pointer;
   text-align: center;
-  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .btn:hover {
