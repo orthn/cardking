@@ -260,12 +260,9 @@ router.get('/export', async function (req, res) {
 
         // Format the cards for export
         const formatted = {
-            userId: userId,
             category: category[0].category,
-            categoryId: categoryId,
             cardCount: category[0].cardCount,
             cards: cards.map(card => ({
-                id: card._id.toString(),
                 type: card.type,
                 question: card.question,
                 answers: card.answers,
@@ -274,7 +271,7 @@ router.get('/export', async function (req, res) {
         }
 
         // Set headers for file download
-        res.setHeader('Content-Disposition', 'attachment filename="cards.json"')
+        res.setHeader('Content-Disposition', `attachment filename="${formatted.category}.json"`)
         res.setHeader('Content-Type', 'application/json')
 
         // Send the formatted JSON data as a response
@@ -283,7 +280,6 @@ router.get('/export', async function (req, res) {
         return res.status(500).send({message: 'Error exporting cards', error: error.message})
     }
 })
-
 
 // Configure Multer for file uploads
 // Sets the destination directory for uploaded files to a folder named "uploads" in the current directory
@@ -317,7 +313,7 @@ router.post('/import', upload.single('file'), async function (req, res) {
             fileData = JSON.parse(fileContent)
 
             // Validate file structure
-            if (!fileData.category || !fileData.categoryId || !Array.isArray(fileData.cards)) {
+            if (!fileData.category || !Array.isArray(fileData.cards)) {
                 return res.status(400).send({message: "Invalid file format. Ensure it includes category, categoryId, and an array of cards."})
             }
         } catch (error) {
@@ -351,8 +347,8 @@ router.post('/import', upload.single('file'), async function (req, res) {
                         ? JSON.stringify(card.correctAnswer.sort()) === JSON.stringify(cardData.correctAnswer.sort())
                         : card.correctAnswer === cardData.correctAnswer
                 )
-            );
-        };
+            )
+        }
 
         // Filter out duplicate cards from the new cards
         const newCardsData = fileData.cards.filter(cardData => !isDuplicate(cardData))
