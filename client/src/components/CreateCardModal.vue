@@ -125,6 +125,7 @@ export default {
           method: "POST",
           body: formData,
           credentials: "include",
+          file: this.selectedFile,
         });
 
         if (!response.ok) {

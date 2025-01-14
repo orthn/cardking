@@ -51,16 +51,16 @@ async function createCategoryIfNotExists(category, userId) {
                 category,
                 cardCount: 1,
                 userId
-            });
+            })
 
             // Save the new category to the database
-            await categoryDoc.save();
+            await categoryDoc.save()
         }
 
-        return categoryDoc;
+        return categoryDoc
     } catch (error) {
-        console.error("Error creating or finding category:", error);
-        throw new Error("Error creating or finding category");
+        console.error("Error creating or finding category:", error)
+        throw new Error("Error creating or finding category")
     }
 }
 
@@ -151,7 +151,7 @@ function validateCardType(type, answers, correctAnswer) {
 
 /**
  * Retrieve Cards for a given category.
- * If no category is specified or found, all cards will be returned.
+ * If no category is specified or found, all cards will be returned for the users categories.
  * GET: localhost:3000/cards/category
  */
 router.get('/category', async function (req, res) {
@@ -172,14 +172,7 @@ router.get('/category', async function (req, res) {
             const categoryIds = categoryEntries.map(category => category._id)
             cards = await Card.find({categoryId: {$in: categoryIds}})
         } else {
-            //categoryEntries = await Category.findOne({ category, userId })
-
-            //if (!categoryEntries) {
-            //    return res.status(404).json({ message: "Category not found" })
-            //}
-
             cards = await Card.find({categoryId: category})
-            console.log(cards)
         }
 
         return res.status(200).send(cards)
@@ -190,7 +183,8 @@ router.get('/category', async function (req, res) {
 })
 
 /**
- * Create a new category for a user
+ * Create a new category for a user.
+ * - Checks if the category already exists for the user, if not creates a new category.
  * POST: localhost:3000/cards/category
  */
 router.post('/category', async function (req, res) {
@@ -202,49 +196,47 @@ router.post('/category', async function (req, res) {
     }
 
     try {
-        const categoryDoc = createCategoryIfNotExists(category, userId)
-        const categoryId = categoryDoc.categoryId
+        const categoryDoc = await createCategoryIfNotExists(category, userId)
 
-        return res.status(200).send({message: "Card created successfully.", categoryId})
+        return res.status(200).send({message: "Category created or found successfully.", categoryId: categoryDoc.categoryId})
     } catch (error) {
-        console.error("Error creating or finding category:", error);
-        return res.status(500).send({message: "Error creating category:", error: error.message})
+        return res.status(500).send({message: "Error creating category", error: error.message})
     }
 })
 
 /**
- * Delete a card by its ID
+ * Delete a card by its ID.
+ * - The card is removed from the database using the card ID.
+ * - The associated category's card count is decremented.
  * DELETE: localhost:3000/cards/delete/:id
  */
 router.delete('/delete/:id', async function (req, res) {
-
-    const {id} = req.params
-
-    console.log('Received ID to delete:', id)
-
     try {
-        const deletedCard = await Card.findByIdAndDelete(id)
+        const {id} = req.params
 
+        if (!id) return res.status(400).send({message: "Card ID is required."})
+
+        const deletedCard = await Card.findByIdAndDelete(id)
         if (!deletedCard) {
             return res.status(404).send({message: `Card with ID ${id} not found.`})
         }
 
         await Category.findByIdAndUpdate(
             deletedCard.categoryId,
-            {$inc: {cardCount: -1}}
+            {$inc: {cardCount: -1}} // Decrement card count by 1
         )
 
         return res.status(200).send({message: "Card deleted successfully.", deletedCard})
     } catch (error) {
-        console.error('Error deleting card:', error)
         return res.status(500).send({message: "Error deleting card: " + error.message})
     }
 })
 
 /**
- * Exporting cards of a category of a user
- * Provide the ID of the category. All cards will be retrieved from the database and formatted.
- * As soon as this is done the user (FE) should see a download start with the exported cards of the category.
+ * Export cards of a specific category for a user.
+ * - The user provides the category ID as a query parameter.
+ * - Retrieves all cards for the given category from the database.
+ * - Formats the data into a JSON file for download.
  * GET: localhost:3000/cards/export
  */
 router.get('/export', async function (req, res) {
@@ -252,27 +244,26 @@ router.get('/export', async function (req, res) {
         const userId = req.session.userId
         const categoryId = req.query.categoryId
 
-        let cards
-        let category
+        if (!categoryId) return res.status(400).send({message: "Category ID is required."})
 
         // Check if category exists and belongs to the user
-        category = await Category.find({userId: userId, _id: categoryId}, null, null)
+        const category = await Category.find({userId: userId, _id: categoryId}, null, null)
         if (!category) {
-            return res.status(404).send({message: "No categories found"})
+            return res.status(404).send({message: "Category not found or does not belong to the user."})
         }
 
-        // Retrieve all cards of this category
-        cards = await Card.find({categoryId: {$in: categoryId}}, null, null)
+        // Retrieve all cards associated with the category
+        const cards = await Card.find({categoryId: {$in: categoryId}}, null, null)
         if (!cards || cards.length === 0) {
             return res.status(404).send({message: `No cards found.`})
         }
 
-        // Format the cards
+        // Format the cards for export
         const formatted = {
             userId: userId,
-            category: category.category,
+            category: category[0].category,
             categoryId: categoryId,
-            cardCount: category.cardCount,
+            cardCount: category[0].cardCount,
             cards: cards.map(card => ({
                 id: card._id.toString(),
                 type: card.type,
@@ -282,64 +273,95 @@ router.get('/export', async function (req, res) {
             }))
         }
 
-        // Set headers and prepare for download
+        // Set headers for file download
         res.setHeader('Content-Disposition', 'attachment filename="cards.json"')
         res.setHeader('Content-Type', 'application/json')
+
+        // Send the formatted JSON data as a response
         return res.status(200).send(JSON.stringify(formatted, null, 2))
     } catch (error) {
-        console.error("Error exporting cards", error)
         return res.status(500).send({message: 'Error exporting cards', error: error.message})
     }
 })
 
-// Needed wo allocate memory for the file the user uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/') // Folder where files will be saved
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname)) // Rename file to avoid conflict
-    }
-})
 
-const upload = multer({storage: storage})
+// Configure Multer for file uploads
+// Sets the destination directory for uploaded files to a folder named "uploads" in the current directory
+const upload = multer({dest: path.join(__dirname, 'uploads')})
 
 /**
- * Importing cards associated with a category. File should be uploaded by the user.
- * Checks if category already exists for the user and adds cards to this category, otherwise creates new category
- * GET: localhost:3000/cards/export
- * */
+ * Import cards associated with a category.
+ * The file is uploaded by the user and should contain a valid JSON format.
+ * - Checks if the category already exists for the user. If it does, adds cards to the category.
+ * - If the category doesn't exist, creates a new one.
+ * - Only imports new cards that don't already exist in the category.
+ * POST: localhost:3000/cards/import
+ */
 router.post('/import', upload.single('file'), async function (req, res) {
     try {
-        const {userId} = req.session.userId
+        const userId = req.session.userId
+        const file = req.file
 
-        if (!req.file) {
-            return res.status(404).send({message: "No file uploaded."})
+        let fileData
+        let dbCards
+        let dbCategory
+
+        // Validate if a file was uploaded
+        if (!file) return res.status(404).send({message: "No file uploaded."})
+
+        // Process and validate the uploaded file
+        try {
+            const filePath = path.join(__dirname, 'uploads', file.filename)
+
+            const fileContent = fs.readFileSync(filePath, 'utf8')
+            fileData = JSON.parse(fileContent)
+
+            // Validate file structure
+            if (!fileData.category || !fileData.categoryId || !Array.isArray(fileData.cards)) {
+                return res.status(400).send({message: "Invalid file format. Ensure it includes category, categoryId, and an array of cards."})
+            }
+        } catch (error) {
+            return res.status(400).send({message: "Failed to process the uploaded file. Ensure it is a valid JSON file."})
         }
 
-        const filePath = path.join(__dirname, 'uploads', req.file.filename)
-        const fileContent = fs.readFileSync(filePath, 'utf8')
-        const data = JSON.parse(fileContent)
+        // Check if category already exists for the user
+        dbCategory = await Category.findOne({category: fileData.category, userId: userId}, null, null)
 
-        if (!data.category || !data.categoryId || !Array.isArray(data.cards)) {
-            return res.status(400).send('Invalid file format')
-        }
-
-        const existingCategory = await Category.findOne({_id: data.categoryId, userId: data.userId}, null, null)
-
-        // Create category if not existent
-        if (!existingCategory) {
-            const categoryDoc = new Category({
-                category: data.category,
-                cardCount: 1,
+        // Create a new category if it doesn't exist yet
+        if (!dbCategory) {
+            dbCategory = new Category({
+                category: fileData.category,
+                cardCount: 0,
                 userId: userId,
             })
-            await categoryDoc.save()
+            await dbCategory.save()
         }
 
-        const newCards = data.cards.map(cardData => {
+        // Retrieve all existing cards of this category
+        dbCards = await Card.find({categoryId: {$in: dbCategory._id}}, null, null)
+
+        // Helper function to check if a card is duplicate based on its content
+        const isDuplicate = (cardData) => {
+            return dbCards.some(card =>
+                card.question === cardData.question &&
+                card.type === cardData.type &&
+                JSON.stringify(card.answers) === JSON.stringify(cardData.answers) &&
+                card.correctAnswer === cardData.correctAnswer
+            )
+        }
+
+        // Filter out duplicate cards from the new cards
+        const newCardsData = fileData.cards.filter(cardData => !isDuplicate(cardData))
+
+        // Check whether cards need to be imported or are already in the database
+        if (newCardsData.length === 0) {
+            return res.status(200).send({message: "No new cards to import. All cards are duplicates."})
+        }
+
+        // Create the new cards
+        const newCards = newCardsData.map(cardData => {
             return new Card({
-                categoryId: data.categoryId,
+                categoryId: dbCategory._id,
                 type: cardData.type,
                 question: cardData.question,
                 answers: cardData.answers,
@@ -347,11 +369,16 @@ router.post('/import', upload.single('file'), async function (req, res) {
             })
         })
 
+        // Save the new cards to the database
         const savedCards = await Card.insertMany(newCards)
-        return res.status(200).send({message: "Cards imported successfully", savedCards})
+
+        // Update the card count for the category
+        dbCategory.cardCount += savedCards.length
+        await dbCategory.save()
+
+        return res.status(200).send({message: "Cards imported successfully.", savedCards})
     } catch (error) {
-        console.log("Error importing cards", error)
-        return res.status(500).send({message: 'Error importing cards', error: error.message})
+        return res.status(500).send({message: "Error importing cards.", error: error.message})
     }
 })
 
