@@ -22,6 +22,14 @@ const userSchema = new mongoose.Schema({
     goal: {
         type: String,
         enum: ['no_goal', 'daily', 'weekly']
+    },
+    wrongCredentialsCount: {
+        type: Number,
+        default: 0
+    },
+    isActivated: {
+        type: Boolean,
+        default: false
     }
 });
 
