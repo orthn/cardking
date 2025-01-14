@@ -32,34 +32,31 @@ router.get('/me', function (req, res) {
 router.get('/data', async function (req, res) {
     const userID = req.session.userId;
     if (!userID) {
-        return res.status(401).json({ message: 'Unauthorized' });
+        return res.status(401).json({message: 'Unauthorized'});
     }
     try {
         const dbUser = await User.findById(userID).select('username email');
         if (!dbUser) {
-            return res.status(404).send({ message: 'User not found' });
+            return res.status(404).send({message: 'User not found'});
         }
 
-        return res.status(200).send({ user: dbUser });
+        return res.status(200).send({user: dbUser});
     } catch (error) {
         console.error(error);
-        return res.status(500).send({ message: 'An error occurred while retrieving user data.' });
+        return res.status(500).send({message: 'An error occurred while retrieving user data.'});
     }
 });
 
 
-
 /**
- * Update a already existing user object
+ * Update an already existing user object
  * PUT: localhost:3000/users/data
  */
 router.put('/data', async function (req, res) {
     try {
         const {username, email, goal} = req.body
 
-        const result = await User.updateOne(
-            {username: username}, {$set: {email, goal}}
-        )
+        const result = await User.updateOne({username: username}, {$set: {email, goal}})
 
         if (result.matchedCount === 0) {
             return res.status(404).send({message: `Cannot find user with username ${username}`})
@@ -89,15 +86,13 @@ router.post('/register', async function (req, res) {
         // Check if the user already exists
         let existingUser = await User.findOne({username: username}, null, null)
         if (existingUser) {
-            console.log("Username already exists")
-            return res.status(400).send("Username already exists")
+            return res.status(400).send({message: 'Username already exists'})
         }
 
         // Check if the email already exists
-        let existingEmail = await User.findOne({ email: email });
+        let existingEmail = await User.findOne({email: email});
         if (existingEmail) {
-            console.log("Email already in use");
-            return res.status(400).send("Email already in use");
+            return res.status(400).send({message: 'Email already in use'})
         }
 
         // Hash password before saving
@@ -105,15 +100,19 @@ router.post('/register', async function (req, res) {
 
         // Create a new User instance using the User model
         const newUser = new User({
-            username: username, email: email, password: hashedPassword, goal: goal || 'no_goal'
+            username: username,
+            email: email,
+            password: hashedPassword,
+            goal: goal || 'no_goal',
+            wrongCredentialsCount: 0,
+            isActivated: true,
         })
 
         await newUser.save()
 
-        return res.status(201).send({message: "User registered successfully.", newUser})
+        return res.status(201).send({message: "User registered successfully.", newUser: newUser})
     } catch (error) {
-        console.error("Error during registration:", error)
-        return res.status(500).send("Internal Server Error")
+        return res.status(500).send({message: 'Internal Server Error', error: error.message})
     }
 })
 
@@ -125,20 +124,32 @@ router.post('/login', async function (req, res) {
     let {username, password} = req.body
     username = username.trimEnd().toLowerCase()
 
-    if (!username) return res.status(400).send("Username is required")
-    if (!password) return res.status(400).send("Password is required")
+    if (!username) return res.status(400).send({message: 'Username is required'})
+    if (!password) return res.status(400).send({message: 'Password is required'})
 
-    // retrieve userdata from database for checking validity and password
-    let dbUser = await User.findOne({username: username}, null, null)
-    if (!dbUser) {
-        return res.status(404).send("User not found")
+    try {
+        // retrieve userdata from database for checking validity and password
+        let dbUser = await User.findOne({username: username}, null, null)
+        if (!dbUser) {
+            return res.status(404).send({message: 'User not found'})
+        }
+
+        let check = await bcrypt.compare(password, dbUser.password)
+        if (check) {
+            dbUser.wrongCredentialsCount = 0;
+            await dbUser.save();
+
+            req.session.userId = dbUser._id;
+            return res.status(200).send({message: 'User is authenticated'});
+        } else {
+            dbUser.wrongCredentialsCount++;
+            await dbUser.save();
+            return res.status(401).send({message: 'Invalid credentials'});
+        }
+    } catch (error) {
+        return res.status(500).send({message: 'An unexpected error occurred', error: error.message})
+
     }
-
-    let check = await bcrypt.compare(password, dbUser.password)
-    if (check) {
-        req.session.userId = dbUser._id
-        return res.status(200).send("User is authenticated")
-    } else return res.status(401).send("Invalid credentials")
 })
 
 /**
@@ -178,7 +189,6 @@ router.post('/reset-password', async function (req, res) {
 
         res.status(200).send("Password reset email sent")
     } catch (error) {
-        console.error(error)
         res.status(500).send("Error during password reset")
     }
 
@@ -193,7 +203,7 @@ router.post('/reset-password/:token', async function (req, res) {
     let {newPassword} = req.body
 
     if (!newPassword) {
-        return res.status(400).send("New password is required")
+        return res.status(400).send({message: "New password is required."})
     }
 
     try {
@@ -202,19 +212,17 @@ router.post('/reset-password/:token', async function (req, res) {
         const dbUser = await User.findOne({email: email}, null, null)
 
         if (!dbUser) {
-            return res.status(404).send("User not found")
+            return res.status(404).send({message: "User not found."})
         }
 
         dbUser.password = await bcrypt.hash(newPassword, 10)
 
         await dbUser.save()
-
-        res.status(200).send('Password updated successfully')
+        return res.status(200).send({message: "Password updated successfully."})
     } catch (error) {
         console.error(error)
-        res.status(400).send('Invalid or expired reset token')
+        return res.status(400).send({message: "Invalid or expired reset token.", error: error.message})
     }
-
 })
 
 module.exports = router
