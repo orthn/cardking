@@ -346,9 +346,13 @@ router.post('/import', upload.single('file'), async function (req, res) {
                 card.question === cardData.question &&
                 card.type === cardData.type &&
                 JSON.stringify(card.answers) === JSON.stringify(cardData.answers) &&
-                card.correctAnswer === cardData.correctAnswer
-            )
-        }
+                (
+                    Array.isArray(card.correctAnswer) && Array.isArray(cardData.correctAnswer)
+                        ? JSON.stringify(card.correctAnswer.sort()) === JSON.stringify(cardData.correctAnswer.sort())
+                        : card.correctAnswer === cardData.correctAnswer
+                )
+            );
+        };
 
         // Filter out duplicate cards from the new cards
         const newCardsData = fileData.cards.filter(cardData => !isDuplicate(cardData))

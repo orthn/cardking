@@ -105,7 +105,7 @@ router.post('/register', async function (req, res) {
 
         // Create a new User instance using the User model
         const newUser = new User({
-            username: username, email: email, password: hashedPassword, goal: goal || ''
+            username: username, email: email, password: hashedPassword, goal: goal || 'no_goal'
         })
 
         await newUser.save()
