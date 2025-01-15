@@ -3,6 +3,7 @@ const router = express.Router()
 
 const Category = require('../models/categorySchema')
 const Statistic = require("../models/statisticSchema")
+const User = require("../models/userSchema");
 
 /**
  * Returns all categories a user has
@@ -15,7 +16,7 @@ router.get('/categories', async function (req, res) {
     }
 
     try {
-        const categories = await Category.find({userId: userId})
+        const categories = await Category.find({userId: userId}, null, null)
         if (!categories || categories.length === 0) {
             return res.status(204).json([]) // wenn keine Kategorien vorhanden sind
         }
@@ -26,51 +27,60 @@ router.get('/categories', async function (req, res) {
 })
 
 /**
- * Retrieves statistics for a single user
- * GET: localhost:3000/cards/statistics
+ *  Retrieves statistics for a user or all users
+ * GET: /cards/statistics
  */
 router.get('/statistics', async function (req, res) {
-    const userId = req.session.userId
-    if (!userId) return res.status(401).json({message: 'Unauthorized'})
+    if (!req.session.userId) return res.status(401).json({message: 'Unauthorized'})
+
+    const filterBy = req.body.filter
+    const userId = req.body.userId
+    let statistics
 
     try {
-        const statistics = await Statistic.find({userId: userId}, null, null)
+        if (userId) {
+            statistics = await Statistic.find({userId: userId}, null, null);
+        } else {
+            statistics = await Statistic.find(null, null, null);
+        }
 
         if (!statistics || statistics.length === 0) {
             return res.status(404).send({message: 'No statistics found'})
         }
-
-        return res.status(200).send(statisticFormatter(statistics))
+        return res.status(200).send(statisticFormatter(statistics, filterBy))
     } catch (error) {
         return res.status(500).send({message: 'Internal server error', error: error.message})
     }
 })
 
 /**
- * Retrieves statistsics for all users
- * GET: localhost:3000/cards/all-statistics
- */
-router.get('/all-statistics', async function (req, res) {
-    try {
-        const statistics = await Statistic.find(null, null, null)
-        return res.status(200).send(statisticFormatter(statistics))
-    } catch (error) {
-        return res.status(500).send({message: 'Internal server error', error: error.message})
-    }
-})
-
-/**
- * Formats statistics data to include only relevant fields
- * @param {Array} data - Array of statistic objects
+ * Formats statistics data to include only relevant fields based on a filter criterion
+ * @param {any} data - Array of statistic objects
+ * @param {string} formatBy - The field to filter by (e.g., "completedQuizzes", "streak", "successRate")
  * @returns {Array} - Formatted array with selected fields
  */
-const statisticFormatter = (data) => {
-    return data.map(item => ({
-        userId: item.userId,
-        completedQuizzes: item.completedQuizzes,
-        streak: item.streak,
-        successRate: item.successRate,
-    }))
-}
+const statisticFormatter = (data, formatBy) => {
+    return data.map(item => {
+        let formattedItem = {userId: item.userId};
+
+        switch (formatBy.toLowerCase()) {
+            case 'completedquizzes':
+                formattedItem.completedQuizzes = item.completedQuizzes; break;
+            case 'streak':
+                formattedItem.streak = item.streak; break;
+            case 'successrate':
+                formattedItem.successRate = item.successRate; break;
+            default:
+                formattedItem = {
+                    userId: item.userId,
+                    completedQuizzes: item.completedQuizzes,
+                    streak: item.streak,
+                    successRate: item.successRate,
+                };
+                break;
+        }
+        return formattedItem;
+    });
+};
 
 module.exports = router
