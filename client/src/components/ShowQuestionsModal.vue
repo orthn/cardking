@@ -58,12 +58,16 @@ export default {
         if (!response.ok) {
           throw new Error(`Export failed: ${response.statusText}`);
         }
+        const responseText = await response.text();
+        const data = JSON.parse(responseText);
+        const categoryName2 = data.category;
 
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
+        const blob = new Blob([responseText], { type: "application/json" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
         link.href = url;
-        link.setAttribute("download", `export_${this.categoryName || "cards"}.json`);
+
+        link.setAttribute("download", `export_${categoryName2 || "cards"}.json`);
         document.body.appendChild(link);
         link.click();
         link.remove();
