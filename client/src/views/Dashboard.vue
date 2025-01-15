@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="welcome-box">
-      Willkommen <span>{{ username }}</span> im Dashboard!
+      Welcome <span>{{ username }}</span> to the Dashboard!
     </div>
     <div class="dashboard">
       <!-- Left Section: Statistics -->
@@ -76,7 +76,7 @@ export default {
     const isShowQuestionsModalVisible = ref(false);
     const isEditQuestionModalVisible = ref(false);
     const currentEditingQuestion = ref(null);
-    const username = ref('Gast');
+    const username = ref('');
 
     const selectCategory = (category) => {
       if (selectedCategory.value === category._id) {

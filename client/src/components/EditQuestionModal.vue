@@ -245,7 +245,6 @@ select {
   border-radius: 50%;
   color: white;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
 }
 
 .icon-indicator i {

@@ -35,7 +35,7 @@ router.get('/data', async function (req, res) {
         return res.status(401).json({message: 'Unauthorized'});
     }
     try {
-        const dbUser = await User.findById(userID).select('username email');
+        const dbUser = await User.findById(userID).select('username email goal');
         if (!dbUser) {
             return res.status(404).send({message: 'User not found'});
         }
@@ -54,15 +54,36 @@ router.get('/data', async function (req, res) {
  */
 router.put('/data', async function (req, res) {
     try {
-        const {username, email, goal} = req.body
-
-        const result = await User.updateOne({username: username}, {$set: {email, goal}})
-
-        if (result.matchedCount === 0) {
-            return res.status(404).send({message: `Cannot find user with username ${username}`})
+        const userId = req.session.userId;
+        const {email, currentPasswordEmail, currentPassword, newPassword, goal} = req.body
+        if (!userId) {
+            return res.status(404).json({ message: "UserID not found." });
         }
-
-        return res.status(200).send({message: 'User updated successfully.'})
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        if (newPassword && currentPassword) {
+            const isMatch = await bcrypt.compare(currentPassword, user.password);
+            if (!isMatch) {
+                return res.status(400).json({ message: "Current password is incorrect." });
+            }
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+            user.password = hashedPassword;
+        }
+        if (email && currentPasswordEmail) {
+            const isMatch = await bcrypt.compare(currentPasswordEmail, user.password);
+            if (!isMatch) {
+                return res.status(400).json({ message: "Current password is incorrect." });
+            } else{
+                user.email = email;
+            }
+        }
+        if (goal) {
+            user.goal = goal;
+        }
+        await user.save();
+        return res.status(200).json({ message: "User updated successfully." });
     } catch (error) {
         console.error(error)
         return res.status(500).send({message: 'An error occurred while updating user data.'})

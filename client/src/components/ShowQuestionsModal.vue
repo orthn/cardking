@@ -119,6 +119,7 @@ export default {
   flex-direction: column;
   max-height: 90%;
   overflow: auto;
+  animation: fadeIn 0.3s ease-out;
 
 }
 
