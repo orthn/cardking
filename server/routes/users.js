@@ -3,7 +3,8 @@ let router = express.Router()
 let bcrypt = require('bcrypt')
 let User = require('../models/userSchema')
 let jwt = require('jsonwebtoken')
-const {sendResetMail} = require("../controllers/mailHandler")
+const {sendResetMail, sendUnsuccessfulLoginMail} = require("../controllers/mailHandler")
+const test = require("node:test");
 let secretKey = process.env.JWT_SECRET
 
 /**
@@ -165,6 +166,7 @@ router.post('/login', async function (req, res) {
         } else {
             dbUser.wrongCredentialsCount++;
             await dbUser.save();
+            if (dbUser.wrongCredentialsCount === 3) sendUnsuccessfulLoginMail(dbUser)
             return res.status(401).send({message: 'Invalid credentials'});
         }
     } catch (error) {
@@ -206,7 +208,7 @@ router.post('/reset-password', async function (req, res) {
 
         let resetToken = jwt.sign({email: email}, secretKey, {expiresIn: '1h'})
 
-        sendResetMail(email, resetToken)
+        sendResetMail(dbUser, resetToken)
 
         res.status(200).send("Password reset email sent")
     } catch (error) {
