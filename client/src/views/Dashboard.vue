@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="welcome-box">
-      Welcome <span>{{ username }}</span> to the Dashboard!
+      Welcome <span>{{ userData.username }}</span> to the Dashboard!
     </div>
     <div class="dashboard">
       <!-- Left Section: Statistics -->
@@ -10,8 +10,8 @@
         <Statistics />
       </div>
 
-     <!-- Main Section: Cards and Categories -->
-     <div class="dashboard-main">
+      <!-- Main Section: Cards and Categories -->
+      <div class="dashboard-main">
         <h3>Categories</h3>
         <div>
           <p v-if="categories.length === 0">Loading categories...</p>
@@ -43,8 +43,8 @@
     <CreateCardModal :show="showModal" :categories="categories" @close="handleModalClose" />
 
     <ShowQuestionsModal v-if="isShowQuestionsModalVisible" :isVisible="isShowQuestionsModalVisible"
-      :categoryName="selectedCategory" :categoryId="selectedCategory"  :questions="selectedCategoryQuestions" @edit-question="openEditQuestionModal"
-      @close="isShowQuestionsModalVisible = false" />
+      :categoryName="selectedCategory" :categoryId="selectedCategory" :questions="selectedCategoryQuestions"
+      @edit-question="openEditQuestionModal" @close="isShowQuestionsModalVisible = false" />
 
 
     <EditQuestionModal v-if="isEditQuestionModalVisible" :isVisible="isEditQuestionModalVisible"
@@ -62,6 +62,9 @@ import ShowQuestionsModal from '../components/ShowQuestionsModal.vue';
 import EditQuestionModal from "@/components/EditQuestionModal.vue";
 export default {
   name: 'Dashboard',
+  props: {
+    userData: Object,
+  },
   components: {
     Statistics,
     CreateCardModal,
@@ -76,7 +79,6 @@ export default {
     const isShowQuestionsModalVisible = ref(false);
     const isEditQuestionModalVisible = ref(false);
     const currentEditingQuestion = ref(null);
-    const username = ref('');
 
     const selectCategory = (category) => {
       if (selectedCategory.value === category._id) {
@@ -85,26 +87,6 @@ export default {
         selectedCategory.value = category._id; // Speichere nur die ID
       }
     };
-
-    const fetchUserData = async () => {
-    try {
-        const response = await fetch('http://localhost:3000/users/data', {
-            method: 'GET',
-            credentials: 'include', // Wichtig, um das Session-Cookie zu senden
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            console.error('Error:', error);
-            throw new Error(error.message || 'Failed to fetch user data');
-        }
-
-        const userData = await response.json();
-        username.value = userData.user.username;
-    } catch (error) {
-        console.error('Fehler beim Abrufen der Benutzerdaten:', error.message);
-    }
-};
 
     const updateQuestion = async (updatedQuestion) => {
       try {
@@ -222,11 +204,9 @@ export default {
 
     onMounted(() => {
       fetchCategories();
-      fetchUserData();
     });
 
     return {
-      username,
       selectedCategory,
       categories,
       showModal,
@@ -253,8 +233,10 @@ export default {
   top: -340px;
   margin: 1rem auto;
   padding: 1rem 2rem;
-  background: var(--card-bg-color, #57bc90); /* Passende Farbe */
-  color: var(--text-color); /* Weißer Text für Kontrast */
+  background: var(--card-bg-color, #57bc90);
+  /* Passende Farbe */
+  color: var(--text-color);
+  /* Weißer Text für Kontrast */
   font-family: 'Comic Sans MS', cursive, sans-serif;
   font-size: 1.5rem;
   font-weight: bold;
@@ -264,18 +246,26 @@ export default {
 }
 
 .welcome-box span {
-  color: var(--highlight-color); /* Helle Akzentfarbe für den Namen */
+  color: var(--highlight-color);
+  /* Helle Akzentfarbe für den Namen */
   text-transform: uppercase;
 
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
+
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
     transform: scale(1);
   }
+
   40% {
     transform: scale(1.1);
   }
+
   60% {
     transform: scale(1.05);
   }

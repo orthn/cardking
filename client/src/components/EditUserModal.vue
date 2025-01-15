@@ -6,14 +6,14 @@
           <MessageBox v-if="message" :message="message" :type="messageType" />
         </transition>
         <div class="modal-content">
-          <h2 class="title">Profile of <span>{{ username }}</span></h2>
+          <h2 class="title">Profile of <span>{{ userData.username }}</span></h2>
           <!-- Left Column -->
           <div class="modal-column">
             <!-- Form for Email -->
             <form @submit.prevent="updateEmail" class="modal-form">
               <div class="form-group">
                 <label>New Email</label>
-                <input class="form-control" type="email" v-model="email" :placeholder="originalEmail" required />
+                <input class="form-control" type="email" v-model="localMail" :placeholder="localMail" required />
               </div>
               <div class="form-group">
                 <label>Current Password</label>
@@ -27,7 +27,7 @@
             <form @submit.prevent="updateGoal" class="modal-form">
               <div class="form-group">
                 <label>Goal</label>
-                <select v-model="goal" class="form-control">
+                <select v-model="localGoal" class="form-control">
                   <option value="no_goal">No Goal</option>
                   <option value="daily">Daily</option>
                   <option value="weekly">Weekly</option>
@@ -71,16 +71,17 @@ import MessageBox from "@/components/MessageBox.vue";
 const message = ref('');
 const messageType = ref('info');
 
-// State variables
-const username = ref('');
-const email = ref('');
-const originalEmail = ref('');
-const goal = ref('');
+const props = defineProps({
+  userData: Object,
+});
+
+const localGoal = ref(props.userData.goal);
+const localMail = ref(props.userData.email);
+
 const currentPassword = ref('');
 const currentPasswordEmail = ref('');
 const newPassword = ref('');
 const confirmPassword = ref('');
-const isDataFetched = ref(false); // Kontrolliert, ob die Daten bereits geladen wurden
 
 const showMessage = (msg, type = 'info', duration = 2000) => {
   message.value = msg;
@@ -101,13 +102,14 @@ const updateEmail = async () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email: email.value, currentPasswordEmail: currentPasswordEmail.value }),
+      body: JSON.stringify({ email: localMail.value, currentPasswordEmail: currentPasswordEmail.value }),
     });
 
     if (!response.ok) {
       const result = await response.json();
       throw new Error(result.message || 'Failed to update email');
     }
+    props.userData.email = localMail.value;
     showMessage('Email updated successfully!', 'success');
   } catch (error) {
     console.error('Error updating email:', error.message);
@@ -123,14 +125,14 @@ const updateGoal = async () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ goal: goal.value }),
+      body: JSON.stringify({ goal: localGoal.value }),
     });
 
     if (!response.ok) {
       const result = await response.json();
       throw new Error(result.message || 'Failed to update goal');
     }
-
+    props.userData.goal = localGoal.value;
     showMessage('Goal updated successfully!', 'success');
   } catch (error) {
     console.error('Error updating goal:', error.message);
@@ -166,30 +168,6 @@ const updatePassword = async () => {
   }
 };
 
-// Fetch-Funktion für Benutzerdaten
-const fetchUserData = async () => {
-  if (isDataFetched.value) return; // Fetch nur einmal ausführen
-
-  try {
-    const response = await fetch('http://localhost:3000/users/data', {
-      method: 'GET',
-      credentials: 'include',
-    });
-
-    if (!response.ok) throw new Error('Failed to fetch user data');
-
-    const data = await response.json();
-    username.value = data.user.username;
-    email.value = data.user.email;
-    originalEmail.value = data.user.email;
-    goal.value = data.user.goal || 'no_goal';
-    isDataFetched.value = true; // Markiere Daten als geladen
-  } catch (error) {
-    showMessage('Could not fetch user data.', 'error');
-  }
-};
-
-onMounted(fetchUserData);
 </script>
 
 

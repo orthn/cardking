@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref,reactive, onMounted } from 'vue';
 import LoginView from './views/LoginView.vue';
 import RegisterView from './views/RegisterView.vue';
 import ResetPasswordRequestView from './views/ResetPasswordRequestView.vue';
@@ -14,8 +14,19 @@ const resetToken = ref(null);
 const showEditModal = ref(false);
 const currentTheme = ref('light');
 const message = ref('');
-const messageType = ref('info'); // 'success' oder 'error'
+const messageType = ref('info');
 const selectedCategory = ref(null);
+
+const userData = reactive({
+  username: '',
+  email: '',
+  goal: '',
+});
+
+const handleLogin = async () => {
+  currentView.value = 'dashboard';
+  await fetchUserData();
+};
 
 const handleStartQuiz = (category) => {
   selectedCategory.value = category;
@@ -38,6 +49,7 @@ const checkSession = async () => {
     if (response.ok) {
       // Benutzer ist eingeloggt, Dashboard anzeigen
       currentView.value = 'dashboard';
+      await fetchUserData();
     } else {
       // Benutzer nicht eingeloggt, Login anzeigen
       currentView.value = 'login';
@@ -45,6 +57,23 @@ const checkSession = async () => {
   } catch (error) {
     console.error('Fehler beim Überprüfen der Session:', error);
     currentView.value = 'login'; // Fallback zur Login-Seite
+  }
+};
+const fetchUserData = async () => {
+  try {
+    const response = await fetch('http://localhost:3000/users/data', {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) throw new Error('Failed to fetch user data');
+
+    const data = await response.json();
+    userData.username = data.user.username;
+    userData.email = data.user.email;
+    userData.goal = data.user.goal || 'no_goal';
+  } catch (error) {
+    console.error('Fehler beim Abrufen der Benutzerdaten:', error.message);
   }
 };
 
@@ -103,7 +132,7 @@ const handleLogout = async () => {
       <template v-else>
         <transition name="slide-left">
           <LoginView v-if="currentView === 'login'" class="auth-view" @goToRegister="changeView('register')"
-            @goToResetRequest="changeView('resetRequest')" @loggedIn="changeView('dashboard')" />
+            @goToResetRequest="changeView('resetRequest')" @loggedIn="handleLogin" />
         </transition>
         <transition name="slide-right">
           <RegisterView v-if="currentView === 'register'" class="auth-view" @goToLogin="changeView('login')" />
@@ -113,7 +142,7 @@ const handleLogout = async () => {
             @goToLogin="changeView('login')" />
         </transition>
         <transition name="slide-right">
-          <DashboardView v-if="currentView === 'dashboard'" class="auth-view" @startQuiz="handleStartQuiz" />
+          <DashboardView v-if="currentView === 'dashboard'" class="auth-view" :userData="userData" @startQuiz="handleStartQuiz" />
         </transition>
         <transition name="slide-left">
           <QuizView v-if="currentView === 'quiz'" class="auth-view" :category="selectedCategory"
@@ -131,7 +160,7 @@ const handleLogout = async () => {
       <button class="icon-btn" @click="openEditModal">
         <i class="fas fa-user-circle"></i>
       </button>
-      <EditUserModal v-if="showEditModal" @close="closeEditModal" />
+      <EditUserModal v-if="showEditModal" :userData="userData" @close="closeEditModal" />
       <button class="icon-btn logout-btn" @click="handleLogout">
         <i class="fas fa-sign-out-alt"></i>
       </button>
