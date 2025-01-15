@@ -260,6 +260,29 @@ export default {
   outline: none;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
+.import-input {
+  display: block;
+  width: 100%;
+  margin-right: 2rem;
+  padding: var(--spacing-sm);
+  font-size: 1rem;
+  color: var(--text-color, #333);
+  background-color: var(--input-bg-color, #f9f9f9);
+  border: 1px solid var(--input-border-color, #ccc);
+  border-radius: var(--border-radius, 8px);
+  cursor: pointer;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.import-input:hover {
+  border-color: var(--highlight-color, #77C9D4);
+}
+
+.import-input:focus {
+  outline: none;
+  border-color: var(--highlight-color, #77C9D4);
+  box-shadow: 0 0 5px var(--highlight-color, #77C9D4);
+}
 
 .answer-text {
   flex-grow: 1;
