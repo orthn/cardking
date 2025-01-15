@@ -1,73 +1,73 @@
 <template>
-  <div class="modal-backdrop" @click.self="$emit('close')">
-    <div class="modal">
-      <transition name="fade">
-        <MessageBox v-if="message" :message="message" :type="messageType" />
-      </transition>
-      <div class="modal-content">
-        <h2 class="title">Profile of <span>{{ username }}</span></h2>
-        <!-- Left Column -->
-        <div class="modal-column">
-          <!-- Form for Email -->
-          <form @submit.prevent="updateEmail" class="modal-form">
-            <div class="form-group">
-              <label>New Email</label>
-              <input class="form-control" type="email" v-model="email" :placeholder="originalEmail" required />
-            </div>
-            <div class="form-group">
-              <label>Current Password</label>
-              <input class="form-control" type="password" v-model="currentPasswordEmail"
-                placeholder="Enter current password" required />
-            </div>
-            <button type="submit" class="btn" style="margin-bottom: 1rem;">Update Email</button>
-          </form>
+  <transition name="fade">
+    <div class="modal-backdrop" @click.self="$emit('close')">
+      <div class="modal">
+        <transition name="fade">
+          <MessageBox v-if="message" :message="message" :type="messageType" />
+        </transition>
+        <div class="modal-content">
+          <h2 class="title">Profile of <span>{{ username }}</span></h2>
+          <!-- Left Column -->
+          <div class="modal-column">
+            <!-- Form for Email -->
+            <form @submit.prevent="updateEmail" class="modal-form">
+              <div class="form-group">
+                <label>New Email</label>
+                <input class="form-control" type="email" v-model="email" :placeholder="originalEmail" required />
+              </div>
+              <div class="form-group">
+                <label>Current Password</label>
+                <input class="form-control" type="password" v-model="currentPasswordEmail"
+                  placeholder="Enter current password" required />
+              </div>
+              <button type="submit" class="btn" style="margin-bottom: 1rem;">Update Email</button>
+            </form>
 
-          <!-- Form for Goal -->
-          <form @submit.prevent="updateGoal" class="modal-form">
-            <div class="form-group">
-              <label>Goal</label>
-              <select v-model="goal" class="form-control">
-                <option value="no_goal">No Goal</option>
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-              </select>
-            </div>
-            <button type="submit" class="btn">Update Goal</button>
-          </form>
-        </div>
+            <!-- Form for Goal -->
+            <form @submit.prevent="updateGoal" class="modal-form">
+              <div class="form-group">
+                <label>Goal</label>
+                <select v-model="goal" class="form-control">
+                  <option value="no_goal">No Goal</option>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                </select>
+              </div>
+              <button type="submit" class="btn">Update Goal</button>
+            </form>
+          </div>
 
-        <!-- Right Column -->
-        <div class="modal-column">
-          <!-- Form for Password -->
-          <form @submit.prevent="updatePassword" class="modal-form">
-            <div class="form-group">
-              <label>Current Password</label>
-              <input class="form-control" type="password" v-model="currentPassword" placeholder="Enter current password"
-                required />
-            </div>
-            <div class="form-group">
-              <label>New Password</label>
-              <input class="form-control" type="password" v-model="newPassword" placeholder="Enter new password"
-                required />
-            </div>
-            <div class="form-group">
-              <label>Confirm New Password</label>
-              <input class="form-control" type="password" v-model="confirmPassword" placeholder="Confirm new password"
-                required />
-            </div>
-            <button type="submit" class="btn">Update Password</button>
-          </form>
+          <!-- Right Column -->
+          <div class="modal-column">
+            <!-- Form for Password -->
+            <form @submit.prevent="updatePassword" class="modal-form">
+              <div class="form-group">
+                <label>Current Password</label>
+                <input class="form-control" type="password" v-model="currentPassword"
+                  placeholder="Enter current password" required />
+              </div>
+              <div class="form-group">
+                <label>New Password</label>
+                <input class="form-control" type="password" v-model="newPassword" placeholder="Enter new password"
+                  required />
+              </div>
+              <div class="form-group">
+                <label>Confirm New Password</label>
+                <input class="form-control" type="password" v-model="confirmPassword" placeholder="Confirm new password"
+                  required />
+              </div>
+              <button type="submit" class="btn">Update Password</button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </transition>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import MessageBox from "@/components/MessageBox.vue";
-
-// State variables für Nachrichten
 const message = ref('');
 const messageType = ref('info');
 
@@ -82,12 +82,10 @@ const newPassword = ref('');
 const confirmPassword = ref('');
 const isDataFetched = ref(false); // Kontrolliert, ob die Daten bereits geladen wurden
 
-// Funktion zum Anzeigen einer Nachricht mit Timeout
 const showMessage = (msg, type = 'info', duration = 2000) => {
   message.value = msg;
   messageType.value = type;
 
-  // Nachricht nach Ablauf der Dauer zurücksetzen
   setTimeout(() => {
     message.value = '';
     messageType.value = 'info';
@@ -184,14 +182,13 @@ const fetchUserData = async () => {
     username.value = data.user.username;
     email.value = data.user.email;
     originalEmail.value = data.user.email;
-    goal.value = data.user.goal || 'no_goal'; // Fallback auf 'no_goal', wenn kein Ziel gesetzt ist
+    goal.value = data.user.goal || 'no_goal';
     isDataFetched.value = true; // Markiere Daten als geladen
   } catch (error) {
     showMessage('Could not fetch user data.', 'error');
   }
 };
 
-// Fetch-Daten bei Modal-Öffnung abrufen
 onMounted(fetchUserData);
 </script>
 
@@ -202,6 +199,7 @@ onMounted(fetchUserData);
   text-transform: uppercase;
 
 }
+
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -350,18 +348,15 @@ onMounted(fetchUserData);
   max-width: 90%;
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
 
-.fade-enter-from {
-  opacity: 0;
-  transform: scale(0.8);
-}
-
-.fade-leave-to {
-  opacity: 0;
-  transform: scale(0.8);
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 </style>

@@ -1,4 +1,5 @@
 <template>
+      <transition name="fade">
   <div v-if="isVisible" class="modal-backdrop"  @click="closeModal">
     <div class="modal" @click.stop>
       <button class="exportbtn"  @click="exportQuestions">Export</button>
@@ -22,6 +23,7 @@
       </div>
     </div>
   </div>
+      </transition>
 </template>
 
 <script>
@@ -185,5 +187,16 @@ export default {
 .btn:hover {
   background-color: var(--highlight-color); /* Hover-Farbe */
   box-shadow: 0 6px 15px var(--highlight-color); /* Hover-Schatten */
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 </style>

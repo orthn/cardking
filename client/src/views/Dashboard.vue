@@ -294,7 +294,8 @@ export default {
   border: 1px solid var(--input-border-color, #ddd);
   border-radius: var(--radius-sm, 4px);
   text-align: center;
-  white-space: nowrap;
+  align-content: center;
+  white-space: wrap;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
 }

@@ -5,7 +5,7 @@ import RegisterView from './views/RegisterView.vue';
 import ResetPasswordRequestView from './views/ResetPasswordRequestView.vue';
 import ResetPasswordView from './views/ResetPasswordView.vue';
 import DashboardView from './views/Dashboard.vue';
-import QuizView from './views/QuizView.vue'; 
+import QuizView from './views/QuizView.vue';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import EditUserModal from './components/EditUserModal.vue';
 
@@ -102,49 +102,26 @@ const handleLogout = async () => {
       </div>
       <template v-else>
         <transition name="slide-left">
-          <LoginView
-            v-if="currentView === 'login'"
-            class="auth-view"
-            @goToRegister="changeView('register')"
-            @goToResetRequest="changeView('resetRequest')"
-            @loggedIn="changeView('dashboard')"
-          />
+          <LoginView v-if="currentView === 'login'" class="auth-view" @goToRegister="changeView('register')"
+            @goToResetRequest="changeView('resetRequest')" @loggedIn="changeView('dashboard')" />
         </transition>
         <transition name="slide-right">
-          <RegisterView
-            v-if="currentView === 'register'"
-            class="auth-view"
-            @goToLogin="changeView('login')"
-          />
+          <RegisterView v-if="currentView === 'register'" class="auth-view" @goToLogin="changeView('login')" />
         </transition>
         <transition name="slide-left">
-          <ResetPasswordRequestView
-            v-if="currentView === 'resetRequest'"
-            class="auth-view"
-            @goToLogin="changeView('login')"
-          />
+          <ResetPasswordRequestView v-if="currentView === 'resetRequest'" class="auth-view"
+            @goToLogin="changeView('login')" />
         </transition>
         <transition name="slide-right">
-          <DashboardView
-            v-if="currentView === 'dashboard'"
-            class="auth-view"
-            @startQuiz="handleStartQuiz"
-          />
+          <DashboardView v-if="currentView === 'dashboard'" class="auth-view" @startQuiz="handleStartQuiz" />
         </transition>
         <transition name="slide-left">
-          <QuizView
-            v-if="currentView === 'quiz'"
-            class="auth-view"
-            :category="selectedCategory"
-            @backToDashboard="changeView('dashboard')"
-          />
+          <QuizView v-if="currentView === 'quiz'" class="auth-view" :category="selectedCategory"
+            @backToDashboard="changeView('dashboard')" />
         </transition>
       </template>
     </div>
-    <button
-      @click="setTheme(currentTheme === 'light' ? 'dark' : 'light')"
-      class="theme-switch-btn"
-    >
+    <button @click="setTheme(currentTheme === 'light' ? 'dark' : 'light')" class="theme-switch-btn">
       <i v-if="currentTheme === 'light'" class="fas fa-moon"></i>
       <i v-else class="fas fa-sun"></i>
     </button>
@@ -157,7 +134,7 @@ const handleLogout = async () => {
       <EditUserModal v-if="showEditModal" @close="closeEditModal" />
       <button class="icon-btn logout-btn" @click="handleLogout">
         <i class="fas fa-sign-out-alt"></i>
-      </button>  
+      </button>
     </div>
   </div>
 </template>
@@ -278,9 +255,11 @@ const handleLogout = async () => {
   0% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
+
   100% {
     background-position: 0% 50%;
   }
