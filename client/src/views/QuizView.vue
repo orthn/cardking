@@ -35,6 +35,9 @@
       >
         Submit Answers
       </button>
+
+      <button class="end-quiz-btn" @click="endQuizEarly">End Quiz</button>
+
     </div>
     <!-- Quiz-Ergebnis mit Navigation -->
     <div v-else-if="userAnswers.length > 0" class="results-container">
@@ -131,13 +134,14 @@ const calculateQuality = (isCorrect, elapsedTime) => {
   }
 };
 
+
 const selectedAnswers = ref([]); // Für Multiple Choice Antworten
 
 const submitAnswer = (answer) => {
   const currentCard = quizData.value[currentIndex.value];
   const endTime = Date.now();
   const elapsedTime = (endTime - startTime) / 1000; // Time in seconds
-
+  hasAnswered.value = true;
   if (currentCard.type === 'multiple_choice') {
     if (selectedAnswers.value.includes(answer)) {
       selectedAnswers.value = selectedAnswers.value.filter((a) => a !== answer);
@@ -231,6 +235,20 @@ const submitAnswers = async () => {
     errorMessage.value = 'An error occurred while submitting the answers.'
   }
 };
+
+const hasAnswered = ref(false);
+
+const emit = defineEmits(['backToDashboard']);
+
+const endQuizEarly = () => {
+  if (!hasAnswered.value) {
+    emit('backToDashboard');
+  } else {
+    isQuizComplete.value = true;
+    submitAnswers();
+  }
+};
+
 
 // Watch for changes to currentIndex and reset the timer
 watch(currentIndex, (newIndex, oldIndex) => {
@@ -483,6 +501,26 @@ onMounted(() => {
   background-color: var(--highlight-color);
   transform: scale(1.1);
 }
+
+
+.end-quiz-btn {
+  margin-top: 1.5rem;
+  padding: var(--spacing-md);
+  font-size: clamp(0.8rem, 2.5vw, 1.3rem);
+  color: var(--button-text-color);
+  background-color: var(--danger-color, #dc3545); /* Rote Farbe für "Beenden" */
+  border: none;
+  width: 80%;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  box-shadow: 0 3px 4px var(--shadow-color);
+}
+
+.end-quiz-btn:hover {
+  background-color: var(--danger-hover-color, #c82333); /* Dunklerer Rotton für Hover */
+  transform: scale(1.05);
+}
+
 
 
 </style>

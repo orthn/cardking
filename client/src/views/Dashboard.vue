@@ -1,8 +1,11 @@
 <template>
   <div>
     <div class="welcome-box">
-      Welcome <span>{{ userData.username }}</span> to the Dashboard!
+      <div class="welcome-text">
+        Welcome <span>{{ userData.username }}</span> to the Dashboard!
+      </div>
     </div>
+
     <div class="dashboard">
       <!-- Left Section: Statistics -->
       <div class="dashboard-sidebar">
@@ -28,7 +31,10 @@
       <!-- Right Section: Actions -->
       <div class="dashboard-actions">
         <h3>Actions</h3>
-        <button class="btn" @click="$emit('startQuiz', selectedCategory)" :disabled="!selectedCategory">
+        <button
+            class="btn"
+            @click="$emit('startQuiz', selectedCategory)"
+            :disabled="!selectedCategory || !isCategoryValid">
           Start Quiz
         </button>
 
@@ -55,11 +61,13 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import {ref, onMounted, watch, computed} from 'vue';
 import Statistics from './Statistics.vue';
 import CreateCardModal from '../components/CreateCardModal.vue';
 import ShowQuestionsModal from '../components/ShowQuestionsModal.vue';
 import EditQuestionModal from "@/components/EditQuestionModal.vue";
+import crownPath from '@/assets/crown.svg';
+
 export default {
   name: 'Dashboard',
   props: {
@@ -79,6 +87,9 @@ export default {
     const isShowQuestionsModalVisible = ref(false);
     const isEditQuestionModalVisible = ref(false);
     const currentEditingQuestion = ref(null);
+
+    const isCategoryValid = computed(() => selectedCategoryQuestions.value.length >= 10);
+
 
     const selectCategory = (category) => {
       if (selectedCategory.value === category._id) {
@@ -163,6 +174,15 @@ export default {
       }
     };
 
+    watch(selectedCategory, async (newCategory) => {
+      if (newCategory) {
+        await fetchCategoryQuestions(newCategory);
+      } else {
+        selectedCategoryQuestions.value = [];
+      }
+    });
+
+
 
     const openShowQuestionsModal = async () => {
       if (!selectedCategory.value) return;
@@ -222,6 +242,8 @@ export default {
       currentEditingQuestion,
       updateQuestion,
       handleQuestionDeleted,
+      isCategoryValid,
+      crownPath,
     };
   },
 };
@@ -385,4 +407,17 @@ export default {
 .message.error {
   color: var(--danger-color, #dc3545);
 }
+
+.btn:disabled {
+  background-color: var(--disabled-bg-color, #ccc);
+  color: var(--disabled-text-color, #666);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.crown-icon {
+  width: 50px; /* Passe die Breite an */
+  height: 50px; /* Passe die Höhe an */
+}
+
 </style>
