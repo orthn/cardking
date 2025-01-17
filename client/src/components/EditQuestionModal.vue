@@ -281,6 +281,7 @@ select {
 }
 
 .modal {
+  font-family: var(--font-family-default);
   background-color: var(--card-bg-color, #1e1e1e);
   color: var(--text-color, white);
   padding: 2rem;

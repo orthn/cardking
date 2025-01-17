@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 *,
 *:before,
@@ -8,7 +9,7 @@
 
 :root {
   --gradient-start: #77C9D4; /* Helles Türkis */
-  --gradient-end: #57BC90;   /* Frisches Grün */
+  --gradient-end: #0e4b31;   /* Frisches Grün */
   --card-bg-color: #ffffff;  /* Weiß bleibt unverändert */
   --text-color: #015249;     /* Dunkelgrün für Text */
   --subtitle-color: #57BC90; /* Frisches Grün für Untertitel */
@@ -18,7 +19,7 @@
   --secondary-button-bg-color: #015249;
   --button-text-color: #ffffff; /* Weiß bleibt unverändert */
   --link-color: #015249; /* Dunkelgrün für Links */
-  --shadow-color: rgba(1, 82, 73, 0.1); /* Leichter Schatten in Dunkelgrün */
+  --shadow-color: rgba(1, 82, 73, 0.2); /* Leichter Schatten in Dunkelgrün */
   --highlight-color: #77C9D4; /* Helles Türkis für Highlights */
   --muted-text-color: #A5A5AF; /* Neutraler Grauton für dezente Texte */
   --font-family-default: 'Inter', Arial, sans-serif;
@@ -33,6 +34,7 @@
   --save-color: #57BC90;   /* Frisches Grün */
   --delete-color: #d83129; /* Kräftiges Rot */
   --cancel-color: #A5A5AF; /* Neutraler Grauton */
+  --border-radius: 0.5rem;
 }
 
 [data-theme='dark'] {
@@ -48,7 +50,7 @@
   --button-text-color: #cdc5b8; /* Tiefes Schwarz für Button-Text */
   --link-color: #d83129; /* Kräftiges Rot für Links */
   --shadow-color: rgba(17, 18, 20, 0.5); /* Leichter Schatten in Schwarz */
-  --highlight-color: #c60a00; /* Kräftiges Rot für Highlights */
+  --highlight-color: #900700; /* Kräftiges Rot für Highlights */
   --muted-text-color: #5a5a5a; /* Dezentes Grau für weniger wichtige Texte */
   --font-family-default: 'Inter', Arial, sans-serif;
   --font-family-heading: 'Inter', sans-serif;
@@ -62,6 +64,7 @@
   --save-color: #ffb339;   /* Beige-Gelb für dunkles Thema */
   --delete-color: #d83129; /* Kräftiges Rot */
   --cancel-color: #5a5a5a; /* Dezentes Grau */
+  --border-radius: 0.5rem;
 }
 .cards .welcome-box .btn{
   transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;

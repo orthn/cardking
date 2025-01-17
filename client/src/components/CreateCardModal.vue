@@ -321,6 +321,8 @@ export default {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  font-family: var(--font-family-default);
+
 }
 
 .modal-content {

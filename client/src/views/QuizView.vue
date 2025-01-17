@@ -1,16 +1,20 @@
 <template>
   <div class="quiz-container">
     <p v-if="errorMessage">{{ errorMessage }}</p>
-
     <!-- Quiz -->
-    <div v-else-if="quizData.length > 0 && !isQuizComplete" class="quiz-card">
+    <transition name="fade">
+    <div v-if="quizData.length > 0 && !isQuizComplete" class="quiz-card" :key="currentIndex">
       <div class="question-container">
-        <p><strong>Question {{ currentIndex + 1 }}:</strong> {{ quizData[currentIndex].question }}</p>
+        
+        <div class="progress-bar-container" v-if="quizData.length > 0 && !isQuizComplete">
+      <div class="progress-bar" :style="{ width: progressPercentage + '%' }"></div>
+    </div>
+        <p><strong>Question {{ currentIndex + 1 }}</strong></p>
+          <p>{{ quizData[currentIndex].question }}</p>
       </div>
 
       <div
         class="answers-container"
-        :class="{ 'grid-two': quizData[currentIndex].type !== 'true_false' }"
       >
         <button
           v-for="(answer, i) in quizData[currentIndex].answers"
@@ -32,7 +36,6 @@
         Submit Answers
       </button>
     </div>
-
     <!-- Quiz-Ergebnis mit Navigation -->
     <div v-else-if="userAnswers.length > 0" class="results-container">
       <h2 class="padding">Quiz Results</h2>
@@ -64,14 +67,12 @@
         ></i>
       </div>
     </div>
-
-    <!-- Ladeanzeige -->
-    <p v-else>Loading...</p>
+  </transition>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch} from 'vue';
+import { ref, onMounted, computed, watch} from 'vue';
 
 const quizData = ref([]);
 const errorMessage = ref('');
@@ -83,6 +84,11 @@ const correctCount = ref(0);
 
 const props = defineProps({
   category: String,
+});
+
+const progressPercentage = computed(() => {
+  if (quizData.value.length === 0) return 0;
+  return ((currentIndex.value + 1) / quizData.value.length) * 100;
 });
 
 const fetchQuiz = async () => {
@@ -241,80 +247,141 @@ onMounted(() => {
 
 
 <style scoped>
+.progress-bar-container {
+  position: relative;
+  max-width: 900px;
+  width: 100%;
+  background-color: rgb(red, green, blue,0); /* Hintergrundfarbe */
+  height: 20px; /* Erhöhte Höhe für bessere Sichtbarkeit */
+  border-radius: 8px; /* Abgerundete Ecken */
+  border: 2px solid var(--text-color); /* Rand um die Fortschrittsleiste */
+  overflow: hidden; /* Begrenzung der Fortschrittsleiste */
+}
+
+.progress-bar {
+  height: 100%; /* Füllt die gesamte Höhe */
+  background-color: var(--text-color); /* Fortschrittsfarbe */
+}
+
+
+
+/* Transition mit Bewegung */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.fade-enter-from {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.fade-enter-to {
+  opacity: 1;
+  transform: scale(1); 
+}
+
+.fade-leave-from {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.fade-leave-to {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.question-container{
+  margin-bottom: 2rem;
+  padding: var(--spacing-lg);
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  color: var(--text-color);
+  background-color: var(--card-bg-color);
+  border-radius: var(--border-radius);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  box-shadow: 0 6px 8px var(--shadow-color);
+}
 .answer-btn.selected {
   background-color: var(--highlight-color);
-  color: var(--button-text-color);
 }
 
 .finalize-btn {
-  margin-top: var(--spacing-md);
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-size: var(--font-size-md);
+  margin-top: 1.5rem;
+  padding: var(--spacing-md);
+  font-size: clamp(0.8rem, 2.5vw, 1.3rem);
   color: var(--button-text-color);
   background-color: var(--button-bg-color);
   border: none;
+  width: 80%;
   border-radius: var(--border-radius);
   cursor: pointer;
+  box-shadow: 0 3px 4px var(--shadow-color);
+
 }
 
 .finalize-btn:hover {
   background-color: var(--highlight-color);
-  box-shadow: 0 6px 15px var(--highlight-color);
+  transform: scale(1.05);
 }
 .padding{
-  padding: var(--spacing-xs);  
+  padding-bottom: var(--spacing-md);  
 }
 /* Quizkarten */
 .quiz-card {
+  position: absolute;
+  font-family: var(--font-family-default);
   display: flex;
+  background: rgba(255, 255, 255, 0.3); /* Halbtransparenter Hintergrund */
+  backdrop-filter: blur(10px); /* Blur-Effekt für den Hintergrund */
+  -webkit-backdrop-filter: blur(10px); /* Für Safari */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Leichter Rand für den Glaseffekt */
+  border-radius: var(--border-radius); /* Abgerundete Ecken */
   flex-direction: column;
-  font-size: var(--font-size-lg);
+  justify-content: center;
+  align-items: center;
+  min-width: 600px;
+  max-width: 900px;
   width: 100%;
-  max-width: 600px;
-  padding: var(--spacing-lg);
-  background-color: var(--card-bg-color);
-  box-shadow: 0 6px 8px var(--shadow-color);
-  animation: fadeIn 0.3s ease-in-out;
-  word-wrap: break-word; 
-  overflow-wrap: break-word;
+  padding: 2rem;
 }
 
-.quiz-card p {
-  font-size: var(--font-size-lg);
-  color: var(--text-color);
-  text-align: center;
-  margin-bottom: var(--spacing-md);
-}
 
 /* Antworten-Container */
 .answers-container {
+  width: 100%;
   display: grid;
-  gap: var(--spacing-sm);
+  font-size: clamp(0.8rem, 2.5vw, 1.3rem);
+  font-weight: 400;
+  gap: 1.5rem;
   word-wrap: break-word;
   overflow-wrap: break-word;
-}
-
-.answers-container.grid-two {
   grid-template-columns: repeat(2, 1fr);
+  font-weight: 500;
 }
 
 .answer-btn {
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-size: var(--font-size-md);
+  padding: var(--spacing-lg);
+  font-size: auto;
   color: var(--button-text-color);
   background-color: var(--button-bg-color);
-  border: none;
   border-radius: var(--border-radius);
+  box-shadow: 0 3px 4px var(--shadow-color);
   cursor: pointer;
   word-wrap: break-word;
   overflow-wrap: break-word;
   text-align: center;
   white-space: normal;
+  
 }
 
 .answer-btn:hover {
   background-color: var(--highlight-color);
-  box-shadow: 0 6px 15px var(--highlight-color);
+  transform: scale(1.05);
 }
 
 .answer-btn:disabled {
@@ -324,24 +391,29 @@ onMounted(() => {
 
 /* Ergebnis-Container */
 .results-container {
+  font-family: var(--font-family-default);
+  position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
   width: 100%;
-  max-width: 600px;
-  padding: var(--spacing-lg);
+  justify-content: center;
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  max-width: 900px;
+  width: 100%;
+  padding: 2rem;
   background-color: var(--card-bg-color);
-  border: 1px solid var(--input-border-color);
   border-radius: var(--border-radius);
   box-shadow: 0 6px 8px var(--shadow-color);
-  animation: fadeIn 0.3s ease-in-out;
   color: var(--text-color);
 }
 
 /* Ergebnisse */
 .result-item {
+  font-size: clamp(0.8rem, 2.5vw, 1.3rem);
   width: 100%;
-  padding: var(--spacing-sm);
+  padding: var(--spacing-md);
   border: 1px solid var(--input-border-color);
   border-radius: var(--border-radius);
   background-color: var(--card-bg-color);
@@ -350,7 +422,7 @@ onMounted(() => {
 }
 
 .result-item p {
-  margin: var(--spacing-xs) 0;
+  margin: var(--spacing-sm) 0;
   color: var(--text-color);
   word-wrap: break-word; 
   overflow-wrap: break-word;
@@ -370,6 +442,7 @@ onMounted(() => {
 /* Navigation-Pfeile */
 .navigation-buttons {
   display: flex;
+  padding: var(--spacing-sm);
   justify-content: space-between;
   align-items: center;
   width: 100%;
@@ -377,10 +450,9 @@ onMounted(() => {
 }
 
 .nav-arrow {
-  font-size: 2rem;
+  font-size: 3rem;
   color: var(--button-bg-color);
   cursor: pointer;
-  transition: color 0.3s, transform 0.2s;
 }
 
 .nav-arrow:hover {
@@ -411,16 +483,6 @@ onMounted(() => {
   background-color: var(--highlight-color);
   transform: scale(1.1);
 }
-/* Animation für Karten */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
+
 
 </style>

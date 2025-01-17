@@ -230,14 +230,12 @@ export default {
 <style scoped>
 .welcome-box {
   position: absolute;
-  top: -340px;
+  top: -300px;
   margin: 1rem auto;
   padding: 1rem 2rem;
   background: var(--card-bg-color, #57bc90);
-  /* Passende Farbe */
+  font-family: var(--font-family-heading);
   color: var(--text-color);
-  /* Weißer Text für Kontrast */
-  font-family: 'Comic Sans MS', cursive, sans-serif;
   font-size: 1.5rem;
   font-weight: bold;
   text-align: center;
@@ -250,25 +248,6 @@ export default {
   /* Helle Akzentfarbe für den Namen */
   text-transform: uppercase;
 
-}
-
-@keyframes bounce {
-
-  0%,
-  20%,
-  50%,
-  80%,
-  100% {
-    transform: scale(1);
-  }
-
-  40% {
-    transform: scale(1.1);
-  }
-
-  60% {
-    transform: scale(1.05);
-  }
 }
 
 .category-grid {
@@ -285,9 +264,12 @@ export default {
   border-radius: var(--radius-sm, 4px);
   text-align: center;
   align-content: center;
-  white-space: wrap;
+  color: var(--text-color);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word; 
 }
 
 .category-box:hover {
@@ -325,6 +307,7 @@ export default {
 .dashboard-sidebar,
 .dashboard-main,
 .dashboard-actions {
+  text-align: center;
   background-color: var(--card-bg-color);
   /* Kartenhintergrund */
   border-radius: var(--border-radius, 8px);
@@ -339,6 +322,7 @@ export default {
 .dashboard-sidebar h3,
 .dashboard-main h3,
 .dashboard-actions h3 {
+  
   font-family: var(--font-family-heading);
   /* Schrift für Überschriften */
   color: var(--text-color);

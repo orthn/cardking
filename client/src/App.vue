@@ -1,5 +1,5 @@
 <script setup>
-import { ref,reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import LoginView from './views/LoginView.vue';
 import RegisterView from './views/RegisterView.vue';
 import ResetPasswordRequestView from './views/ResetPasswordRequestView.vue';
@@ -125,6 +125,30 @@ const handleLogout = async () => {
 
 <template>
   <div class="bg">
+  
+    <svg id="visual" viewBox="0 0 900 600" width="100%" height="100%" preserveAspectRatio="xMidYMid slice"
+    xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
+    <defs>
+      <!-- Gradient nutzt CSS-Variablen -->
+      <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color: var(--gradient-start);" />
+        <stop offset="100%" style="stop-color: var(--gradient-end);" />
+      </linearGradient>
+      <filter id="blur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="0" /> <!--Gradient vom Rand mit stdDevation einstellbar!-->
+    </filter>
+    </defs>
+    <rect width="100%" height="100%" fill="var(--gradient-start)"></rect>
+    <g>
+      <circle class="circle-1" cx="25%" cy="25%" filter="url(#blur)" fill="url(#gradient)" r="30vh"></circle>
+      <circle class="circle-2" cx="25%" cy="75%" filter="url(#blur)" fill="url(#gradient)" r="38vh"></circle>
+      <circle class="circle-3" cx="50%" cy="33%" filter="url(#blur)" fill="url(#gradient)" r="32vh"></circle>
+      <circle class="circle-4" cx="50%" cy="67%" filter="url(#blur)" fill="url(#gradient)" r="34vh"></circle>
+      <circle class="circle-5" cx="75%" cy="25%" filter="url(#blur)" fill="url(#gradient)" r="36vh"></circle>
+      <circle class="circle-6" cx="75%" cy="75%" filter="url(#blur)" fill="url(#gradient)" r="40vh"></circle>
+      <circle class="circle-4" cx="90%" cy="90%" filter="url(#blur)" fill="url(#gradient)" r="36vh"></circle>
+    </g>
+  </svg>
     <div class="view-container">
       <div v-if="currentView === 'resetPassword'">
         <ResetPasswordView :token="resetToken" />
@@ -142,7 +166,8 @@ const handleLogout = async () => {
             @goToLogin="changeView('login')" />
         </transition>
         <transition name="slide-right">
-          <DashboardView v-if="currentView === 'dashboard'" class="auth-view" :userData="userData" @startQuiz="handleStartQuiz" />
+          <DashboardView v-if="currentView === 'dashboard'" class="auth-view" :userData="userData"
+            @startQuiz="handleStartQuiz" />
         </transition>
         <transition name="slide-left">
           <QuizView v-if="currentView === 'quiz'" class="auth-view" :category="selectedCategory"
@@ -170,16 +195,100 @@ const handleLogout = async () => {
 
 <style scoped>
 .bg {
-  font-family: var(--font-family-heading);
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  width: 100vw;
-  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-  background-size: 300% 300%;
-  animation: gradient-animation 12s ease infinite;
 }
+
+#visual {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+}
+  .circle-1 {
+    animation: move1 10s ease-in-out infinite alternate;
+  }
+
+  .circle-2 {
+    animation: move2 12s ease-in-out infinite alternate;
+  }
+
+  .circle-3 {
+    animation: move3 8s ease-in-out infinite alternate;
+  }
+
+  .circle-4 {
+    animation: move4 14s ease-in-out infinite alternate;
+  }
+
+  .circle-5 {
+    animation: move5 9s ease-in-out infinite alternate;
+  }
+
+  .circle-6 {
+    animation: move6 11s ease-in-out infinite alternate;
+  }
+
+  /* Keyframes für Bewegung */
+  @keyframes move1 {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(-20px, -30px);
+    }
+  }
+
+  @keyframes move2 {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(-40px, 50px);
+    }
+  }
+
+  @keyframes move3 {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(30px, -20px);
+    }
+  }
+
+  @keyframes move4 {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(-30px, 40px);
+    }
+  }
+
+  @keyframes move5 {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(50px, -50px);
+    }
+  }
+
+  @keyframes move6 {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(-20px, 20px);
+    }
+  }
+
 
 .theme-switch-btn {
   font-family: var(--font-family-heading);
@@ -280,17 +389,4 @@ const handleLogout = async () => {
   transform: scale(1.1);
 }
 
-@keyframes gradient-animation {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
-}
 </style>
