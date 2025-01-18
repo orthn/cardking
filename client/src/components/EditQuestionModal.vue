@@ -1,6 +1,7 @@
 <template>
   <div v-if="isVisible" class="modal-backdrop">
     <div class="modal">
+      <MessageBox :message="message" :type="messageType" />
       <h3>Edit Question</h3>
       <label style="font-weight: bold;">Question:</label>
       <textarea class="inputquestion" v-model="editableQuestion.question" type="text" />
@@ -69,105 +70,92 @@
   </div>
 </template>
 
-<script>
-import { ref, onMounted } from 'vue';
-export default {
-  props: {
-    isVisible: Boolean,
-    question: Object,
-  },
-  setup(props, { emit }) {
-    const editableQuestion = ref({ ...props.question });
-    const categories = ref([]);
+<script setup>
+import { ref, onMounted, reactive } from "vue";
+import MessageBox from "@/components/MessageBox.vue";
 
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch('http://localhost:3000/dashboard/categories', {
-          method: 'GET',
-          credentials: 'include',
-        });
-        if (!response.ok) {
-          throw new Error('Failed to fetch categories');
-        }
-        categories.value = await response.json();
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      }
-    };
-    const toggleCorrectAnswer = (answer) => {
-      const index = editableQuestion.value.correctAnswer.indexOf(answer);
-      if (index === -1) {
-        editableQuestion.value.correctAnswer.push(answer);
-      } else {
-        editableQuestion.value.correctAnswer.splice(index, 1);
-      }
-    };
+// Props
+const props = defineProps({
+  isVisible: Boolean,
+  question: Object,
+});
 
-    const setCorrectAnswer = (answer) => {
-      editableQuestion.value.correctAnswer = answer;
-    };
+const emit = defineEmits(["save", "deleted"]);
 
+// Reaktive Daten
+const editableQuestion = reactive({ ...props.question });
+const categories = ref([]);
+const message = ref("");
+const messageType = ref("info");
 
-    const saveChanges = () => {
-      emit('save', editableQuestion.value);
-    };
-
-
-    /*
-        const deleteQuestion = async () => {
-          console.log('Deleting question with ID:', editableQuestion.value._id);
-          try {
-            const response = await fetch(`http://localhost:3000/cards/delete/${editableQuestion.value._id}`, {
-              method: 'DELETE',
-              credentials: 'include',
-            });
-    
-            if (!response.ok) {
-              const errorData = await response.json();
-              throw new Error(errorData.message || 'Failed to delete the question');
-            }
-            console.log('Question deleted successfully');
-            emit('delete', editableQuestion.value._id);
-          } catch (error) {
-            console.error('Error deleting question:', error);
-          }
-        };
-    */
-
-    const deleteQuestion = async () => {
-      console.log('Deleting question with ID:', editableQuestion.value._id);
-      try {
-        const response = await fetch(`http://localhost:3000/cards/delete/${editableQuestion.value._id}`, {
-          method: 'DELETE',
-          credentials: 'include',
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to delete the question');
-        }
-        console.log('Question deleted successfully');
-        emit('deleted');
-      } catch (error) {
-        console.error('Error deleting question:', error);
-      }
-    };
-
-
-    onMounted(fetchCategories);
-
-    return {
-      editableQuestion,
-      categories,
-      fetchCategories,
-      toggleCorrectAnswer,
-      saveChanges,
-      deleteQuestion,
-      setCorrectAnswer,
-    };
-  },
+// Methoden
+const fetchCategories = async () => {
+  try {
+    const response = await fetch("http://localhost:3000/dashboard/categories", {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!response.ok) {
+      throw new Error("Failed to fetch categories");
+    }
+    categories.value = await response.json();
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    message.value = "Failed to load categories.";
+    messageType.value = "error";
+  }
 };
+
+const toggleCorrectAnswer = (answer) => {
+  const index = editableQuestion.correctAnswer.indexOf(answer);
+  if (index === -1) {
+    editableQuestion.correctAnswer.push(answer);
+  } else {
+    editableQuestion.correctAnswer.splice(index, 1);
+  }
+};
+
+const setCorrectAnswer = (answer) => {
+  editableQuestion.correctAnswer = answer;
+};
+
+const saveChanges = () => {
+  message.value = "Question saved successfully!";
+  messageType.value = "success";
+  setTimeout(() => {
+    emit("save", editableQuestion);
+  }, 1500);
+};
+
+const deleteQuestion = async () => {
+  try {
+    const response = await fetch(
+      `http://localhost:3000/cards/delete/${editableQuestion._id}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+      }
+    );
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to delete the question");
+    }
+    message.value = "Question deleted successfully!";
+    messageType.value = "success";
+    setTimeout(() => {
+      emit("deleted");
+    }, 1500);
+  } catch (error) {
+    console.error("Error deleting question:", error);
+    message.value = "Failed to delete the question.";
+    messageType.value = "error";
+  }
+};
+
+// Kategorien laden, wenn die Komponente gemountet wird
+onMounted(fetchCategories);
 </script>
+
 
 <style scoped>
 .true-false-options {
@@ -196,9 +184,11 @@ export default {
   border-color: var(--highlight-color, #77C9D4);
   color: var(--button-text-color, #fff);
 }
+
 .true-false-label:not(:last-child) {
   margin-right: var(--spacing-sm);
 }
+
 select {
   width: 100%;
   padding: 0.5rem;
@@ -210,7 +200,6 @@ select {
   font-size: 1rem;
   cursor: pointer;
   appearance: none;
-  /* Entfernt Standard-Pfeile in einigen Browsern */
 }
 
 .option-row {
@@ -245,6 +234,7 @@ select {
   border-radius: 50%;
   color: white;
   cursor: pointer;
+  transition: none;
 }
 
 .icon-indicator i {
@@ -257,11 +247,13 @@ select {
 }
 
 .icon-indicator i.fas.fa-check {
+  transition: none;
   color: var(--correct-color, #57BC90);
   /* Grün für korrekt */
 }
 
 .icon-indicator i.fas.fa-times {
+  transition: none;
   color: var(--incorrect-color, #d83129);
   /* Rot für falsch */
 }
