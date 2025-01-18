@@ -1,15 +1,54 @@
 <template>
   <div>
     <div class="dashboard">
+
+
+
       <div class="welcome-box">
-      <div class="welcome-text" style="color: var(--text-color);">
-        Welcome <span>{{ userData.username }}</span> to the Dashboard!
+
+        <div class="crown-wrapper">
+
+          <div class="crown-icon">
+            <svg v-if="successRate < 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 293.47 197.17">
+              <g>
+                <path d="M97.36,15.95c3.19,1.73,3.99,1.73,7.31,0,4.92-2.79,5.84-10.77,1.33-13.82-1.59-1.2-3.85-2.13-5.05-2.13s-3.45.93-5.05,2.13c-4.52,3.05-3.59,11.02,1.46,13.82Z"/>
+                <path d="M126.99,81.73c-.4,12.89-1.59,26.44-2.79,31.76-1.59,7.44-1.73,9.57-.4,11.57.93,1.19,4.52,5.71,7.84,9.97,3.32,4.38,8.1,11.56,10.5,16.21l4.39,8.37,5.18-9.44c2.79-5.32,8.37-13.69,12.36-18.87l7.31-9.3v-10.37c0-34.69-13.95-63.93-39.2-81.73-10.23-7.17-17.28-10.9-16.21-8.5,10.63,24.45,11.96,31.89,11.03,60.33Z"/>
+                <path d="M113.3,172.5l28.84.26v-3.19c0-9.57-19.53-38.81-33.49-50.24-19.67-16.08-47.71-24.19-66.31-19.14-7.31,1.99-12.62,5.59-19.67,13.69-5.85,6.52-6.91,9.17-3.06,7.71,12.36-4.79,26.05-3.46,36.55,3.46,10.23,6.77,21.26,23.52,26.18,39.73l2.13,7.31,28.84.4Z"/>
+                <path d="M261.35,105.39c-10.23-6.78-22.99-8.51-38.8-5.05-23.12,5.05-45.71,21.93-60.87,45.32-4.92,7.44-11.56,22.86-11.56,26.44,0,.4,13.03.66,28.97.66h29.1l1.6-5.72c.93-3.06,3.99-10.37,6.77-16.35,11.96-24.85,31.1-36.28,51.16-30.57,4.12,1.33,7.84,1.99,8.11,1.73,1.33-1.33-8.64-12.49-14.49-16.48Z"/>
+                <path d="M1.27,130.1c-2.26,4.26-1.46,7.97,1.99,10.24,6.91,4.52,14.75-4.12,9.3-10.1-3.06-3.46-9.43-3.46-11.3-.14Z"/>
+                <path d="M291.65,130.24c-3.06-3.46-9.43-3.46-11.3-.14-2.26,4.26-1.46,7.97,1.99,10.24,6.91,4.52,14.75-4.12,9.3-10.1Z"/>
+                <rect x="83.76" y="181.04" width="125.94" height="15.66" transform="translate(-1.42 1.11) rotate(-.43)"/>
+              </g>
+            </svg>
+
+
+            <svg v-else-if="successRate < 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 205.57 147.61">
+              <g>
+                <path d="M205.57,62.1l-2.91,62.03c0,.14-.07.29-.17.38-.31-.05-.62-.07-.93-.07H4.01c-.31,0-.62.02-.93.07-.1-.1-.17-.24-.17-.38L0,62.1c-.05-.86,1.22-1,1.36-.14,5.02,27.63,14.66,45.57,26.56,45.57,13.78,0,24.96-54.86,24.96-71.56,0,32.89,11.15,71.56,24.96,71.56S102.77,70.51,102.77,0c0,70.51,11.18,107.53,24.96,107.53s24.96-38.67,24.96-71.56c0,16.69,11.18,71.56,24.96,71.56,11.89,0,21.54-17.94,26.56-45.57.14-.86,1.41-.72,1.36.14Z"/>
+                <rect x="3.94" y="131.95" width="197.69" height="15.66"/>
+              </g>
+            </svg>
+
+
+            <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 223.57 168.54">
+              <g>
+                <path d="M197.45,61.82l10.76,13.9c.29,7.51-2.62,20.88-19.36,39.69-13.73-18.89-14.38-32.2-12.84-39.64l13.1-13.95-20.39-34.79-24.26,34.79,11.55,13.95c.66,6.97-1.17,19.09-14.41,36.13-16.96-22.76-18.51-38.99-17.1-48.25l15.8-18.05L111.79,0l-28.5,45.6,15.8,18.05c1.41,9.25-.15,25.48-17.1,48.25-13.24-17.03-15.07-29.15-14.41-36.13l11.55-13.95-24.26-34.79-20.39,34.79,13.1,13.95c1.53,7.45.88,20.75-12.84,39.64-16.74-18.81-19.65-32.18-19.36-39.69l10.76-13.9L0,27.03l4.56,41.72,2,18.34,4.39,40.21h0s2.01,18.38,2.01,18.38h197.65l2.01-18.38h0s4.39-40.21,4.39-40.21l2-18.34,4.56-41.72-26.12,34.79Z"/>
+                <rect x="13.63" y="152.89" width="197.69" height="15.66"/>
+              </g>
+            </svg>
+
+          </div>
+
+
+          <div class="welcome-text">
+            Welcome <span>{{ userData.username }}</span> to the Dashboard!
+          </div>
+        </div>
       </div>
-    </div>
       <!-- Left Section: Statistics -->
       <div class="dashboard-sidebar">
         <h2>Statistics</h2>
-        <Statistics />
+        <Statistics @updateSuccessRate="$emit('updateSuccessRate', $event)"/>
       </div>
 
       <!-- Main Section: Cards and Categories -->
@@ -65,12 +104,13 @@ import Statistics from './Statistics.vue';
 import CreateCardModal from '../components/CreateCardModal.vue';
 import ShowQuestionsModal from '../components/ShowQuestionsModal.vue';
 import EditQuestionModal from "@/components/EditQuestionModal.vue";
-import crownPath from '@/assets/crown.svg';
+
 
 export default {
   name: 'Dashboard',
   props: {
     userData: Object,
+    successRate: Number,
   },
   components: {
     Statistics,
@@ -79,6 +119,7 @@ export default {
     EditQuestionModal
   },
   setup() {
+
     const categories = ref([]);
     const showModal = ref(false);
     const selectedCategory = ref(null);
@@ -216,6 +257,7 @@ export default {
 
 
 
+
     const handleModalClose = () => {
       showModal.value = false;
       fetchCategories();
@@ -242,7 +284,6 @@ export default {
       updateQuestion,
       handleQuestionDeleted,
       isCategoryValid,
-      crownPath,
     };
   },
 };
@@ -264,12 +305,36 @@ export default {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+.crown-icon {
+  position: absolute;
+  top: -140px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px;
+  height: auto;
+  fill: var(--highlight-color);
+  stroke: var(--text-color);
+  stroke-width: 3px;
+  filter: drop-shadow(0 0 8px var(--highlight-color)) brightness(1.42);
+  transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+}
+
+.crown-icon:hover {
+  animation: bounce 0.5s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-10px);
+  }
+}
 
 .welcome-box span {
   color: var(--highlight-color);
-  /* Helle Akzentfarbe für den Namen */
   text-transform: uppercase;
-
 }
 
 .category-grid {
@@ -416,11 +481,6 @@ export default {
   color: var(--disabled-text-color, #666);
   cursor: not-allowed;
   box-shadow: none;
-}
-
-.crown-icon {
-  width: 50px; /* Passe die Breite an */
-  height: 50px; /* Passe die Höhe an */
 }
 
 </style>

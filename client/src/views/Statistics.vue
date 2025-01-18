@@ -45,11 +45,12 @@
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted,defineEmits  } from "vue";
 
 export default {
   name: "Statistics",
-  setup() {
+  emits: ["updateSuccessRate"],
+  setup(_, { emit }) {
     const statistics = ref({
       userId: null,
       completedQuizzes: 0,
@@ -73,14 +74,19 @@ export default {
         }
         const data = await response.json();
         statistics.value = {
-      userId: data[0].userId || null, // Setze die userId aus der Backend-Antwort
-      completedQuizzes: data[0].completedQuizzes || 0,
-      successRate: data[0].successRate || 0,
-      streak: data[0].streak || 0,
-    };      } catch (error) {
+          userId: data[0].userId || null,
+          completedQuizzes: data[0].completedQuizzes || 0,
+          successRate: data[0].successRate || 0,
+          streak: data[0].streak || 0,
+        };
+
+        emit("updateSuccessRate", data[0]?.successRate || 0);
+        console.log("Statistics emitting successRate:", data[0]?.successRate || 0);
+      } catch (error) {
         console.error("Fehler beim Laden der Statistiken:", error);
       }
     };
+
 
     // Öffnet das Modal für das Leaderboard
     const openModal = async (statKey) => {

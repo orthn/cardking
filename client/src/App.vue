@@ -23,10 +23,20 @@ const userData = reactive({
   goal: '',
 });
 
+const successRate = ref(0);
+
+const updateSuccessRate = (rate) => {
+  console.log("Appview received successRate:", rate);
+  successRate.value = rate;
+};
+
+
+
 const handleLogin = async () => {
   currentView.value = 'dashboard';
   await fetchUserData();
 };
+
 
 const handleStartQuiz = (category) => {
   selectedCategory.value = category;
@@ -166,8 +176,8 @@ const handleLogout = async () => {
             @goToLogin="changeView('login')" />
         </transition>
         <transition name="slide-right">
-          <DashboardView v-if="currentView === 'dashboard'" class="auth-view" :userData="userData"
-            @startQuiz="handleStartQuiz" />
+          <DashboardView v-if="currentView === 'dashboard'" class="auth-view" :userData="userData" :successRate="successRate"
+                         @updateSuccessRate="updateSuccessRate" @startQuiz="handleStartQuiz"  />
         </transition>
         <transition name="slide-left">
           <QuizView v-if="currentView === 'quiz'" class="auth-view" :category="selectedCategory"
