@@ -11,10 +11,26 @@ let secretKey = process.env.JWT_SECRET
  * Retrieve all neccessary data to load the users dashboard
  * GET: localhost:3000/users/
  */
-router.get('/', function (req, res, next) {
-    res.send("WIP: Default Users Page")
-})
-
+router.post('/', async (req, res) => {
+    const { userIds } = req.body;
+  
+    if (!userIds || !Array.isArray(userIds)) {
+      return res.status(400).json({ message: "Invalid or missing userIds" });
+    }
+  
+    try {
+      // Finde die Benutzer basierend auf den IDs
+      const users = await User.find(
+        { _id: { $in: userIds } },
+        "username _id" // Nur die Felder username und _id zurückgeben
+      );
+      res.status(200).json(users);
+    } catch (error) {
+      console.error("Fehler beim Abrufen der Benutzernamen:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
 /**
  * Retrieve Session ID for current user
  * GET: localhost:3000/users/me

@@ -41,10 +41,10 @@
     </div>
     <!-- Quiz-Ergebnis mit Navigation -->
     <div v-else-if="userAnswers.length > 0" class="results-container">
-      <h2 class="padding">Quiz Results</h2>
-      <p class="padding"><strong>Total Correct:</strong> {{ correctCount }} / {{ quizData.length }}</p>
+      <h2 class="padding" style="color: var(--text-color);">Quiz Results</h2>
+      <p class="padding" style="color: var(--text-color);" ><strong style="color: var(--text-color);">Total Correct:</strong> {{ correctCount }} / {{ userAnswers.length }}</p>
       <div class="result-item">
-        <p><strong>Question {{ resultIndex + 1 }}:</strong> {{ userAnswers[resultIndex].question }}</p>
+        <p><strong style="color: var(--text-color);">Question {{ resultIndex + 1 }}:</strong> {{ userAnswers[resultIndex].question }}</p>
         <p>
           Your Answer: 
           <span :class="{ correct: userAnswers[resultIndex].isCorrect, incorrect: !userAnswers[resultIndex].isCorrect }">
@@ -324,6 +324,12 @@ onMounted(() => {
   width: 100%;
   box-shadow: 0 6px 8px var(--shadow-color);
 }
+.question-container p{
+  color: var(--text-color);
+}
+.question-container p strong{
+  color: var(--text-color);
+}
 .answer-btn.selected {
   background-color: var(--highlight-color);
 }
@@ -367,7 +373,6 @@ onMounted(() => {
   width: 100%;
   padding: 2rem;
 }
-
 
 /* Antworten-Container */
 .answers-container {
@@ -479,7 +484,7 @@ onMounted(() => {
 }
 
 .nav-arrow.disabled {
-  color: var(--card-bg-color);
+  visibility: hidden;
 }
 
 /* Home-Button */
@@ -508,7 +513,7 @@ onMounted(() => {
   padding: var(--spacing-md);
   font-size: clamp(0.8rem, 2.5vw, 1.3rem);
   color: var(--button-text-color);
-  background-color: var(--danger-color, #dc3545); /* Rote Farbe für "Beenden" */
+  background-color: var(--delete-color);
   border: none;
   width: 80%;
   border-radius: var(--border-radius);
@@ -517,7 +522,7 @@ onMounted(() => {
 }
 
 .end-quiz-btn:hover {
-  background-color: var(--danger-hover-color, #c82333); /* Dunklerer Rotton für Hover */
+  background-color: var(--delete-color);
   transform: scale(1.05);
 }
 

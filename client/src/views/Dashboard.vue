@@ -1,21 +1,20 @@
 <template>
   <div>
-    <div class="welcome-box">
-      <div class="welcome-text">
+    <div class="dashboard">
+      <div class="welcome-box">
+      <div class="welcome-text" style="color: var(--text-color);">
         Welcome <span>{{ userData.username }}</span> to the Dashboard!
       </div>
     </div>
-
-    <div class="dashboard">
       <!-- Left Section: Statistics -->
       <div class="dashboard-sidebar">
-        <h3>Statistics</h3>
+        <h2>Statistics</h2>
         <Statistics />
       </div>
 
       <!-- Main Section: Cards and Categories -->
       <div class="dashboard-main">
-        <h3>Categories</h3>
+        <h2>Categories</h2>
         <div>
           <p v-if="categories.length === 0">Loading categories...</p>
           <div v-else class="category-grid">
@@ -30,7 +29,7 @@
 
       <!-- Right Section: Actions -->
       <div class="dashboard-actions">
-        <h3>Actions</h3>
+        <h2>Actions</h2>
         <button
             class="btn"
             @click="$emit('startQuiz', selectedCategory)"
@@ -252,8 +251,9 @@ export default {
 <style scoped>
 .welcome-box {
   position: absolute;
-  top: -300px;
-  margin: 1rem auto;
+  top: -50px;
+  left: 50%;
+  transform: translate(-50%, -50%);
   padding: 1rem 2rem;
   background: var(--card-bg-color, #57bc90);
   font-family: var(--font-family-heading);
@@ -261,7 +261,7 @@ export default {
   font-size: 1.5rem;
   font-weight: bold;
   text-align: center;
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -313,6 +313,7 @@ export default {
 }
 
 .dashboard {
+  position: relative;
   display: grid;
   grid-template-columns: 2fr 2fr 1fr;
   /* Drei Spalten */
@@ -330,6 +331,7 @@ export default {
 .dashboard-main,
 .dashboard-actions {
   text-align: center;
+  justify-content: center;
   background-color: var(--card-bg-color);
   /* Kartenhintergrund */
   border-radius: var(--border-radius, 8px);
@@ -341,15 +343,15 @@ export default {
   width: auto;
 }
 
-.dashboard-sidebar h3,
-.dashboard-main h3,
-.dashboard-actions h3 {
+.dashboard-sidebar h2,
+.dashboard-main h2,
+.dashboard-actions h2 {
   
   font-family: var(--font-family-heading);
   /* Schrift für Überschriften */
   color: var(--text-color);
   /* Haupttextfarbe */
-  margin-bottom: var(--spacing-sm, 0.5rem);
+  margin-bottom: var(--spacing-md, 0.5rem);
   /* Abstand unter Überschrift */
 }
 
@@ -374,8 +376,9 @@ export default {
 
 .btn {
   display: block;
-  margin: var(--spacing-sm, 0.5rem) 0;
-  padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
+  width: 100%;
+  margin: var(--spacing-md, 0.5rem) 0;
+  padding: var(--spacing-md, 0.5rem) var(--spacing-md, 1rem);
   background-color: var(--button-bg-color);
   /* Button-Farbe */
   color: var(--button-text-color);

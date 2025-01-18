@@ -28,30 +28,40 @@ router.get('/categories', async function (req, res) {
 
 /**
  *  Retrieves statistics for a user or all users
- * GET: /cards/statistics
+ * GET: /dashboard/statistics
  */
 router.get('/statistics', async function (req, res) {
-    if (!req.session.userId) return res.status(401).json({message: 'Unauthorized'})
+    if (!req.session.userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
 
-    const filterBy = req.body.filter
-    const userId = req.body.userId
-    let statistics
+    const filterBy = req.query.filter || 'default'; // Filter für das Leaderboard
+    const userId = req.session.userId; // Benutzer-ID aus der Session
+    const includeAll = req.query.all === 'true'; // Überprüft, ob alle Statistiken benötigt werden
 
     try {
-        if (userId) {
-            statistics = await Statistic.find({userId: userId}, null, null);
+        let statistics;
+
+        if (includeAll) {
+            // Wenn 'all=true' übergeben wurde, gebe alle Statistiken zurück (z. B. für Leaderboard)
+            statistics = await Statistic.find({});
         } else {
-            statistics = await Statistic.find(null, null, null);
+            // Andernfalls nur die Statistiken des aktuellen Benutzers
+            statistics = await Statistic.find({ userId: userId });
         }
 
         if (!statistics || statistics.length === 0) {
-            return res.status(404).send({message: 'No statistics found'})
+            return res.status(404).send({ message: 'No statistics found' });
         }
-        return res.status(200).send(statisticFormatter(statistics, filterBy))
+
+        // Daten formatieren und zurückgeben
+        return res.status(200).send(statisticFormatter(statistics, filterBy));
     } catch (error) {
-        return res.status(500).send({message: 'Internal server error', error: error.message})
+        console.error('Fehler beim Abrufen der Statistiken:', error);
+        return res.status(500).send({ message: 'Internal server error', error: error.message });
     }
-})
+});
+
 
 /**
  * Formats statistics data to include only relevant fields based on a filter criterion
