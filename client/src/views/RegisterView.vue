@@ -1,121 +1,82 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue';
 import MessageBox from "@/components/MessageBox.vue";
 
-const name = ref('')
-const email = ref('')
-const password = ref('')
-const confirmPassword = ref('')
+const password = ref('');
+const confirmPassword = ref('');
+const message = ref('');
+const messageType = ref('info');
+const token = ref(null);
 
-const message = ref('')
-const messageType = ref('info')
-const handleRegister = async () => {
-  message.value = ''
+onMounted(() => {
+  // Token direkt aus der URL auslesen
+  const url = new URL(window.location.href);
+  if (url.pathname.startsWith('/reset-password/')) {
+    token.value = url.pathname.split('/reset-password/')[1]; // Token extrahieren
+  } else {
+    message.value = 'Invalid link.';
+    messageType.value = 'error';
+  }
+});
+
+const resetPassword = async () => {
+  message.value = '';
+
   if (password.value !== confirmPassword.value) {
-    message.value = 'Passwörter stimmen nicht überein!'
-    messageType.value = 'error'
-    return
+    message.value = 'Passwords do not match!';
+    messageType.value = 'error';
+    return;
   }
 
   try {
-    const response = await fetch('http://localhost:3000/users/register', {
+    const response = await fetch(`http://localhost:3000/users/reset-password/${token.value}`, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        username: name.value,
-        email: email.value,
-        password: password.value,
-        goal: undefined
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ newPassword: password.value }),
     });
 
     const data = await response.json();
+
     if (!response.ok) {
-      message.value = data.error || 'Fehler bei der Registrierung'
-      messageType.value = 'error'
+      message.value = data.error || 'Failed to reset password.';
+      messageType.value = 'error';
       return;
     }
 
-    message.value = 'Registrierung erfolgreich!'
-    messageType.value = 'success'
-    // Optional: automatisch zum Login wechseln, z.B.:
-    // emit('goToLogin')
+    message.value = 'Password reset successfully!';
+    messageType.value = 'success';
+    setTimeout(() => {
+      window.location.href = window.location.origin;
+    }, 1500);
   } catch (err) {
-    message.value = 'Netzwerkfehler: ' + err.message
-    messageType.value = 'error'
+    message.value = 'Network error: ' + err.message;
+    messageType.value = 'error';
   }
-}
-
-const emit = defineEmits(['goToLogin'])
-const goToLogin = () => {
-  emit('goToLogin')
-}
+};
 </script>
-
 <template>
+  <MessageBox :message="message" :type="messageType" />
   <div class="container">
     <div class="card">
-      <h2 class="title">Create Account</h2>
-
-      <MessageBox :message="message" :type="messageType" />
-
-      <form @submit.prevent="handleRegister" class="form">
+      <h2 class="title">Reset Password</h2>
+      <form @submit.prevent="resetPassword" class="form">
         <div class="form-group">
-          <label for="name">Username</label>
-          <input
-              id="name"
-              class="form-control"
-              type="text"
-              v-model="name"
-              required
-              placeholder="Your Username"
-          />
-        </div>
-        <div class="form-group">
-          <label for="email">E-Mail</label>
-          <input
-              id="email"
-              class="form-control"
-              type="email"
-              v-model="email"
-              required
-              placeholder="example@mail.com"
-          />
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input
-              id="password"
-              class="form-control"
-              type="password"
-              v-model="password"
-              required
-              placeholder="**********"
-          />
+          <label for="password">New Password</label>
+          <input id="password" class="form-control" type="password" v-model="password" required
+            placeholder="**********" />
         </div>
         <div class="form-group">
           <label for="confirmPassword">Confirm Password</label>
-          <input
-              id="confirmPassword"
-              class="form-control"
-              type="password"
-              v-model="confirmPassword"
-              required
-              placeholder="**********"
-          />
+          <input id="confirmPassword" class="form-control" type="password" v-model="confirmPassword" required
+            placeholder="**********" />
         </div>
         <div class="actions">
-          <button type="submit" class="btn">Register</button>
+          <button type="submit" class="btn">Reset Password</button>
         </div>
       </form>
-      <p class="register-text">
-        Already have an account?
-        <a href="#" class="link" @click.prevent="goToLogin">Login</a>
-      </p>
     </div>
   </div>
 </template>
-
 <style scoped>
 /* Container */
 .container {
@@ -149,20 +110,12 @@ const goToLogin = () => {
   text-align: center;
 }
 
-.subtitle {
-  font-family: var(--font-family-heading);
-  font-size: 1rem;
-  color: var(--subtitle-color);
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
 /* Formular */
 .form-group {
   width: 100%;
   color: var(--text-color);
   margin-bottom: 1.5rem;
-  position: relative; /* Ermöglicht die Positionierung für dekorative Elemente */
+  position: relative;
 }
 
 .form-group label {
@@ -172,8 +125,8 @@ const goToLogin = () => {
   font-weight: bold;
   margin-bottom: 0.5rem;
   display: block;
-  text-transform: uppercase; /* Labels in Großbuchstaben für bessere Lesbarkeit */
-  letter-spacing: 0.05em; /* Etwas Abstand zwischen Buchstaben */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   transition: color 0.3s;
 }
 
@@ -182,21 +135,13 @@ const goToLogin = () => {
   display: block;
   width: 50px;
   height: 2px;
-  background: var(--highlight-color); /* Farbiger Akzent */
+  background: var(--highlight-color);
   margin-top: 0.2rem;
   transition: width 0.3s;
 }
 
 .form-group:hover label::after {
-  width: 100%; /* Vergrößert den Akzent bei Hover */
-}
-
-.form-control-label {
-  font-family: var(--font-family-heading);
-  font-size: 0.85rem;
-  color: var(--text-color);
-  margin-bottom: 0.5rem;
-  display: block;
+  width: 100%;
 }
 
 .form-control {
@@ -232,28 +177,5 @@ const goToLogin = () => {
 .btn:hover {
   background-color: var(--highlight-color);
   box-shadow: 0 6px 15px var(--highlight-color);
-}
-
-.btn:active {
-  transform: translateY(0);
-  box-shadow: 0 4px 12px var(--highlight-color);
-}
-
-.register-text {
-  font-size: 0.85rem;
-  text-align: center;
-  color: var(--muted-text-color);
-  margin-top: 1.5rem;
-}
-
-.link {
-  color: var(--link-color);
-  text-decoration: none;
-  font-weight: bold;
-  transition: color 0.3s;
-}
-
-.link:hover {
-  color: var(--highlight-color);
 }
 </style>

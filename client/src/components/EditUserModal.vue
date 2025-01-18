@@ -2,9 +2,7 @@
   <transition name="fade">
     <div class="modal-backdrop" @click.self="$emit('close')">
       <div class="modal">
-        <transition name="fade">
-          <MessageBox v-if="message" :message="message" :type="messageType" />
-        </transition>
+        <MessageBox :message="message" :type="messageType" />
         <div class="modal-content">
           <h2 class="title">Profile of <span>{{ userData.username }}</span></h2>
           <!-- Left Column -->
@@ -83,16 +81,6 @@ const currentPasswordEmail = ref('');
 const newPassword = ref('');
 const confirmPassword = ref('');
 
-const showMessage = (msg, type = 'info', duration = 2000) => {
-  message.value = msg;
-  messageType.value = type;
-
-  setTimeout(() => {
-    message.value = '';
-    messageType.value = 'info';
-  }, duration);
-};
-
 // Funktionen für Updates
 const updateEmail = async () => {
   try {
@@ -110,10 +98,11 @@ const updateEmail = async () => {
       throw new Error(result.message || 'Failed to update email');
     }
     props.userData.email = localMail.value;
-    showMessage('Email updated successfully!', 'success');
+    message.value = 'Email updated successfully!';
+    messageType.value = 'success';
   } catch (error) {
-    console.error('Error updating email:', error.message);
-    showMessage(error.message, 'error');
+    message.value = error.message;
+    messageType.value = 'error';
   }
 };
 
@@ -133,10 +122,11 @@ const updateGoal = async () => {
       throw new Error(result.message || 'Failed to update goal');
     }
     props.userData.goal = localGoal.value;
-    showMessage('Goal updated successfully!', 'success');
+    message.value = 'Goal updated successfully!';
+    messageType.value = 'success';
   } catch (error) {
-    console.error('Error updating goal:', error.message);
-    showMessage(error.message, 'error');
+    message.value = error.message;
+    messageType.value = 'error';
   }
 };
 
@@ -161,10 +151,11 @@ const updatePassword = async () => {
       throw new Error(result.message || 'Failed to update password');
     }
 
-    showMessage('Password updated successfully!', 'success');
-  } catch (error) {
-    console.error('Error updating password:', error.message);
-    showMessage(error.message, 'error');
+    message.value = 'Password updated successfully!';
+    messageType.value = 'success';
+    } catch (error) {
+    message.value = error.message;
+    messageType.value = 'error';
   }
 };
 
@@ -314,16 +305,6 @@ const updatePassword = async () => {
 .btn:active {
   transform: translateY(0);
   box-shadow: 0 4px 12px var(--highlight-color);
-}
-
-.message-box {
-  position: absolute;
-  top: 24%;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  width: auto;
-  max-width: 90%;
 }
 
 @keyframes fadeIn {

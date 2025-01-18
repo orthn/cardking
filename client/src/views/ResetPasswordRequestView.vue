@@ -1,8 +1,12 @@
 <script setup>
 import { ref } from 'vue';
+import MessageBox from "@/components/MessageBox.vue";
+
 
 const email = ref('');
 const message = ref('');
+const messageType = ref('info')
+
 
 const sendPasswordReset = async () => {
   message.value = '';
@@ -16,12 +20,20 @@ const sendPasswordReset = async () => {
     if (!response.ok) {
       const data = await response.json();
       message.value = data.error || 'Fehler beim Senden der E-Mail.';
+      messageType.value = 'error';
+
       return;
     }
 
-    message.value = 'Eine E-Mail zum Zurücksetzen des Passworts wurde gesendet.';
-  } catch (error) {
+    message.value = 'Mail sent successfully'
+    messageType.value = 'success'
+    setTimeout(() => {
+      emit('goToLogin')
+    }, 1500)
+    } catch (error) {
     message.value = 'Netzwerkfehler: ' + error.message;
+    messageType.value = 'error';
+
   }
 };
 const emit = defineEmits(['goToLogin'])
@@ -31,6 +43,8 @@ const goToLogin = () => {
 </script>
 
 <template>
+  <MessageBox :message="message" :type="messageType" />
+
   <div class="container">
     <div class="card">
       <h2 class="title">Reset Password</h2>

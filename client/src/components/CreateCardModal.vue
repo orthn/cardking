@@ -2,6 +2,7 @@
   <transition name="fade">
     <div v-if="show" class="modal" @click.self="closeModal">
       <div class="modal-content">
+        <MessageBox :message="message" :type="messageType" />
         <h3 class="title">Create a New Card</h3>
         <form @submit.prevent="submitForm" class="form">
           <!-- Question -->
@@ -79,137 +80,151 @@
   </transition>
 </template>
 
-<script>
-export default {
-  name: "CreateCardModal",
-  props: {
-    show: {
-      type: Boolean,
-      required: true,
-    },
-    categories: {
-      type: Array,
-      required: true,
-    },
+<script setup>
+import { ref, computed, watch } from 'vue';
+import MessageBox from '../components/MessageBox.vue';
+
+// Props
+const props = defineProps({
+  show: {
+    type: Boolean,
+    required: true,
   },
-  data() {
-    return {
-      card: {
-        question: "",
-        category: "",
-        type: "true_false",
-        answers: ["True", "False"],
-        correctAnswer: [],
-      },
-      message: "",
+  categories: {
+    type: Array,
+    required: true,
+  },
+});
+
+// Reactive states
+const card = ref({
+  question: '',
+  category: '',
+  type: 'true_false',
+  answers: ['True', 'False'],
+  correctAnswer: [],
+});
+
+const message = ref('');
+const messageType = ref('info');
+const selectedFile = ref(null);
+
+// Methods
+const handleFileSelect = (event) => {
+  const files = event.target.files;
+  if (files && files.length > 0) {
+    selectedFile.value = files[0];
+  }
+};
+
+const importCards = async () => {
+  if (!selectedFile.value) {
+    message.value = 'Please select a file to import.';
+    messageType.value = 'error';
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('file', selectedFile.value);
+
+  try {
+    const response = await fetch('http://localhost:3000/cards/import', {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      message.value = errorData?.error || 'Failed to import cards.';
+      messageType.value = 'error';
+      return;
+    }
+
+    message.value = 'Cards imported successfully!';
+    messageType.value = 'success';
+    selectedFile.value = null;
+  } catch (error) {
+    message.value = `Error importing cards: ${error.message}`;
+    messageType.value = 'error';
+  }
+};
+
+const updateAnswerFields = () => {
+  card.value.correctAnswer = [];
+  if (card.value.type === 'true_false') {
+    card.value.answers = ['True', 'False'];
+  } else {
+    card.value.answers = ['', '', '', ''];
+  }
+};
+
+const toggleAnswer = (index) => {
+  if (card.value.type === 'single_choice' || card.value.type === 'true_false') {
+    card.value.correctAnswer = [index];
+  } else if (card.value.type === 'multiple_choice') {
+    if (card.value.correctAnswer.includes(index)) {
+      card.value.correctAnswer = card.value.correctAnswer.filter((i) => i !== index);
+    } else {
+      card.value.correctAnswer.push(index);
+    }
+  }
+};
+
+const submitForm = async () => {
+  try {
+    const cardData = {
+      question: card.value.question,
+      category: card.value.category,
+      type: card.value.type,
+      answers: card.value.answers,
+      correctAnswer:
+        card.value.type === 'multiple_choice'
+          ? card.value.correctAnswer.map((index) => card.value.answers[index])
+          : card.value.type === 'single_choice'
+          ? card.value.answers[card.value.correctAnswer[0]]
+          : card.value.correctAnswer[0],
     };
-  },
-  methods: {
-    handleFileSelect(event) {
-      const files = event.target.files;
-      if (files && files.length > 0) {
-        this.selectedFile = files[0];
-      }
-    },
-    async importCards() {
-      if (!this.selectedFile) {
-        this.message = "Please select a file to import.";
-        return;
-      }
 
-      const formData = new FormData();
-      formData.append("file", this.selectedFile);
+    const response = await fetch('http://localhost:3000/cards/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cardData),
+      credentials: 'include',
+    });
 
-      try {
-        const response = await fetch("http://localhost:3000/cards/import", {
-          method: "POST",
-          body: formData,
-          credentials: "include",
-          file: this.selectedFile,
-        });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      message.value = errorData?.error || 'Error creating card.';
+      messageType.value = 'error';
+      return;
+    }
 
-        if (!response.ok) {
-          throw new Error(`Failed to import cards: ${response.statusText}`);
-        }
+    message.value = 'Card created successfully!';
+    messageType.value = 'success';
+    resetForm();
+  } catch (err) {
+    message.value = `Error creating card: ${err.message}`;
+    messageType.value = 'error';
+  }
+};
 
-        const data = await response.json();
-        this.message = "Cards imported successfully!";
-        console.log("Imported cards:", data);
-      } catch (error) {
-        this.message = `Error importing cards: ${error.message}`;
-        console.error(error);
-      } finally {
-        this.selectedFile = null;
-        if (this.$refs.importFile) {
-          this.$refs.importFile.value = ""; // Reset file input
-        }
-      }
-    },
-    updateAnswerFields() {
-      this.card.correctAnswer = [];
-      if (this.card.type === "true_false") {
-        this.card.answers = ["True", "False"];
-      } else {
-        this.card.answers = ["", "", "", ""];
-      }
-    },
-    toggleAnswer(index) {
-      if (this.card.type === "single_choice" || this.card.type === "true_false") {
-        this.card.correctAnswer = [index];
-      } else if (this.card.type === "multiple_choice") {
-        if (this.card.correctAnswer.includes(index)) {
-          this.card.correctAnswer = this.card.correctAnswer.filter((i) => i !== index);
-        } else {
-          this.card.correctAnswer.push(index);
-        }
-      }
-    },
-    async submitForm() {
-      try {
-        const cardData = {
-          question: this.card.question,
-          category: this.card.category,
-          type: this.card.type,
-          answers: this.card.answers,
-          correctAnswer:
-            this.card.type === "multiple_choice"
-              ? this.card.correctAnswer.map((index) => this.card.answers[index])
-              : this.card.type === "single_choice"
-                ? this.card.answers[this.card.correctAnswer[0]]
-                : this.card.correctAnswer[0],
-        };
+const resetForm = () => {
+  card.value = {
+    question: '',
+    category: '',
+    type: 'true_false',
+    answers: ['True', 'False'],
+    correctAnswer: [],
+  };
+};
+const emit = defineEmits(['close']);
 
-        const response = await fetch("http://localhost:3000/cards/create", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(cardData),
-          credentials: "include",
-        });
-
-        if (!response.ok) throw new Error("Failed to create card");
-
-        this.resetForm();
-        this.closeModal();
-      } catch (err) {
-        this.message = "Error creating card: " + err.message;
-        console.error(err);
-      }
-    },
-    resetForm() {
-      this.card = {
-        question: "",
-        category: "",
-        type: "true_false",
-        answers: ["True", "False"],
-        correctAnswer: [],
-      };
-    },
-    closeModal() {
-      this.$emit("close");
-    },
-  },
+const closeModal = () => {
+  emit('close');
 };
 </script>
+
 
 <style scoped>
 .imp{

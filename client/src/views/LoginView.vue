@@ -7,7 +7,7 @@ const password = ref('')
 const message = ref('')
 const messageType = ref('info')
 
-const emit = defineEmits(['goToRegister','goToResetRequest','loggedIn'])
+const emit = defineEmits(['goToRegister', 'goToResetRequest', 'loggedIn'])
 
 const handleLogin = async () => {
   message.value = '';
@@ -21,30 +21,18 @@ const handleLogin = async () => {
 
     const data = await response.text();
     if (!response.ok) {
-      message.value = data || 'Fehler beim Login.';
+      message.value = data || 'Login failed.';
       messageType.value = 'error';
-
-      setTimeout(() => {
-        message.value = '';
-      }, 3000);
       return;
     }
 
-    message.value = 'Login erfolgreich!';
+    message.value = 'Login successful!';
     messageType.value = 'success';
-
-    setTimeout(() => {
-      message.value = '';
-    }, 3000);
 
     emit('loggedIn');
   } catch (err) {
-    message.value = 'Netzwerkfehler: ' + err.message;
+    message.value = 'Network error: ' + err.message;
     messageType.value = 'error';
-
-    setTimeout(() => {
-      message.value = '';
-    }, 3000);
   }
 };
 
@@ -54,38 +42,22 @@ const goToRegister = () => {
 </script>
 
 <template>
+  <MessageBox :message="message" :type="messageType" />
   <div class="container">
     <div class="card">
       <h2 class="title">Welcome future CardKing!</h2>
       <p class="subtitle">Please sign in to continue</p>
-
-      <transition name="fade">
-        <MessageBox v-if="message" :message="message" :type="messageType" />
-      </transition>
-
       <form @submit.prevent="handleLogin" class="form">
         <div class="form-group">
-          <input
-            id="username"
-            class="form-control"
-            type="username"
-            v-model="username"
-            required
-            placeholder="Username"
-          />
+          <input id="username" class="form-control" type="username" v-model="username" required
+            placeholder="Username" />
         </div>
         <div class="form-group">
-          <input
-            id="password"
-            type="password"
-            class="form-control"
-            v-model="password"
-            required
-            placeholder="Password"
-          />
+          <input id="password" type="password" class="form-control" v-model="password" required
+            placeholder="Password" />
           <p class="forgot-password-text">
-        <a href="#" @click.prevent="$emit('goToResetRequest')">Forgot password?</a>
-      </p>
+            <a href="#" @click.prevent="$emit('goToResetRequest')">Forgot password?</a>
+          </p>
         </div>
         <div class="actions">
           <button type="submit" class="btn">Login</button>
@@ -137,12 +109,14 @@ const goToRegister = () => {
   text-align: center;
   margin-bottom: 1.5rem;
 }
+
 .forgot-password-text {
   padding-top: 6px;
   font-size: 0.85rem;
   color: var(--muted-text-color);
   margin-top: 0.2rem;
 }
+
 .forgot-password-text:hover {
   color: var(--highlight-color);
 }
@@ -216,30 +190,6 @@ const goToRegister = () => {
 
 .link:hover {
   color: var(--highlight-color);
-}
-
-.message-box {
-  position: absolute;
-  top: -20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  width: auto;
-  max-width: 90%;
-}
-
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.fade-enter-from {
-  opacity: 0;
-  transform: scale(0.8);
-}
-
-.fade-leave-to {
-  opacity: 0;
-  transform: scale(0.8);
 }
 
 </style>

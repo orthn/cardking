@@ -16,8 +16,7 @@
       <div class="dashboard-main">
         <h2>Categories</h2>
         <div>
-          <p v-if="categories.length === 0">Loading categories...</p>
-          <div v-else class="category-grid">
+          <div class="category-grid">
             <div v-for="category in categories" :key="category._id" class="category-box"
               :class="{ selected: selectedCategory === category._id }" @click="selectCategory(category)">
               {{ category.category }}
@@ -65,7 +64,6 @@ import Statistics from './Statistics.vue';
 import CreateCardModal from '../components/CreateCardModal.vue';
 import ShowQuestionsModal from '../components/ShowQuestionsModal.vue';
 import EditQuestionModal from "@/components/EditQuestionModal.vue";
-import crownPath from '@/assets/crown.svg';
 
 export default {
   name: 'Dashboard',
@@ -242,7 +240,6 @@ export default {
       updateQuestion,
       handleQuestionDeleted,
       isCategoryValid,
-      crownPath,
     };
   },
 };

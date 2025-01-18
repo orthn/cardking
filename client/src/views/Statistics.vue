@@ -44,47 +44,47 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, onMounted } from "vue";
 
-export default {
-  name: "Statistics",
-  setup() {
-    const statistics = ref({
-      userId: null,
-      completedQuizzes: 0,
-      successRate: 0,
-      streak: 0,
+// Reaktive Zustände
+const statistics = ref({
+  userId: null,
+  completedQuizzes: 0,
+  successRate: 0,
+  streak: 0,
+});
+
+const showModal = ref(false);
+const modalTitle = ref("");
+const modalStatKey = ref("");
+const topUsers = ref([]);
+
+// Statistiken des Benutzers abrufen
+const fetchStatistics = async () => {
+  try {
+    const response = await fetch("http://localhost:3000/dashboard/statistics", {
+      method: "GET",
+      credentials: "include",
     });
-    const showModal = ref(false);
-    const modalTitle = ref("");
-    const modalStatKey = ref("");
-    const topUsers = ref([]);
-
-    // Ruft die Statistiken des aktuellen Benutzers ab
-    const fetchStatistics = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/dashboard/statistics", {
-          method: "GET",
-          credentials: "include",
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch statistics");
-        }
-        const data = await response.json();
-        statistics.value = {
-      userId: data[0].userId || null, // Setze die userId aus der Backend-Antwort
-      completedQuizzes: data[0].completedQuizzes || 0,
-      successRate: data[0].successRate || 0,
-      streak: data[0].streak || 0,
-    };      } catch (error) {
-        console.error("Fehler beim Laden der Statistiken:", error);
-      }
+    if (!response.ok) {
+      throw new Error("Failed to fetch statistics");
+    }
+    const data = await response.json();
+    statistics.value = {
+      userId: data[0]?.userId || null,
+      completedQuizzes: data[0]?.completedQuizzes || 0,
+      successRate: data[0]?.successRate || 0,
+      streak: data[0]?.streak || 0,
     };
+  } catch (error) {
+    console.error("Error fetching statistics:", error);
+  }
+};
 
-    // Öffnet das Modal für das Leaderboard
-    const openModal = async (statKey) => {
-      const statKeyMapping = {
+// Modal öffnen und Leaderboard-Daten laden
+const openModal = async (statKey) => {
+  const statKeyMapping = {
     completedQuizzes: "Completed Quizzes",
     successRate: "Success Rate",
     streak: "Longest Streak",
@@ -95,7 +95,6 @@ export default {
   showModal.value = true;
 
   try {
-    // Abrufen der Statistikdaten
     const response = await fetch("http://localhost:3000/dashboard/statistics?all=true", {
       method: "GET",
       credentials: "include",
@@ -105,21 +104,16 @@ export default {
     }
     const data = await response.json();
 
-    // Sortiere und schneide die Top 10 Statistiken aus
     const topStats = data
       .sort((a, b) => b[statKey] - a[statKey])
       .slice(0, 10);
 
-    // Extrahiere die User-IDs
     const userIds = topStats.map((stat) => stat.userId);
 
-    // Abrufen der Benutzernamen basierend auf den User-IDs
     const usersResponse = await fetch("http://localhost:3000/users/", {
-      method: "POST", // Verwende POST, um die IDs zu senden
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userIds }), // Sende die IDs als JSON
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userIds }),
     });
 
     if (!usersResponse.ok) {
@@ -127,38 +121,25 @@ export default {
     }
 
     const users = await usersResponse.json();
-
-    // Kombiniere die Benutzernamen mit den Statistiken
     topUsers.value = topStats.map((stat) => ({
       ...stat,
-      username: users.find((user) => user._id === stat.userId)?.username || "Anonym",
+      username: users.find((user) => user._id === stat.userId)?.username || "Anonymous",
     }));
   } catch (error) {
-    console.error("Fehler beim Laden der Bestenliste:", error);
+    console.error("Error loading leaderboard:", error);
   }
 };
 
-
-    const closeModal = () => {
-      showModal.value = false;
-      topUsers.value = [];
-    };
-
-    onMounted(fetchStatistics);
-
-    return {
-      statistics,
-      showModal,
-      modalTitle,
-      modalStatKey,
-      topUsers,
-      fetchStatistics,
-      openModal,
-      closeModal,
-    };
-  },
+// Modal schließen
+const closeModal = () => {
+  showModal.value = false;
+  topUsers.value = [];
 };
+
+// Beim Laden der Komponente Statistiken abrufen
+onMounted(fetchStatistics);
 </script>
+
 
 <style scoped>
 .fade-enter-active, .fade-leave-active {
