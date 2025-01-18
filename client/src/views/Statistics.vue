@@ -190,7 +190,7 @@ export default {
   background: var(--card-bg-color);
   border-radius: var(--border-radius);
   padding: var(--spacing-md);
-border: 1px solid var(--highlight-color);
+border: 1.5px solid var(--highlight-color);
 display: flex;
   justify-content: space-between;
   align-items: center;
@@ -218,6 +218,7 @@ display: flex;
 .value {
   font-size: 1.5rem;
   font-weight: bold;
+
 }
 
 i {
@@ -271,7 +272,7 @@ h3 {
   background: var(--card-bg-color);
   padding: var(--spacing-md);
   border-radius: var(--border-radius);
-  border: 1px solid var(--highlight-color);
+  border: 1.5px solid var(--highlight-color);
 }
 
 .user-rank {
