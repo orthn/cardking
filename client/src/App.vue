@@ -26,7 +26,6 @@ const userData = reactive({
 const successRate = ref(0);
 
 const updateSuccessRate = (rate) => {
-  console.log("Appview received successRate:", rate);
   successRate.value = rate;
 };
 

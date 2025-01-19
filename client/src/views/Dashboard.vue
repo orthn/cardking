@@ -76,15 +76,27 @@
           </button>
 
           <button class="btn" @click="showModal = true">Create Card</button>
-          <button class="btn" @click="openShowQuestionsModal" :disabled="!selectedCategory">
+          <button class="btn" @click="showCreateCategoryModal = true">
+            Create Category
+          </button>
+
+          <button
+              class="btn"
+              @click="openShowQuestionsModal"
+              :disabled="!selectedCategoryQuestions.length"
+          >
             Show Questions
           </button>
+
         </div>
       </div>
     </div>
 
 
     <CreateCardModal :show="showModal" :categories="categories" @close="handleModalClose" />
+
+    <CreateCategoryModal v-if="showCreateCategoryModal" :show="showCreateCategoryModal"
+                         @close="handleCreateCategoryModalClose" />
 
     <ShowQuestionsModal v-if="isShowQuestionsModalVisible" :isVisible="isShowQuestionsModalVisible"
       :categoryName="selectedCategory" :categoryId="selectedCategory" :questions="selectedCategoryQuestions"
@@ -102,6 +114,7 @@
 import { ref, onMounted, computed } from 'vue';
 import Statistics from './Statistics.vue';
 import CreateCardModal from '../components/CreateCardModal.vue';
+import CreateCategoryModal from "@/components/CreateCategoryModal.vue";
 import ShowQuestionsModal from '../components/ShowQuestionsModal.vue';
 import EditQuestionModal from "@/components/EditQuestionModal.vue";
 
@@ -114,6 +127,7 @@ export default {
   components: {
     Statistics,
     CreateCardModal,
+    CreateCategoryModal,
     ShowQuestionsModal,
     EditQuestionModal
   },
@@ -212,6 +226,13 @@ export default {
       }
     };
 
+    const showCreateCategoryModal = ref(false);
+
+    const handleCreateCategoryModalClose = async () => {
+      showCreateCategoryModal.value = false;
+      await fetchCategories(); // Kategorien neu laden
+    };
+
     // Initial Kategorien laden
     onMounted(() => {
       fetchCategories();
@@ -232,6 +253,8 @@ export default {
       currentEditingQuestion,
       handleQuestionDeleted,
       isCategoryValid,
+      showCreateCategoryModal,
+      handleCreateCategoryModalClose,
     };
   },
 };

@@ -81,7 +81,6 @@ export default {
         };
 
         emit("updateSuccessRate", data[0]?.successRate || 0);
-        console.log("Statistics emitting successRate:", data[0]?.successRate || 0);
       } catch (error) {
         console.error("Fehler beim Laden der Statistiken:", error);
       }
