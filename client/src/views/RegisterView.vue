@@ -15,7 +15,7 @@ const emit = defineEmits(['goToLogin'])
 const handleRegister = async () => {
   message.value = ''
   if (password.value !== confirmPassword.value) {
-    message.value = 'Passwörter stimmen nicht überein!'
+    message.value = 'Passwords do not match!'
     messageType.value = 'error'
     return
   }
@@ -34,12 +34,12 @@ const handleRegister = async () => {
 
     const data = await response.json();
     if (!response.ok) {
-      message.value = data.error || 'Fehler bei der Registrierung'
+      message.value = data.error || 'Error during Registration'
       messageType.value = 'error'
       return;
     }
 
-    message.value = 'Registrierung erfolgreich!'
+    message.value = 'Registration successful!'
     messageType.value = 'success'
 
     // Nach 2 Sekunden zum Login weiterleiten
@@ -47,7 +47,7 @@ const handleRegister = async () => {
       emit('goToLogin')
     }, 1500)
   } catch (err) {
-    message.value = 'Netzwerkfehler: ' + err.message
+    message.value = 'Network error: ' + err.message
     messageType.value = 'error'
   }
 }

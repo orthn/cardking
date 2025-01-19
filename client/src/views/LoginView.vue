@@ -39,6 +39,9 @@ const handleLogin = async () => {
 const goToRegister = () => {
   emit('goToRegister')
 }
+const goToResetRequest = () => {
+  emit('goToResetRequest')
+}
 </script>
 
 <template>
@@ -56,7 +59,7 @@ const goToRegister = () => {
           <input id="password" type="password" class="form-control" v-model="password" required
             placeholder="Password" />
           <p class="forgot-password-text">
-            <a href="#" @click.prevent="$emit('goToResetRequest')">Forgot password?</a>
+            <a href="#" @click.prevent="goToResetRequest">Forgot password?</a>
           </p>
         </div>
         <div class="actions">

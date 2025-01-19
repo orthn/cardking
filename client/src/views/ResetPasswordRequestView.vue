@@ -19,7 +19,7 @@ const sendPasswordReset = async () => {
 
     if (!response.ok) {
       const data = await response.json();
-      message.value = data.error || 'Fehler beim Senden der E-Mail.';
+      message.value = data.error || 'Error when sending the e-mail.';
       messageType.value = 'error';
 
       return;
@@ -31,7 +31,7 @@ const sendPasswordReset = async () => {
       emit('goToLogin')
     }, 1500)
     } catch (error) {
-    message.value = 'Netzwerkfehler: ' + error.message;
+    message.value = 'Network issue: ' + error.message;
     messageType.value = 'error';
 
   }
@@ -43,11 +43,14 @@ const goToLogin = () => {
 </script>
 
 <template>
-  <MessageBox :message="message" :type="messageType" />
+
 
   <div class="container">
     <div class="card">
       <h2 class="title">Reset Password</h2>
+
+      <MessageBox :message="message" :type="messageType" />
+
       <p class="subtitle">Enter your email address to receive a link to reset your password.</p>
       <form @submit.prevent="sendPasswordReset" class="form">
         <div class="form-group">
