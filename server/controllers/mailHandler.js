@@ -60,10 +60,34 @@ const sendResetMail = function (user, resetToken) {
     transporter.sendMail(mailOptions).then(info => console.log("Mail successfully sent!")).catch(err => console.log(`Error sending email: ${err}`));
 }
 
-const sendReminder = function (email, streak) {
+const sendReminder = function (email, streak, successRate) {
     // Create a transporter object using the default SMTP transport
     let transporter = createTransporter();
     const buttonStyle = getButtonStyle();
+
+    // Determine user level and corresponding image
+    let filename;
+    let pathname;
+    let level;
+    let levelDescription;
+
+    if (successRate >= 80) {
+        level = 'King';
+        filename = 'king.svg';
+        pathname = 'server/assets/king.svg';
+        levelDescription = `Congratulations! You are reigning as a true CardKing, demonstrating exceptional consistency and skill.`;
+    } else if (successRate > 50) {
+        level = 'Prince';
+        filename = 'Prince.svg';
+        pathname = 'server/assets/Prince.svg';
+        levelDescription = `You're well on your way to the throne as a CardPrince. Keep pushing forward and claim your crown!`;
+    } else {
+        level = 'Jester';
+        filename = 'Jester.svg';
+        pathname = 'server/assets/Jester.svg';
+        levelDescription = `Every King starts somewhere! As a CardJester, your journey has just begun. Keep climbing and you'll reach greatness.`;
+    }
+
 
     const _url = `http://localhost:5173`;
     const mailBody = `
@@ -73,14 +97,19 @@ const sendReminder = function (email, streak) {
             <meta charset="UTF-8">
         </head>
         <body>
-            <b>Extend your streak by completing a quiz:</b> <br>
-            <a href="${_url}" style="${buttonStyle}">CardKing</a>
+            <h1>Don't Lose Your Streak, ${level}!</h1>
+            <p>${levelDescription}</p>
             <img src="cid:crownImage" alt="crown" width="500" height="500">
-            <p>Your current Streak is: ${streak}</p>
+            <p><b>Your current Streak is: ${streak}</b></p>
+            <p>Extend your streak by completing a quiz:</p> <br>
+            <p><a href="${_url}" style="${buttonStyle}">Take a Quiz Now!</a></p>
+            <p>By completing quizzes regularly, you can increase your success rate and secure your legacy as a true CardKing!</p>
         </body>
         </html>
     `;
-// Setup email data
+
+
+    // Setup email data
     let mailOptions = {
         from: process.env.EMAIL_ADDRESS,
         to: email,
@@ -88,8 +117,8 @@ const sendReminder = function (email, streak) {
         html: mailBody,
         attachments: [
             {
-                filename: 'crown.png',
-                path: 'server/assets/crown.png',
+                filename: filename,
+                path: pathname,
                 cid: 'crownImage'
             }
         ]
@@ -98,6 +127,7 @@ const sendReminder = function (email, streak) {
 // Send email
     transporter.sendMail(mailOptions).then(info => console.log("Mail successfully sent!")).catch(err => console.log(`Error sending email: ${err}`));
 }
+
 const sendUnsuccessfulLoginMail = function (user) {
     // Create a transporter object using the default SMTP transport
     let transporter = createTransporter();

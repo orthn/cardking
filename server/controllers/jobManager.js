@@ -36,11 +36,11 @@ const jobReminderMail = schedule.scheduleJob({hour: 15, minute: 30}, async funct
                 const date = new Date(timestamp);
                 if (user.goal === 'daily') {
                     if (!isSameDay(date, statistic.lastQuizDate)) {
-                        sendReminder(user.email, 1);
+                        sendReminder(user.email, statistic.streak, statistic.successRate);
                     }
                 }
                 if (user.goal === 'weekly') {
-                    if (!isSameWeek(date, statistic.lastQuizDate)) sendReminder(user.email, statistic.streak);
+                    if (!isSameWeek(date, statistic.lastQuizDate)) sendReminder(user.email, statistic.streak, statistic.successRate);
                 }
             }
             }
