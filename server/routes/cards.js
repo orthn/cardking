@@ -49,7 +49,7 @@ async function createCategoryIfNotExists(category, userId) {
         if (!categoryDoc) {
             categoryDoc = new Category({
                 category,
-                cardCount: 1,
+                cardCount: 0,
                 userId
             })
 

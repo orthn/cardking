@@ -4,7 +4,6 @@ let bcrypt = require('bcrypt')
 let User = require('../models/userSchema')
 let jwt = require('jsonwebtoken')
 const {sendResetMail, sendUnsuccessfulLoginMail} = require("../controllers/mailHandler")
-const test = require("node:test");
 let secretKey = process.env.JWT_SECRET
 
 /**
