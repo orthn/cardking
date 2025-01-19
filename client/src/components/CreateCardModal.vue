@@ -218,8 +218,10 @@ const submitForm = async () => {
       return;
     }
 
-    message.value = 'Card created successfully!';
-    messageType.value = 'success';
+    setTimeout(() => {
+      message.value = 'Card created successfully!';
+      messageType.value = 'success';
+    }, 100);
     resetForm();
   } catch (err) {
     message.value = `Error creating card: ${err.message}`;
