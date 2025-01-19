@@ -42,12 +42,13 @@ cd ..
 ### Storing serverside process variables
 Process variables such as API keys and DB connection variables should be stored in `server/.env` in the format
 ```
-PORT=6000
-API_KEY=1234
-DB_USER='username'
-DB_PASSWD='password'
+MONGO_URI=mongodb
+EMAIL_ADDRESS=example@example.com
+EMAIL_PASSWORD=password
+SESSION_SECRET=secret
+JWT_SECRET=secret
 ```
-wheread `1234` represents the API key. **Make sure not to push your `.env` file to github!**
+whereas `secret` represents the JWT_SECRET key. **Make sure not to push your `.env` file to github!**
 #### Start Server
 ```
 npm run server
