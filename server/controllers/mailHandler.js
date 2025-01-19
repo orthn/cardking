@@ -99,10 +99,10 @@ const sendReminder = function (email, streak, successRate) {
         <body>
             <h1>Don't Lose Your Streak, ${level}!</h1>
             <p>${levelDescription}</p>
-            <img src="cid:crownImage" alt="crown" width="500" height="500">
+            <img src="cid:crownImage" alt="crown" width="400">
             <p><b>Your current Streak is: ${streak}</b></p>
             <p>Extend your streak by completing a quiz:</p> <br>
-            <p><a href="${_url}" style="${buttonStyle}">Take a Quiz Now!</a></p>
+            <p><a href="${_url}" style="${buttonStyle}">Take a Quiz Now!</a></p> <br>
             <p>By completing quizzes regularly, you can increase your success rate and secure your legacy as a true CardKing!</p>
         </body>
         </html>
