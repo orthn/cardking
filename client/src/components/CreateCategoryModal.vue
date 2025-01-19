@@ -70,7 +70,7 @@ const submitForm = async () => {
     message.value = 'Category created successfully!';
     messageType.value = 'success';
     categoryName.value = '';
-    setTimeout(() => closeModal(), 1000);
+    setTimeout(() => closeModal(), 1500);
   } catch (error) {
     message.value = `Error creating category: ${error.message}`;
     messageType.value = 'error';
@@ -104,6 +104,7 @@ const closeModal = () => {
   width: 90%;
   max-width: 400px;
   animation: fadeIn 0.3s ease-out;
+  font-family: var(--font-family-default);
 }
 
 .title {

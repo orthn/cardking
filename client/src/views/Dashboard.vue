@@ -93,7 +93,7 @@
     </div>
 
 
-    <CreateCardModal :show="showModal" :categories="categories" @close="handleModalClose" />
+    <CreateCardModal :show="showModal" :categoryId="selectedCategory" :categories="categories" @close="handleModalClose" />
 
     <CreateCategoryModal v-if="showCreateCategoryModal" :show="showCreateCategoryModal"
                          @close="handleCreateCategoryModalClose" />

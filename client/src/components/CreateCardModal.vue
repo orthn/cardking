@@ -94,16 +94,34 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  categoryId: String,
 });
 
 // Reactive states
+// Initialisierung des Card-Objekts
 const card = ref({
   question: '',
-  category: '',
+  category: props.categoryId
+    ? props.categories.find((category) => category._id === props.categoryId)?.category || ''
+    : '',
   type: 'true_false',
   answers: ['True', 'False'],
   correctAnswer: [],
 });
+
+watch(
+  () => props.categoryId,
+  (newCategoryId) => {
+    if (newCategoryId) {
+      const matchedCategory = props.categories.find((category) => category._id === newCategoryId);
+      card.value.category = matchedCategory ? matchedCategory.category : '';
+    } else {
+      card.value.category = '';
+    }
+  },
+  { immediate: true }
+);
+
 
 const message = ref('');
 const messageType = ref('info');
